@@ -1,3 +1,6 @@
+# --- added for lang-align branch (l_t <-> caption embedding alignment) ---
+transformers>=4.30
+# --- end lang-align additions ---
 absl-py==1.4.0
 aiofiles==22.1.0
 aiosqlite==0.18.0

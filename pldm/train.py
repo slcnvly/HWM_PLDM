@@ -313,6 +313,14 @@ class Trainer:
                 if self.model.level2 is not None
                 else None
             ),
+            # added for lang-align branch: LangAlign needs these to de-normalize
+            # l2_locations and to size its z-side projection head.
+            location_std=self.ds.normalizer.location_std,
+            z_dim=(
+                self.model.level2.config.predictor.z_dim
+                if self.model.level2 is not None
+                else None
+            ),
         )
         # other stuff...
 
@@ -428,11 +436,20 @@ class Trainer:
         return False
 
     def train(self):
+        # added for lang-align branch: collect param groups owned by objectives
+        # themselves (e.g. LangAlignObjective's projection heads / text encoder),
+        # since OptimizerFactory otherwise only registers self.model's parameters.
+        extra_param_groups = []
+        for objective in self.objectives_l1 + self.objectives_l2:
+            if hasattr(objective, "param_groups"):
+                extra_param_groups += objective.param_groups(self.config.base_lr)
+
         self.optimizer = OptimizerFactory(
             model=self.model,
             optimizer_type=self.config.optimizer_type,
             base_lr=self.config.base_lr,
             l1_to_l2_lr_ratio=self.config.l1_to_l2_lr_ratio,
+            extra_param_groups=extra_param_groups,
         ).create_optimizer()
 
         if self.config.resume_if_possible:

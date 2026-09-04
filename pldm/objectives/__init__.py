@@ -1,12 +1,17 @@
 from dataclasses import dataclass, field
 import enum
-from typing import List
+from typing import List, Optional
+
+import torch
 
 from pldm.objectives.vicreg import VICRegObjective, VICRegObjectiveConfig  # noqa
 from pldm.objectives.idm import IDMObjective, IDMObjectiveConfig  # noqa
 from pldm.objectives.kl import KLObjective, KLObjectiveConfig
 from pldm.objectives.prediction import PredictionObjective, PredictionObjectiveConfig
 from pldm.objectives.probe import ProbeObjective, ProbeObjectiveConfig
+# --- added for lang-align branch (l_t <-> caption embedding alignment) ---
+from pldm.objectives.lang.lang_align import LangAlignObjective, LangAlignObjectiveConfig
+# --- end lang-align additions ---
 
 
 class ObjectiveType(enum.Enum):
@@ -25,6 +30,7 @@ class ObjectiveType(enum.Enum):
     PredictionRawLocation = enum.auto()
     ProbeLocation = enum.auto()
     ProbeProprioVel = enum.auto()
+    LangAlign = enum.auto()  # added for lang-align branch
 
 
 @dataclass
@@ -41,11 +47,17 @@ class ObjectivesConfig:
     prediction_proprio: PredictionObjectiveConfig = PredictionObjectiveConfig()
     prediction_raw_location: PredictionObjectiveConfig = PredictionObjectiveConfig()
     probe: ProbeObjectiveConfig = ProbeObjectiveConfig()
+    # added for lang-align branch
+    lang_align: LangAlignObjectiveConfig = LangAlignObjectiveConfig()
 
     def build_objectives_list(
         self,
         repr_dim: int,
         name_prefix: str = "",
+        # added for lang-align branch: needed to de-normalize l2_locations into
+        # block-unit displacements for rule-based captioning.
+        location_std: Optional[torch.Tensor] = None,
+        z_dim: Optional[int] = None,
     ):
         objectives = []
         for objective_type in self.objectives:
@@ -138,6 +150,20 @@ class ObjectivesConfig:
                         repr_dim=repr_dim,
                         pred_dim=2,
                         probe_target="proprio_vel",
+                    )
+                )
+            elif objective_type == ObjectiveType.LangAlign:
+                # added for lang-align branch
+                assert location_std is not None and z_dim is not None, (
+                    "ObjectiveType.LangAlign requires location_std and z_dim to be "
+                    "passed into build_objectives_list()"
+                )
+                objectives.append(
+                    LangAlignObjective(
+                        self.lang_align,
+                        z_dim=z_dim,
+                        location_std=location_std,
+                        name_prefix=name_prefix,
                     )
                 )
             else:

@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 import torch
 from pldm.optimizers.lars import LARS, exclude_bias_and_norm
 import enum
@@ -15,16 +17,26 @@ class OptimizerFactory:
         optimizer_type: str,
         base_lr: float,
         l1_to_l2_lr_ratio: float,
+        # added for lang-align branch: objectives (e.g. LangAlignObjective) can own
+        # their own learnable modules (projection heads, a finetuned text encoder).
+        # Without this, those parameters are silently never registered with the
+        # optimizer and never train -- the same pre-existing gap that VICReg's
+        # Projector has, just made explicit here since LangAlign relies on it.
+        extra_param_groups: Optional[List[dict]] = None,
     ):
         self.model = model
         self.optimizer_type = optimizer_type
         self.base_lr = base_lr
         self.l1_to_l2_lr_ratio = l1_to_l2_lr_ratio
+        self.extra_param_groups = extra_param_groups or []
 
     def create_optimizer(self):
         if self.optimizer_type == OptimizerType.LARS:
+            lars_groups = [{"params": self.model.parameters(), "lr": 0}]
+            # added for lang-align branch
+            lars_groups += self.extra_param_groups
             optimizer = LARS(
-                self.model.parameters(),
+                lars_groups,
                 lr=0,
                 weight_decay=1e-6,
                 weight_decay_filter=exclude_bias_and_norm,
@@ -62,6 +74,8 @@ class OptimizerFactory:
                             "lr": lr,
                         }
                     )
+
+            params_list += self.extra_param_groups  # added for lang-align branch
 
             optimizer = torch.optim.Adam(
                 params_list,
