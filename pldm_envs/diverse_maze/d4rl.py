@@ -189,6 +189,34 @@ class D4RLDataset(torch.utils.data.Dataset):
 
         return states, locations, actions, proprio_vel, proprio_pos
 
+    def _build_l2_sample(self, episode_idx, start_idx):
+        """Extracted from __getitem__ (pure refactor, no behavior change) so
+        it can be overridden independently -- see the adaptive-waypoints
+        branch's changepoint-based segmentation, which needs to replace only
+        this fixed-stride chunking without duplicating the rest of
+        __getitem__."""
+        if self.l2_n_steps_total > 0:
+            l2_states, l2_locations, l2_actions1, l2_proprio_vel, l2_proprio_pos = (
+                self._load_data_from_start_idx(
+                    episode_idx=episode_idx,
+                    start_idx=start_idx,
+                    length=self.l2_n_steps_total + self.config.stack_states - 1,
+                    skip_frame=self.config.l2_step_skip,
+                )
+            )
+            if self.config.chunked_actions:
+                chunks = l2_actions1.split(self.config.l2_step_skip)
+                l2_actions = torch.stack(chunks, dim=0)
+            else:
+                raise NotImplementedError
+        else:
+            l2_states = torch.empty(0)
+            l2_locations = torch.empty(0)
+            l2_proprio_vel = torch.empty(0)
+            l2_proprio_pos = torch.empty(0)
+            l2_actions = torch.empty(0)
+        return l2_states, l2_locations, l2_proprio_vel, l2_proprio_pos, l2_actions
+
     def __getitem__(self, idx):
         """
         Return:
@@ -223,27 +251,9 @@ class D4RLDataset(torch.utils.data.Dataset):
             proprio_vel = torch.empty(0)
             proprio_pos = torch.empty(0)
 
-        if self.l2_n_steps_total > 0:
-            l2_states, l2_locations, l2_actions1, l2_proprio_vel, l2_proprio_pos = (
-                self._load_data_from_start_idx(
-                    episode_idx=episode_idx,
-                    start_idx=start_idx,
-                    length=self.l2_n_steps_total + self.config.stack_states - 1,
-                    skip_frame=self.config.l2_step_skip,
-                )
-            )
-            # print(l2_actions1.shape)
-            if self.config.chunked_actions:
-                chunks = l2_actions1.split(self.config.l2_step_skip)
-                l2_actions = torch.stack(chunks, dim=0)
-            else:
-                raise NotImplementedError
-        else:
-            l2_states = torch.empty(0)
-            l2_locations = torch.empty(0)
-            l2_proprio_vel = torch.empty(0)
-            l2_proprio_pos = torch.empty(0)
-            l2_actions = torch.empty(0)
+        l2_states, l2_locations, l2_proprio_vel, l2_proprio_pos, l2_actions = (
+            self._build_l2_sample(episode_idx, start_idx)
+        )
 
         return D4RLSample(
             states=states,
