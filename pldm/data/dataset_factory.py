@@ -5,9 +5,21 @@ from pldm.data.utils import make_dataloader
 
 # if "AMD" not in torch.cuda.get_device_name(0):
 from pldm_envs.diverse_maze.d4rl import D4RLDataset
+from pldm_envs.diverse_maze.adaptive_waypoints.d4rl_adaptive import (
+    AdaptiveD4RLDataset,
+)
 
 from pldm.probing.evaluator import ProbingConfig
 from pldm.data.enums import DataConfig, DatasetType, ProbingDatasets, Datasets
+
+
+def _make_d4rl_dataset(config, **kwargs):
+    # added for adaptive-waypoints branch: config.adaptive_min_seg is None
+    # for every existing caller/config, so this is a no-op (plain
+    # D4RLDataset) unless a config explicitly opts in.
+    if config.adaptive_min_seg is not None:
+        return AdaptiveD4RLDataset(config, min_seg=config.adaptive_min_seg, **kwargs)
+    return D4RLDataset(config, **kwargs)
 
 
 
@@ -51,10 +63,10 @@ class DatasetFactory:
 
 
     def _create_d4rl_datasets(self):
-        ds = D4RLDataset(self.config.d4rl_config, load_l1=self.config.d4rl_config.train_l1)
+        ds = _make_d4rl_dataset(self.config.d4rl_config, load_l1=self.config.d4rl_config.train_l1)
         ds = make_dataloader(ds=ds, loader_config=self.config)
 
-        probe_ds = D4RLDataset(
+        probe_ds = _make_d4rl_dataset(
             dataclasses.replace(
                 self.config.d4rl_config,
                 path=self.probing_cfg.train_path,
@@ -69,7 +81,7 @@ class DatasetFactory:
             suffix="probe_train",
         )
 
-        probe_val_ds = D4RLDataset(
+        probe_val_ds = _make_d4rl_dataset(
             dataclasses.replace(
                 self.config.d4rl_config,
                 path=self.probing_cfg.val_path,
@@ -95,7 +107,7 @@ class DatasetFactory:
                 probing_datasets=ProbingDatasets(ds=probe_ds, val_ds=probe_val_ds),
             )
         else:
-            l2_probe_ds = D4RLDataset(
+            l2_probe_ds = _make_d4rl_dataset(
                 dataclasses.replace(
                     self.config.d4rl_config,
                     path=self.probing_cfg.train_path,
@@ -110,7 +122,7 @@ class DatasetFactory:
                 normalizer=ds.normalizer,
                 suffix="l2_probe_train",
             )
-            l2_probe_val_ds = D4RLDataset(
+            l2_probe_val_ds = _make_d4rl_dataset(
                 dataclasses.replace(
                     self.config.d4rl_config,
                     path=self.probing_cfg.val_path,

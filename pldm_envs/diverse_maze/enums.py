@@ -49,6 +49,11 @@ class D4RLDatasetConfig:
     l2_step_skip: int = 4
     location_in_proprio_component: bool = False
     train_l1: bool = True
+    # added for adaptive-waypoints branch: when set, l2 chunking uses
+    # changepoint-based variable boundaries (AdaptiveD4RLDataset) instead of
+    # fixed-stride chunking (D4RLDataset). None preserves exact baseline
+    # behavior. See pldm_envs/diverse_maze/adaptive_waypoints/DESIGN.md.
+    adaptive_min_seg: Optional[int] = None
 
     def __post_init__(self):
         if not self.image_based:
