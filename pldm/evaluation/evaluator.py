@@ -351,7 +351,9 @@ class Evaluator:
 
         log_dict = {}
 
+        print("DIAG: entering evaluate_loc_probing", flush=True)
         self.probers, self.probers_l2 = self.evaluate_loc_probing()
+        print("DIAG: evaluate_loc_probing done", flush=True)
 
         # Planning
         if not self.config.disable_planning and self.config.eval_l1:
@@ -387,20 +389,25 @@ class Evaluator:
                 )
 
         if not self.config.disable_l2_planning and self.config.eval_l2:
+            print("DIAG: entering L2 planning block", flush=True)
             levels, level_configs = self._get_planning_levels(l2=True)
+            print(f"DIAG: levels={levels}", flush=True)
 
             for i, level in enumerate(levels):
                 level_config = level_configs[i]
 
+                print(f"DIAG: creating l2 planning evaluator for level={level}", flush=True)
                 planning_evaluator = self._create_l2_planning_evaluator(
                     level=level,
                     level_config=level_config,
                 )
                 print(
-                    f"evaluating l2 planning level {level} for {planning_evaluator.config.n_envs} envs"
+                    f"DIAG: created. evaluating l2 planning level {level} for {planning_evaluator.config.n_envs} envs",
+                    flush=True,
                 )
 
                 l2_mpc_result, l2_mpc_report = planning_evaluator.evaluate()
+                print("DIAG: l2 planning_evaluator.evaluate() done", flush=True)
                 log_dict.update(
                     l2_mpc_report.build_log_dict(prefix=planning_evaluator.prefix)
                 )
