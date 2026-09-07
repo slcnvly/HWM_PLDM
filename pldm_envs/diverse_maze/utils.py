@@ -503,7 +503,18 @@ def load_uniform(env_name, data_path):
 
     uniform_obs_by_map = {}
 
+    import resource
+    print(
+        f"DIAG-MEM [before load_uniform's torch.load({data_path}/data.p)]: peak RSS = "
+        f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
+        flush=True,
+    )
     uniform_ds = torch.load(f"{data_path}/data.p")
+    print(
+        f"DIAG-MEM [after torch.load, {len(uniform_ds)} episodes]: peak RSS = "
+        f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
+        flush=True,
+    )
 
     for i in range(len(uniform_ds)):
         episode = uniform_ds[i]

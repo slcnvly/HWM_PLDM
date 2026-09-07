@@ -49,6 +49,12 @@ class MazeMPCEvaluator(MPCEvaluator):
 
         level_cfg = getattr(config, config.level)
 
+        import resource
+        print(
+            f"DIAG-MEM [before Maze2DEnvsGenerator]: peak RSS so far = "
+            f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
+            flush=True,
+        )
         envs_generator = Maze2DEnvsGenerator(
             env_name=config.env_name,
             n_envs=level_cfg.n_envs,
@@ -64,7 +70,17 @@ class MazeMPCEvaluator(MPCEvaluator):
             unique_shortest_path=config.unique_shortest_path,
             normalizer=self.normalizer,
         )
+        print(
+            f"DIAG-MEM [after Maze2DEnvsGenerator init, before __call__]: peak RSS so far = "
+            f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
+            flush=True,
+        )
         self.envs, _ = envs_generator()
+        print(
+            f"DIAG-MEM [after envs_generator() call]: peak RSS so far = "
+            f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
+            flush=True,
+        )
 
         self.prober_l2 = prober_l2
         self.fix_start = fix_start

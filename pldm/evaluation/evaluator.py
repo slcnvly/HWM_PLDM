@@ -1,8 +1,14 @@
 from pldm.configs import ConfigBase
+import resource
 import torch
 from typing import Optional
 from dataclasses import dataclass
 import dataclasses
+
+
+def _diag_mem(label):
+    rss_gb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
+    print(f"DIAG-MEM [{label}]: peak RSS so far = {rss_gb:.2f} GB", flush=True)
 
 from pldm.probing.evaluator import ProbingConfig, ProbingEvaluator
 from pldm.data.enums import ProbingDatasets
@@ -352,8 +358,10 @@ class Evaluator:
         log_dict = {}
 
         print("DIAG: entering evaluate_loc_probing", flush=True)
+        _diag_mem("before evaluate_loc_probing")
         self.probers, self.probers_l2 = self.evaluate_loc_probing()
         print("DIAG: evaluate_loc_probing done", flush=True)
+        _diag_mem("after evaluate_loc_probing")
 
         # Planning
         if not self.config.disable_planning and self.config.eval_l1:
@@ -390,6 +398,7 @@ class Evaluator:
 
         if not self.config.disable_l2_planning and self.config.eval_l2:
             print("DIAG: entering L2 planning block", flush=True)
+            _diag_mem("entering L2 planning block")
             levels, level_configs = self._get_planning_levels(l2=True)
             print(f"DIAG: levels={levels}", flush=True)
 
@@ -397,6 +406,7 @@ class Evaluator:
                 level_config = level_configs[i]
 
                 print(f"DIAG: creating l2 planning evaluator for level={level}", flush=True)
+                _diag_mem("before _create_l2_planning_evaluator")
                 planning_evaluator = self._create_l2_planning_evaluator(
                     level=level,
                     level_config=level_config,
