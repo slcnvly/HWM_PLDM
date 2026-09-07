@@ -21,6 +21,12 @@ class EvalConfig(ConfigBase):
     probing: ProbingConfig = ProbingConfig()
     eval_l1: bool = True
     eval_l2: bool = False
+    # eval_l2 alone gates both L2 probing (train_pred_prober(l2=True), in
+    # evaluate_loc_probing below) and L2 planning -- they have very different
+    # costs (probing OOM'd a Kaggle GPU kernel repeatedly, independent of any
+    # planning-side batch/sample-count reduction) and no reason to always run
+    # together. Defaults true so existing configs keep prior behavior.
+    probe_l2: bool = True
     log_heatmap: bool = True
     disable_planning: bool = False
     disable_l2_planning: bool = False
@@ -148,7 +154,7 @@ class Evaluator:
                 )
 
         # L2 Probing
-        if self.config.eval_l2:
+        if self.config.eval_l2 and self.config.probe_l2:
             probers_l2 = self.probing_evaluator.train_pred_prober(
                 epoch=self.epoch,
                 l2=True,
