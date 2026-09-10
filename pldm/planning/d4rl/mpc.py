@@ -55,6 +55,14 @@ class MazeMPCEvaluator(MPCEvaluator):
             f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6:.2f} GB",
             flush=True,
         )
+        print(
+            f"DIAG: MazeMPCEvaluator.__init__: config.level={config.level!r}, "
+            f"config.n_envs={config.n_envs}, config.set_start_target_path={config.set_start_target_path!r}, "
+            f"level_cfg is config.{config.level}, level_cfg.n_envs={level_cfg.n_envs}, "
+            f"level_cfg.set_start_target_path={level_cfg.set_start_target_path!r}, "
+            f"id(level_cfg)={id(level_cfg)}",
+            flush=True,
+        )
         envs_generator = Maze2DEnvsGenerator(
             env_name=config.env_name,
             n_envs=level_cfg.n_envs,

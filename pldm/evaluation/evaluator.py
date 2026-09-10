@@ -303,6 +303,7 @@ class Evaluator:
 
         mpc_config = dataclasses.replace(
             self.h_planning_config,
+            level=level,
             n_envs=n_envs,
             n_steps=n_steps,
             level2=planner_config_l2,
@@ -407,7 +408,10 @@ class Evaluator:
                 print(
                     f"DIAG: level_config for {level}: n_envs={getattr(level_config, 'n_envs', None)}, "
                     f"override_config={getattr(level_config, 'override_config', None)}, "
-                    f"set_start_target_path={getattr(level_config, 'set_start_target_path', None)}",
+                    f"set_start_target_path={getattr(level_config, 'set_start_target_path', None)}, "
+                    f"id(level_config)={id(level_config)}, "
+                    f"id(self.h_planning_config)={id(self.h_planning_config)}, "
+                    f"self.h_planning_config.n_envs={self.h_planning_config.n_envs}",
                     flush=True,
                 )
 
