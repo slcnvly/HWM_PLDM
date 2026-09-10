@@ -121,6 +121,25 @@ worth knowing before re-running anything:
   bonus (a real held-out metric for free) but worth knowing since it's what
   produced the Stage 1 validation-loss numbers above without ever being asked
   for.
+- **`Evaluator._create_l2_planning_evaluator` (pldm/evaluation/evaluator.py)
+  dropped `level=level` from its `dataclasses.replace(self.h_planning_config,
+  ...)` call** (its L1 sibling, `_create_l1_planning_evaluator`, already
+  included it correctly) -- found while building the n=120 re-eval (SS6b)
+  when `hard.n_envs` was set to something other than 40 for the first time.
+  `MazeMPCEvaluator.__init__` does `level_cfg = getattr(config, config.level)`
+  to pick the per-difficulty settings; with `config.level` stuck at its class
+  default (`"medium"`), every *hierarchical (L2)* planning eval in this
+  project -- regardless of which difficulty was requested -- was silently
+  reading `n_envs`/`min_block_radius`/`max_block_radius` from **medium's**
+  settings instead of the requested level's. Confirmed harmless for every
+  number already in this document: this yaml sets identical
+  `min_block_radius=4, max_block_radius=9999` across easy/medium/hard, and
+  every prior hard-difficulty run in this project happened to set
+  `hard.n_envs=40` -- identical to medium's default -- so the misdirected
+  read produced the same result it would have anyway. `set_start_target_path`
+  (the actual trial file) and `n_steps`/MPPI sub-configs are separate
+  top-level `mpc_config` fields set correctly by the same call, so those were
+  never affected. Fixed by adding `level=level` to match the L1 version.
 
 Kaggle kernels used (all in `hwm-experiment/experiments/`):
 `kaggle_render_shards` (dataset rendering), `kaggle_package_r50` +
@@ -214,8 +233,67 @@ the order of 150-200+ trials per condition at this effect size and base
 rate (rough two-proportion power calculation, 80% power, alpha=.05
 two-sided) -- well beyond a single free-tier Kaggle GPU session's budget for
 a 500-step, 40-env MPPI eval (the hard-only eval above alone took ~1h11m of
-planning time on top of ~2h of fine-tuning). **Bottom line: the staircase
-pattern (fine-tuning helps; adaptive placement adds a further, similarly-sized
-increment on top) is the best point estimate available, but should be read as
-a promising, non-definitive signal pending a larger run, not a settled
-result.**
+planning time on top of ~2h of fine-tuning). **Bottom line at n=40: the
+staircase pattern (fine-tuning helps; adaptive placement adds a further,
+similarly-sized increment on top) is the best point estimate available, but
+should be read as a promising, non-definitive signal pending a larger run,
+not a settled result.** Section 6b below is that larger run.
+
+### 6b. Scaling to n=120 (hard difficulty)
+
+The existing 40 trials per condition (`starts_targets_13_16.pt`, seed=42) were
+kept as-is and combined with 80 new trials per condition (same map pool,
+disjoint start/target instances, seed=20260910), evaluated in three
+checkpointed/resumable chunks (30/30/20) using the identical three already-
+saved checkpoints from Section 5 -- no re-training, evaluation only, same
+`n_steps=500, level2.mppi.num_samples=200`. Chunked new-80 results (chunks of
+30/30/20): baseline 22+24+17=63/80, fixed-stride control 28+27+20=75/80,
+adaptive min_seg=8 29+28+17=74/80 (full breakdown in
+`results_hard_n120_progress.json`/`results_hard_n120_final.json`); combined
+n=120 totals below.
+
+| Condition | n=40 rate | n=40 avg steps | n=120 rate | n=120 avg steps |
+|---|---|---|---|---|
+| Baseline | 82.5% (33/40) | 161.2 | **80.0%** (96/120) | 169.6 |
+| Fixed-stride control | 87.5% (35/40) | 151.1 | **91.7%** (110/120) | 169.5 |
+| Adaptive min_seg=8 | 92.5% (37/40) | 145.9 | **92.5%** (111/120) | 155.1 |
+
+The n=40 "staircase" (baseline < control < adaptive, evenly spaced) does
+**not** hold up at n=120. Two things move:
+- **Fixed-stride control jumps from 87.5% to 91.7%** and lands within 1
+  success of adaptive (110/120 vs 111/120) -- at n=40 the control's extra 8
+  trials happened to undershoot fine-tuning's true effect. With more data,
+  fine-tuning alone (no adaptive placement) accounts for nearly all of the
+  gain over baseline.
+- **Baseline itself drops slightly, from 82.5% to 80.0%**, widening the
+  fine-tuning-vs-no-fine-tuning gap rather than narrowing it.
+- **Adaptive's success rate is flat (92.5% at both scales)**, but its avg
+  steps-to-goal advantage persists and sharpens relative to the control:
+  155.1 vs 169.5, whereas at n=40 the gap was smaller (145.9 vs 151.1) and
+  baseline's n=120 avg steps (169.6) is now essentially tied with the
+  control's (169.5), not worse.
+
+| Pair (n=120) | Diff | Newcombe 95% CI | Permutation p (2-sided) | Significant @ .05 |
+|---|---|---|---|---|
+| Baseline vs. adaptive min_seg=8 | -0.125 | [-0.213, -0.038] | 0.0083 | **Yes** |
+| Baseline vs. fixed-stride control | -0.117 | [-0.205, -0.028] | 0.0149 | **Yes** |
+| Adaptive min_seg=8 vs. fixed-stride control | +0.008 | [-0.064, +0.081] | 1.000 | **No** |
+
+At n=120, both fine-tuned conditions are now significantly better than
+baseline on success rate (this wasn't true at n=40). But **adaptive vs. the
+fixed-stride control is not distinguishable on success rate** (diff
++0.8pp, p=1.0) -- the n=40 result's "~half the gain is adaptive-placement-
+specific" claim does not survive the larger sample. What does survive:
+adaptive's steps-to-goal advantage over the control (155.1 vs 169.5, ~8%
+fewer steps among successful trials) persists at both scales, though no
+significance test is reported for this continuous metric here (only success
+rate was tested; a proper comparison would need the per-trial steps-to-goal
+distribution, not just the aggregate mean, which isn't retained from this
+run's summary.json outputs).
+
+**Revised bottom line: fine-tuning on r50 -- regardless of whether waypoints
+are placed adaptively or at fixed stride -- is the effect that reliably beats
+baseline at this sample size. Adaptive placement's distinct contribution, if
+any, shows up in steps-to-goal efficiency among successful trials, not in
+whether the agent succeeds at all.** This is a materially different (and more
+conservative) conclusion than Section 6's n=40 read, and supersedes it.

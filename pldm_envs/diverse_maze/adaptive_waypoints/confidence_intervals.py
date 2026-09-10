@@ -1,6 +1,8 @@
 """
 95% confidence intervals (binomial + bootstrap) for the three hard-difficulty
 (D 13-16) planning-success conditions, and pairwise significance between them.
+Computed at both n=40 (original curated starts_targets_13_16.pt, seed=42) and
+n=120 (n=40 + 80 new trials, seed=20260910, combined per RESULTS.md SS6b).
 
 Run: python confidence_intervals.py
 Writes confidence_intervals_results.json alongside this script.
@@ -32,12 +34,22 @@ RNG = np.random.default_rng(0)
 N_BOOTSTRAP = 10_000
 N_PERMUTATIONS = 10_000
 
-# ---- data: hard difficulty (D 13-16), n=40 each ----------------------------
-CONDITIONS = {
+# ---- data: hard difficulty (D 13-16) -----------------------------------
+CONDITIONS_N40 = {
     "baseline": {"k": 33, "n": 40, "label": "baseline (pretrained, no fine-tune)"},
     "adaptive_minseg8": {"k": 37, "n": 40, "label": "adaptive min_seg=8 (2-epoch fine-tune)"},
     "fixed_stride_finetuned": {"k": 35, "n": 40, "label": "fixed-stride, 2-epoch fine-tune (control)"},
 }
+
+# n=120 = n40 above + 80 new trials (seed=20260910, disjoint start/target
+# instances from the original 40) per RESULTS.md SS6b / results_hard_n120_final.json
+CONDITIONS_N120 = {
+    "baseline": {"k": 96, "n": 120, "label": "baseline (pretrained, no fine-tune)"},
+    "adaptive_minseg8": {"k": 111, "n": 120, "label": "adaptive min_seg=8 (2-epoch fine-tune)"},
+    "fixed_stride_finetuned": {"k": 110, "n": 120, "label": "fixed-stride, 2-epoch fine-tune (control)"},
+}
+
+SCALES = {"n40": CONDITIONS_N40, "n120": CONDITIONS_N120}
 
 
 @dataclass
@@ -101,22 +113,10 @@ def permutation_test(k1: int, n1: int, k2: int, n2: int, n_perm: int = N_PERMUTA
     return count_ge / n_perm
 
 
-def main():
-    have_control = CONDITIONS["fixed_stride_finetuned"]["k"] is not None
-    if not have_control:
-        print(
-            "NOTE: fixed_stride_finetuned k is not filled in yet (Kaggle run "
-            "still pending) -- computing CIs for baseline and adaptive_minseg8 "
-            "only; re-run this script once the control result is in.\n"
-        )
-
-    active = {
-        name: c for name, c in CONDITIONS.items() if c["k"] is not None
-    }
-
+def run_scale(conditions: dict) -> tuple:
     results = {}
     print(f"{'condition':<28} {'k/n':>8} {'rate':>8}   {'wilson 95% CI':<22} {'bootstrap 95% CI':<22}")
-    for name, c in active.items():
+    for name, c in conditions.items():
         k, n = c["k"], c["n"]
         w = wilson_interval(k, n)
         b = bootstrap_interval(k, n)
@@ -129,8 +129,8 @@ def main():
 
     print(f"\n{'pair':<48} {'diff':>7}   {'newcombe 95% CI':<20} {'perm. p (2-sided)':>18}  significant@.05")
     pairwise = {}
-    for name_a, name_b in itertools.combinations(active.keys(), 2):
-        a, b = active[name_a], active[name_b]
+    for name_a, name_b in itertools.combinations(conditions.keys(), 2):
+        a, b = conditions[name_a], conditions[name_b]
         diff = a["k"] / a["n"] - b["k"] / b["n"]
         ci = newcombe_diff_interval(a["k"], a["n"], b["k"], b["n"])
         p = permutation_test(a["k"], a["n"], b["k"], b["n"])
@@ -147,8 +147,18 @@ def main():
             f"{label:<48} {diff:>+7.3f}   [{ci[0]:+.3f}, {ci[1]:+.3f}]      "
             f"{p:>18.4f}  {'yes' if sig else 'no'}"
         )
+    return results, pairwise
 
-    out = {"conditions": results, "pairwise": pairwise, "n_bootstrap": N_BOOTSTRAP, "n_permutations": N_PERMUTATIONS}
+
+def main():
+    out = {}
+    for scale_name, conditions in SCALES.items():
+        print(f"\n{'=' * 20} {scale_name} {'=' * 20}")
+        results, pairwise = run_scale(conditions)
+        out[scale_name] = {"conditions": results, "pairwise": pairwise}
+
+    out["n_bootstrap"] = N_BOOTSTRAP
+    out["n_permutations"] = N_PERMUTATIONS
     out_path = "confidence_intervals_results.json"
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2)

@@ -1,75 +1,152 @@
 {
-  "conditions": {
-    "baseline": {
-      "label": "baseline (pretrained, no fine-tune)",
-      "k": 33,
-      "n": 40,
-      "rate": 0.825,
-      "wilson_95": [
-        0.6805000966821229,
-        0.9125458625396408
-      ],
-      "bootstrap_95": [
-        0.7,
-        0.925
-      ]
+  "n40": {
+    "conditions": {
+      "baseline": {
+        "label": "baseline (pretrained, no fine-tune)",
+        "k": 33,
+        "n": 40,
+        "rate": 0.825,
+        "wilson_95": [
+          0.6805000966821229,
+          0.9125458625396408
+        ],
+        "bootstrap_95": [
+          0.7,
+          0.925
+        ]
+      },
+      "adaptive_minseg8": {
+        "label": "adaptive min_seg=8 (2-epoch fine-tune)",
+        "k": 37,
+        "n": 40,
+        "rate": 0.925,
+        "wilson_95": [
+          0.8013576647568946,
+          0.9741639742254119
+        ],
+        "bootstrap_95": [
+          0.825,
+          1.0
+        ]
+      },
+      "fixed_stride_finetuned": {
+        "label": "fixed-stride, 2-epoch fine-tune (control)",
+        "k": 35,
+        "n": 40,
+        "rate": 0.875,
+        "wilson_95": [
+          0.738878801611489,
+          0.945404997490546
+        ],
+        "bootstrap_95": [
+          0.775,
+          0.975
+        ]
+      }
     },
-    "adaptive_minseg8": {
-      "label": "adaptive min_seg=8 (2-epoch fine-tune)",
-      "k": 37,
-      "n": 40,
-      "rate": 0.925,
-      "wilson_95": [
-        0.8013576647568946,
-        0.9741639742254119
-      ],
-      "bootstrap_95": [
-        0.825,
-        1.0
-      ]
-    },
-    "fixed_stride_finetuned": {
-      "label": "fixed-stride, 2-epoch fine-tune (control)",
-      "k": 35,
-      "n": 40,
-      "rate": 0.875,
-      "wilson_95": [
-        0.738878801611489,
-        0.945404997490546
-      ],
-      "bootstrap_95": [
-        0.775,
-        0.975
-      ]
+    "pairwise": {
+      "baseline_vs_adaptive_minseg8": {
+        "diff": -0.10000000000000009,
+        "newcombe_95_ci": [
+          -0.25263459116633036,
+          0.05149820167968372
+        ],
+        "permutation_p_two_sided": 0.3076,
+        "significant_at_0.05": false
+      },
+      "baseline_vs_fixed_stride_finetuned": {
+        "diff": -0.050000000000000044,
+        "newcombe_95_ci": [
+          -0.2107391854232179,
+          0.11184331527293315
+        ],
+        "permutation_p_two_sided": 0.7549,
+        "significant_at_0.05": false
+      },
+      "adaptive_minseg8_vs_fixed_stride_finetuned": {
+        "diff": 0.050000000000000044,
+        "newcombe_95_ci": [
+          -0.09228243298458258,
+          0.19472759589090582
+        ],
+        "permutation_p_two_sided": 0.721,
+        "significant_at_0.05": false
+      }
     }
   },
-  "pairwise": {
-    "baseline_vs_adaptive_minseg8": {
-      "diff": -0.10000000000000009,
-      "newcombe_95_ci": [
-        -0.25263459116633036,
-        0.05149820167968372
-      ],
-      "permutation_p_two_sided": 0.3076,
-      "significant_at_0.05": false
+  "n120": {
+    "conditions": {
+      "baseline": {
+        "label": "baseline (pretrained, no fine-tune)",
+        "k": 96,
+        "n": 120,
+        "rate": 0.8,
+        "wilson_95": [
+          0.7196332649371805,
+          0.8617552352115975
+        ],
+        "bootstrap_95": [
+          0.725,
+          0.8666666666666667
+        ]
+      },
+      "adaptive_minseg8": {
+        "label": "adaptive min_seg=8 (2-epoch fine-tune)",
+        "k": 111,
+        "n": 120,
+        "rate": 0.925,
+        "wilson_95": [
+          0.8635908239400624,
+          0.9600428846040397
+        ],
+        "bootstrap_95": [
+          0.875,
+          0.9666666666666667
+        ]
+      },
+      "fixed_stride_finetuned": {
+        "label": "fixed-stride, 2-epoch fine-tune (control)",
+        "k": 110,
+        "n": 120,
+        "rate": 0.9166666666666666,
+        "wilson_95": [
+          0.8533776783593434,
+          0.9541063496250703
+        ],
+        "bootstrap_95": [
+          0.8666666666666667,
+          0.9666666666666667
+        ]
+      }
     },
-    "baseline_vs_fixed_stride_finetuned": {
-      "diff": -0.050000000000000044,
-      "newcombe_95_ci": [
-        -0.2107391854232179,
-        0.11184331527293315
-      ],
-      "permutation_p_two_sided": 0.7549,
-      "significant_at_0.05": false
-    },
-    "adaptive_minseg8_vs_fixed_stride_finetuned": {
-      "diff": 0.050000000000000044,
-      "newcombe_95_ci": [
-        -0.09228243298458258,
-        0.19472759589090582
-      ],
-      "permutation_p_two_sided": 0.721,
-      "significant_at_0.05": false
+    "pairwise": {
+      "baseline_vs_adaptive_minseg8": {
+        "diff": -0.125,
+        "newcombe_95_ci": [
+          -0.21267448811387193,
+          -0.03790926581776828
+        ],
+        "permutation_p_two_sided": 0.0083,
+        "significant_at_0.05": true
+      },
+      "baseline_vs_fixed_stride_finetuned": {
+        "diff": -0.11666666666666659,
+        "newcombe_95_ci": [
+          -0.20532636418861402,
+          -0.0282403972836138
+        ],
+        "permutation_p_two_sided": 0.0149,
+        "significant_at_0.05": true
+      },
+      "adaptive_minseg8_vs_fixed_stride_finetuned": {
+        "diff": 0.008333333333333415,
+        "newcombe_95_ci": [
+          -0.06358896337906453,
+          0.08067626527790238
+        ],
+        "permutation_p_two_sided": 1.0,
+        "significant_at_0.05": false
+      }
     }
   },
   "n_bootstrap": 10000,
