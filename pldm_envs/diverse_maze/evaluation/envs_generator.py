@@ -60,7 +60,15 @@ class EnvsGenerator:
 
             if trials_path is not None and trials_path:
                 trials = torch.load(trials_path)
-                assert n_envs <= len(trials["map_layouts"])
+                print(
+                    f"DIAG: EnvsGenerator loading trials_path={trials_path}, "
+                    f"n_envs={n_envs}, len(trials['map_layouts'])={len(trials['map_layouts'])}",
+                    flush=True,
+                )
+                assert n_envs <= len(trials["map_layouts"]), (
+                    f"n_envs={n_envs} > len(trials['map_layouts'])={len(trials['map_layouts'])} "
+                    f"(trials_path={trials_path})"
+                )
 
                 for i in range(n_envs):
                     env, _, _, _ = self._make_env(

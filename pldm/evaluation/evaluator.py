@@ -404,6 +404,12 @@ class Evaluator:
 
             for i, level in enumerate(levels):
                 level_config = level_configs[i]
+                print(
+                    f"DIAG: level_config for {level}: n_envs={getattr(level_config, 'n_envs', None)}, "
+                    f"override_config={getattr(level_config, 'override_config', None)}, "
+                    f"set_start_target_path={getattr(level_config, 'set_start_target_path', None)}",
+                    flush=True,
+                )
 
                 print(f"DIAG: creating l2 planning evaluator for level={level}", flush=True)
                 _diag_mem("before _create_l2_planning_evaluator")
