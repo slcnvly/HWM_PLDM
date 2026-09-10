@@ -1,0 +1,77 @@
+{
+  "conditions": {
+    "baseline": {
+      "label": "baseline (pretrained, no fine-tune)",
+      "k": 33,
+      "n": 40,
+      "rate": 0.825,
+      "wilson_95": [
+        0.6805000966821229,
+        0.9125458625396408
+      ],
+      "bootstrap_95": [
+        0.7,
+        0.925
+      ]
+    },
+    "adaptive_minseg8": {
+      "label": "adaptive min_seg=8 (2-epoch fine-tune)",
+      "k": 37,
+      "n": 40,
+      "rate": 0.925,
+      "wilson_95": [
+        0.8013576647568946,
+        0.9741639742254119
+      ],
+      "bootstrap_95": [
+        0.825,
+        1.0
+      ]
+    },
+    "fixed_stride_finetuned": {
+      "label": "fixed-stride, 2-epoch fine-tune (control)",
+      "k": 35,
+      "n": 40,
+      "rate": 0.875,
+      "wilson_95": [
+        0.738878801611489,
+        0.945404997490546
+      ],
+      "bootstrap_95": [
+        0.775,
+        0.975
+      ]
+    }
+  },
+  "pairwise": {
+    "baseline_vs_adaptive_minseg8": {
+      "diff": -0.10000000000000009,
+      "newcombe_95_ci": [
+        -0.25263459116633036,
+        0.05149820167968372
+      ],
+      "permutation_p_two_sided": 0.3076,
+      "significant_at_0.05": false
+    },
+    "baseline_vs_fixed_stride_finetuned": {
+      "diff": -0.050000000000000044,
+      "newcombe_95_ci": [
+        -0.2107391854232179,
+        0.11184331527293315
+      ],
+      "permutation_p_two_sided": 0.7549,
+      "significant_at_0.05": false
+    },
+    "adaptive_minseg8_vs_fixed_stride_finetuned": {
+      "diff": 0.050000000000000044,
+      "newcombe_95_ci": [
+        -0.09228243298458258,
+        0.19472759589090582
+      ],
+      "permutation_p_two_sided": 0.721,
+      "significant_at_0.05": false
+    }
+  },
+  "n_bootstrap": 10000,
+  "n_permutations": 10000
+}

@@ -29,6 +29,21 @@ sample size, not the n=4 pilot this project started Stage 2 with -- see §4 for
 how that pilot result (baseline 75%, adaptive 100%, both on n=4) motivated
 re-running at full scale before treating anything as evidence.
 
+**Two important qualifications, added after a follow-up control experiment and
+significance analysis (§5-6) -- read before citing the "+10 points" figure
+above:**
+1. **About half of the hard-difficulty gain is just from fine-tuning, not
+   from adaptive placement.** A control that fine-tunes on *fixed*-stride
+   data, identically otherwise, lands at 87.5% (35/40) -- almost exactly
+   halfway between baseline (82.5%) and adaptive (92.5%). Adaptive placement's
+   own marginal contribution on top of fine-tuning is closer to +5 points,
+   not +10.
+2. **None of the pairwise differences (baseline vs. control, control vs.
+   adaptive, or baseline vs. adaptive) are statistically significant at
+   n=40** (95% CI always includes 0; permutation p in 0.31-0.76). The
+   monotonic staircase across all three conditions is a real, promising
+   pattern, but not yet a settled result at this sample size.
+
 ## 2. Experiment design
 
 **Stage 1 -- training-loss / held-out-validation screening across min_seg.**
@@ -111,7 +126,9 @@ Kaggle kernels used (all in `hwm-experiment/experiments/`):
 `kaggle_render_shards` (dataset rendering), `kaggle_package_r50` +
 `kaggle_compute_changepoints` (dataset packaging), `kaggle_adaptive_train`
 (Stage 1), `kaggle_finetune_compare` (Stage 2 pilot, n=4 -- superseded),
-`kaggle_finetune_full_eval` (Stage 2 real run, n=40, this document's numbers).
+`kaggle_finetune_full_eval` (Stage 2 real run, n=40, this document's numbers),
+`kaggle_finetune_fixed_control` (§5 control, fixed-stride 2-epoch fine-tune,
+hard-only n=40).
 
 ## 4. On the n=4 pilot (why it's not reported above)
 
@@ -120,3 +137,85 @@ gave baseline 75% / adaptive 100% on medium only. That's the same direction as
 the n=40 result above but far too small a sample to treat as evidence on its
 own -- it's reported here only as the reason the n=40 re-run happened, not as
 a second data point.
+
+## 5. Fine-tuning control (isolating placement from "more training")
+
+Section 1's adaptive result (33/40 -> 37/40 on hard) confounds two things:
+adaptive waypoint *placement*, and simply receiving 2 epochs of gradient
+updates that the untrained baseline never got. A third condition isolates
+this: fine-tuned from the identical pretrained checkpoint, on the identical
+r50 dataset, for the identical 2 epochs at the identical reduced LR
+(`base_lr` x0.1) as the adaptive run -- the only change is the waypoint
+dataset itself, plain `D4RLDataset` (fixed `l2_step_skip=10`,
+`l2_n_steps=6`) instead of `AdaptiveD4RLDataset(min_seg=8)`. Evaluated on
+hard difficulty only (medium already ties baseline/adaptive, so it isn't
+informative for this question), same `n_envs=40, n_steps=500,
+level2.mppi.num_samples=200` as the other two hard numbers.
+
+| Condition | Hard success | Avg steps to goal |
+|---|---|---|
+| Baseline (pretrained, no fine-tune) | 82.5% (33/40) | 161.2 |
+| **Fixed-stride, 2-epoch fine-tune (control)** | **87.5%** (35/40) | **151.1** |
+| Adaptive min_seg=8, 2-epoch fine-tune | 92.5% (37/40) | 145.9 |
+
+The control lands almost exactly halfway between baseline and adaptive on both
+metrics (success rate: 82.5 &rarr; 87.5 &rarr; 92.5, i.e. +5pp then +5pp again;
+steps: 161.2 &rarr; 151.1 &rarr; 145.9). Point estimates split the 10-point
+baseline-to-adaptive gain roughly evenly:
+- **~half (5 of 10 points) is attributable to fine-tuning itself** -- 2 epochs
+  on r50 helps even without changing waypoint placement, which isn't
+  surprising (the pretrained checkpoint has never seen this specific
+  main-dataset subset).
+- **~the other half (5 of 10 points) is attributable to adaptive placement
+  specifically** -- switching only the waypoint dataset, with identical
+  compute/LR/schedule, adds a further +5pp and ~5 fewer average steps on top
+  of what fine-tuning alone gets.
+
+This is a real finding in its own right and a substantially more honest claim
+than Section 1's original "adaptive beats baseline by 10 points" -- about
+half of that gap would have shown up from fine-tuning on *any* waypoint
+schedule, fixed or adaptive. See Section 6 for whether any of these three
+point estimates are actually distinguishable from each other at n=40.
+
+## 6. Statistical significance (hard difficulty, n=40 per condition)
+
+Two independent checks per condition: a Wilson score interval (better-behaved
+than the normal approximation at n=40) and a percentile bootstrap (10,000
+resamples) on the binomial success rate. Pairwise comparisons use a Newcombe
+interval on the difference in proportions plus a two-sided permutation test
+(10,000 permutations) on the pooled pass/fail counts. Script:
+`confidence_intervals.py` in this directory; raw output:
+`confidence_intervals_results.json`.
+
+| Condition | k/n | Rate | Wilson 95% CI | Bootstrap 95% CI |
+|---|---|---|---|---|
+| Baseline | 33/40 | 0.825 | [0.681, 0.913] | [0.700, 0.925] |
+| Fixed-stride control | 35/40 | 0.875 | [0.739, 0.945] | [0.775, 0.975] |
+| Adaptive min_seg=8 | 37/40 | 0.925 | [0.801, 0.974] | [0.825, 1.000] |
+
+| Pair | Diff | Newcombe 95% CI | Permutation p (2-sided) | Significant @ .05 |
+|---|---|---|---|---|
+| Baseline vs. adaptive min_seg=8 | -0.100 | [-0.253, +0.051] | 0.308 | **No** |
+| Baseline vs. fixed-stride control | -0.050 | [-0.211, +0.112] | 0.755 | **No** |
+| Adaptive min_seg=8 vs. fixed-stride control | +0.050 | [-0.092, +0.195] | 0.721 | **No** |
+
+**None of the three pairwise gaps reach significance at n=40** -- every 95%
+CI on a difference includes 0, and every permutation p-value is well above
+.05 (0.31-0.76). This holds even though the point estimates move in a clean,
+monotonic staircase (baseline < control < adaptive, both on success rate and
+steps-to-goal, Section 5) -- a pattern that's suggestive but, at this sample
+size, not statistically distinguishable from three draws off the same
+underlying rate. Concretely: the 95% CI on baseline vs. adaptive alone spans
+roughly [-25pp, +5pp], wide enough to be consistent with adaptive being
+worse, the same, or better than baseline.
+
+A meaningfully tighter CI on the ~5pp step-wise effects above would need on
+the order of 150-200+ trials per condition at this effect size and base
+rate (rough two-proportion power calculation, 80% power, alpha=.05
+two-sided) -- well beyond a single free-tier Kaggle GPU session's budget for
+a 500-step, 40-env MPPI eval (the hard-only eval above alone took ~1h11m of
+planning time on top of ~2h of fine-tuning). **Bottom line: the staircase
+pattern (fine-tuning helps; adaptive placement adds a further, similarly-sized
+increment on top) is the best point estimate available, but should be read as
+a promising, non-definitive signal pending a larger run, not a settled
+result.**
