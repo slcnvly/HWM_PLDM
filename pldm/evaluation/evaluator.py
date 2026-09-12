@@ -313,10 +313,18 @@ class Evaluator:
         )
 
         if "maze2d" in self.config.env_name:
-            from pldm.planning.d4rl.hmpc import HierarchicalD4RLMPCEvaluator
+            from pldm.planning.d4rl.hmpc import (
+                HierarchicalD4RLMPCEvaluator,
+                ErrorAdaptiveHierarchicalD4RLMPCEvaluator,
+            )
             from pldm.planning.d4rl.enums import HierarchicalD4RLMPCConfig
 
-            planning_evaluator = HierarchicalD4RLMPCEvaluator(
+            evaluator_cls = (
+                ErrorAdaptiveHierarchicalD4RLMPCEvaluator
+                if getattr(mpc_config, "error_adaptive_l1", False)
+                else HierarchicalD4RLMPCEvaluator
+            )
+            planning_evaluator = evaluator_cls(
                 config=mpc_config,
                 normalizer=self.normalizer,
                 model=self.model,

@@ -194,3 +194,87 @@ class HierarchicalD4RLMPCEvaluator(MazeMPCEvaluator):
         opt_steps = opt_depths * hjepa.config.step_skip
 
         return opt_steps
+
+
+class ErrorAdaptiveHierarchicalD4RLMPCEvaluator(HierarchicalD4RLMPCEvaluator):
+    """RESULTS.md SS7 (eval-only, no training-code changes). After every real
+    MPC step, computes a one-step latent prediction error using a separate
+    frozen L1-only checkpoint (see
+    pldm_envs/diverse_maze/adaptive_waypoints/error_adaptive_l1.py) and, if it
+    exceeds config.error_adaptive_l1_threshold, boosts the L1 MPPI planner's
+    num_samples (per-env) and planning horizon (whole-batch) for the next
+    planning call; otherwise the checkpoint's normal fixed settings are used.
+    Only active when config.error_adaptive_l1 is set (checked by the caller,
+    pldm/evaluation/evaluator.py) -- this class does no gating itself.
+    """
+
+    def __init__(
+        self,
+        config,
+        normalizer,
+        model,
+        pixel_mapper,
+        prober=None,
+        prober_l2=None,
+        prefix: str = "d4rl_h_",
+        quick_debug: bool = False,
+        l2_use_latent_mean_std: bool = False,
+    ):
+        from pldm_envs.diverse_maze.adaptive_waypoints.error_adaptive_l1 import (
+            ErrorAdaptiveL1Planner,
+            L1ErrorMonitor,
+        )
+
+        # Set up before calling super().__init__(): that call constructs
+        # self.h_planner via self._construct_h_planner (overridden below),
+        # which needs these already in place.
+        self._ErrorAdaptiveL1Planner = ErrorAdaptiveL1Planner
+        self.error_monitor = L1ErrorMonitor(
+            config_path=config.error_adaptive_l1_config_path,
+            checkpoint_path=config.error_adaptive_l1_checkpoint_path,
+            normalizer=normalizer,
+        )
+        self.error_threshold = config.error_adaptive_l1_threshold
+        self.num_samples_multiplier = config.error_adaptive_l1_num_samples_multiplier
+        self.horizon_multiplier = config.error_adaptive_l1_horizon_multiplier
+        self._active_l1_proxy = None
+
+        super().__init__(
+            config=config,
+            normalizer=normalizer,
+            model=model,
+            pixel_mapper=pixel_mapper,
+            prober=prober,
+            prober_l2=prober_l2,
+            prefix=prefix,
+            quick_debug=quick_debug,
+            l2_use_latent_mean_std=l2_use_latent_mean_std,
+        )
+        self.post_l1_step_hook = self._on_post_l1_step
+
+    def _construct_h_planner(self, n_envs: int):
+        h_planner = super()._construct_h_planner(n_envs)
+        base_num_samples = self.config.level1.mppi.num_samples
+        base_plan_size = h_planner.l2_step_skip
+        h_planner.l1_planner = self._ErrorAdaptiveL1Planner(
+            h_planner.l1_planner,
+            base_num_samples=base_num_samples,
+            base_plan_size=base_plan_size,
+            num_samples_multiplier=self.num_samples_multiplier,
+            horizon_multiplier=self.horizon_multiplier,
+        )
+        self._active_l1_proxy = h_planner.l1_planner
+        self.error_monitor.reset()
+        return h_planner
+
+    def _on_post_l1_step(self, step, offset, planning_result, current_obs, infos):
+        import numpy as np
+
+        proprio_after = torch.from_numpy(
+            np.stack([info["proprio"] for info in infos])
+        ).float()
+        action_taken = planning_result.actions[:, offset].detach().cpu()
+        err = self.error_monitor.step_error(current_obs, action_taken, proprio_after)
+        boost_mask = None if err is None else (err > self.error_threshold)
+        if self._active_l1_proxy is not None:
+            self._active_l1_proxy.set_boost_mask(boost_mask)

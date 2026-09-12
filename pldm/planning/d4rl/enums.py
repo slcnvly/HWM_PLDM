@@ -22,6 +22,15 @@ class HierarchicalD4RLMPCConfig(D4RLMPCConfig):
     error_threshold: float = 1.0
     mock_l1: bool = False
     level2: PlannerConfig = PlannerConfig()
+    # Error-adaptive L1 resource allocation (RESULTS.md SS7, eval-only --
+    # unrelated to error_threshold above, which is a pre-existing field used
+    # elsewhere). See pldm_envs/diverse_maze/adaptive_waypoints/error_adaptive_l1.py.
+    error_adaptive_l1: bool = False
+    error_adaptive_l1_threshold: float = 0.0
+    error_adaptive_l1_config_path: str = ""
+    error_adaptive_l1_checkpoint_path: str = ""
+    error_adaptive_l1_num_samples_multiplier: float = 2.0
+    error_adaptive_l1_horizon_multiplier: float = 1.5
 
 
 class MPCReport(NamedTuple):

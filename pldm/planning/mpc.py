@@ -41,6 +41,12 @@ class MPCEvaluator(ABC):
         self.image_based = image_based
         self.hierarchical = hierarchical
         self.l2_use_latent_mean_std = l2_use_latent_mean_std
+        # Optional callback(step, offset, planning_result, current_obs, infos),
+        # invoked once per real step (bilevel planning only) right after the
+        # env step executes. Used by adaptive_waypoints' error-adaptive L1
+        # resource allocation to decide the next planning call's num_samples
+        # / horizon; None (default) is a no-op, zero behavior change otherwise.
+        self.post_l1_step_hook = None
 
     def close(self):
         pass
@@ -539,6 +545,15 @@ class MPCEvaluator(ABC):
             current_obs = torch.from_numpy(np.stack([r[0] for r in results])).float()
             rewards_t = torch.from_numpy(np.stack([r[1] for r in results])).float()
             infos = [r[4] for r in results]
+
+            if bilevel_planning and self.post_l1_step_hook is not None:
+                self.post_l1_step_hook(
+                    step=i,
+                    offset=i % self.config.replan_every,
+                    planning_result=planning_result,
+                    current_obs=current_obs,
+                    infos=infos,
+                )
 
             action_history.append(planned_actions.detach().cpu())
             observation_history.append(current_obs)
