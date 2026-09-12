@@ -1,0 +1,37 @@
+{
+  "error_threshold_info": {
+    "mean": 4.633825778961182,
+    "std": 1.0756497383117676,
+    "threshold": 6.785125255584717,
+    "n_steps": 75000,
+    "n_sigma": 2.0
+  },
+  "baseline": {
+    "fixed_alloc": {
+      "k": 96,
+      "n": 120,
+      "rate": 0.8,
+      "avg_steps": 169.6
+    },
+    "error_adaptive": {
+      "k": 96,
+      "n": 120,
+      "rate": 0.8,
+      "avg_steps": 163.93750047683716
+    }
+  },
+  "adaptive_minseg8_finetuned": {
+    "fixed_alloc": {
+      "k": 111,
+      "n": 120,
+      "rate": 0.925,
+      "avg_steps": 155.1
+    },
+    "error_adaptive": {
+      "k": 115,
+      "n": 120,
+      "rate": 0.9583333333333334,
+      "avg_steps": 152.60869870393174
+    }
+  }
+}

@@ -297,3 +297,166 @@ baseline at this sample size. Adaptive placement's distinct contribution, if
 any, shows up in steps-to-goal efficiency among successful trials, not in
 whether the agent succeeds at all.** This is a materially different (and more
 conservative) conclusion than Section 6's n=40 read, and supersedes it.
+
+## 7. Error-adaptive L1 resource allocation (eval-only)
+
+Sections 5-6b vary *what's in the level2 waypoint dataset* (fixed stride vs.
+adaptive segmentation) but always give the level1 MPPI planner the same fixed
+compute budget every real step. This section asks a different, orthogonal
+question: at fixed model weights (no re-training, same two checkpoints as
+SS6b -- baseline and adaptive min_seg=8), can *spending more level1 planning
+compute only when the model is visibly surprised* improve on always spending
+the same amount?
+
+### 7.1 Experiment design
+
+**Online surprise signal.** After every real MPC step, compute a one-step
+latent prediction error: encode the actual post-step observation and compare
+it to the one-step-ahead prediction, squared-error-averaged over the encoding
+feature dims -- exactly `compute_changepoints.py`'s `compute_error_series`
+formula (DESIGN.md SS3), just evaluated online instead of once offline over
+stored trajectories. Two choices made here, checked with the user before
+running (both approved) since they affect whether the online number and the
+threshold below are even on the same scale:
+- **Latent-space MSE, not raw xy/pixel distance.** The changepoint error
+  distribution this threshold is drawn from is latent-space; a location-space
+  error would be a different metric on a different scale.
+- **Computed with the same separate frozen L1-only checkpoint**
+  `compute_changepoints.py` used (`3-9-1-seed248_epoch=3_sample_step=15465472.ckpt`,
+  from `kevinghst/pldm-maze2d-large-diverse`), not the L1 weights bundled
+  inside whichever hierarchical checkpoint (baseline/adaptive) is being
+  planned with -- those are two different pretrained models in this repo.
+  This monitor model has nothing to do with the model actually doing the
+  planning; it only produces the surprise signal.
+
+**Threshold.** Mean + 2*std of the identical error computed over every
+step of every episode in the r50 **main** dataset (1250 episodes x 60 steps
+= 75,000 steps -- the same data/model `compute_changepoints.py` swept for
+changepoints, just aggregated into a scalar mean/std here instead of used for
+peak-picking): mean=4.6338, std=1.0756, **threshold=6.7851**. Computed once
+per kernel run (~1 minute), before any of the 12 eval chunks.
+
+**Resource boost.** Whenever a real step's error exceeds the threshold, the
+*next* level1 planning call uses 2x `num_samples` and 1.5x planning horizon;
+otherwise the checkpoint's normal fixed settings (hard: `num_samples=1000`,
+horizon=`l2_step_skip=10`) are used. Implementation detail worth stating
+plainly: `num_samples` boosts **per-env** (MPPI already runs its per-sample
+rollout in a per-env Python loop, so `ctrl.K` is trivially settable per env),
+but planning **horizon** boosts at the **whole-chunk** level (any env in the
+20-env chunk tripping the threshold boosts the horizon for the entire batch
+that step) -- `MPPIPlanner.plan()`'s batched dynamics rollout requires one
+shared plan length per call, so per-env horizon isn't available without
+restructuring the batched planner itself, which was out of scope for an
+eval-only change. Level2 (waypoint planning) is completely untouched --
+`num_samples=200`, no horizon change -- matching the user's request.
+
+Implementation lives entirely in new eval-side files
+(`error_adaptive_l1.py`'s `compute_r50_error_threshold`, `L1ErrorMonitor`,
+`ErrorAdaptiveL1Planner`) plus one small additive hook on the existing
+`MPCEvaluator` (`post_l1_step_hook`, default `None`, called once per real
+step in the bilevel branch of `pldm/planning/mpc.py`) and a new
+`ErrorAdaptiveHierarchicalD4RLMPCEvaluator` subclass
+(`pldm/planning/d4rl/hmpc.py`) wired in behind an opt-in config flag
+(`eval_cfg.h_d4rl_planning.error_adaptive_l1`, default `false`). No training
+code (`pldm/train.py`, objectives, model definitions) was touched.
+
+**Trials.** Same 120 hard-difficulty (D 13-16) trials as SS6b: the original
+40 (`starts_targets_13_16.pt`, seed=42) + the same 80 new ones (seed=20260910)
+-- reused directly from SS6b's own saved `extra80_full.pt` rather than
+regenerated, so the trial set is byte-identical, not just seed-identical.
+Evaluated fresh in full (not just the new 80) for the two new conditions,
+since fixed-vs-error-adaptive is a new axis that SS6b never ran. Same
+`n_steps=500`, same `level2.mppi.num_samples=200`. Chunked 6x20 (vs. SS6b's
+30/30/20) with progress written to
+`results_hard_l1adaptive_progress.json` after every chunk, same
+resumable-skip-already-done-chunks pattern as SS6b's kernel. (In practice
+this run completed end-to-end in one ~9h Kaggle session, so resumption was
+never exercised for real -- see SS7.3.)
+
+### 7.2 Results
+
+| Checkpoint | L1 resource allocation | Hard success (n=120) | Avg steps to goal |
+|---|---|---|---|
+| baseline | fixed (SS6b) | 80.0% (96/120) | 169.6 |
+| baseline | error-adaptive (SS7) | 80.0% (96/120) | 163.9 |
+| adaptive min_seg=8 | fixed (SS6b) | 92.5% (111/120) | 155.1 |
+| adaptive min_seg=8 | error-adaptive (SS7) | **95.8%** (115/120) | **152.6** |
+
+Error-adaptive allocation moves in the same direction for both checkpoints
+(flat-or-better success rate, fewer average steps), but the effect is small
+and, per SS7.3 below, not statistically distinguishable from zero at this
+sample size:
+- **Baseline: identical success rate (96/120 both ways), ~3.3% fewer average
+  steps** (169.6 -> 163.9). Boosting compute on surprising steps didn't turn
+  any failure into a success here, but successful trials finished slightly
+  faster.
+- **Adaptive min_seg=8: +4 successes (111 -> 115, 92.5% -> 95.8%), ~1.6%
+  fewer average steps** (155.1 -> 152.6). The larger of the two effects, and
+  the only one where the success count actually moved -- but see the
+  significance test below before reading much into +4/120.
+
+### 7.3 Statistical significance
+
+Same three checks as SS6 (Wilson CI, Newcombe CI on the difference, two-sided
+permutation test, 10,000 resamples/permutations each), extended to all 6
+pairs among the resulting 4 conditions (`confidence_intervals.py`, scale
+`n120_l1adaptive`). The two pairs this experiment is actually about --
+same checkpoint, fixed vs. error-adaptive -- first:
+
+| Pair | Diff | Newcombe 95% CI | Permutation p (2-sided) | Significant @ .05 |
+|---|---|---|---|---|
+| Baseline: fixed vs. error-adaptive | +0.000 | [-0.101, +0.101] | 1.0000 | **No** |
+| Adaptive min_seg=8: fixed vs. error-adaptive | -0.033 | [-0.099, +0.030] | 0.4016 | **No** |
+
+Neither same-checkpoint pair is significant -- baseline's is exactly zero
+(identical 96/120 both ways) and adaptive min_seg=8's +4-success gain has a
+95% CI that comfortably includes 0. The remaining 4 (cross-checkpoint) pairs,
+for completeness -- these reproduce SS6b's already-established
+baseline-vs-fine-tuned result and aren't new information:
+
+| Pair | Diff | Newcombe 95% CI | Permutation p (2-sided) | Significant @ .05 |
+|---|---|---|---|---|
+| Baseline (fixed) vs. adaptive min_seg=8 (fixed) | -0.125 | [-0.213, -0.038] | 0.0073 | **Yes** |
+| Baseline (fixed) vs. adaptive min_seg=8 (error-adaptive) | -0.158 | [-0.242, -0.077] | 0.0001 | **Yes** |
+| Baseline (error-adaptive) vs. adaptive min_seg=8 (fixed) | -0.125 | [-0.213, -0.038] | 0.0079 | **Yes** |
+| Baseline (error-adaptive) vs. adaptive min_seg=8 (error-adaptive) | -0.158 | [-0.242, -0.077] | 0.0005 | **Yes** |
+
+**Bottom line: at n=120, error-adaptive L1 resource allocation is not
+distinguishable from fixed allocation for either checkpoint on success rate**
+-- both point estimates move in the helpful direction (flat-or-better,
+never worse) and average steps-to-goal improves modestly for both, but
+none of that clears the bar a Wilson/permutation test needs at this sample
+size. This doesn't rule out a real effect (the adaptive-checkpoint pair's
+point estimate, +3.3pp, is the same rough magnitude as SS6's n=40-scale
+effects that later *did* firm up at n=120 in SS6b) -- it says a larger run
+would be needed to tell a small real effect apart from noise here, same
+caveat SS6 raised about its own n=40 numbers.
+
+### 7.4 Infra notes and timing
+
+Three bugs surfaced and were fixed before this run's numbers landed (kept
+here rather than only in commit messages, per this project's practice of
+documenting what actually went wrong):
+- Two attempts (kernel versions 1-2) crashed during setup on issues specific
+  to this kernel script, not the feature code: a nested-duplicate-path glob
+  on the mounted L1-only checkpoint (same root cause as the
+  main/probe-directory gotcha already in kaggle-infra-gotchas, just not
+  applied consistently to every glob in this script), and then the
+  checkpoint being deleted (as part of the usual extraction-dir cleanup)
+  before threshold calibration got to load it.
+- One more fix applied in review, before it could cause a third failure: the
+  calibrated threshold is a small float that can render in Python's
+  scientific notation, which risked being misparsed when interpolated into
+  the OmegaConf CLI override string -- fixed by formatting it fixed-point.
+
+Version 3 ran clean end-to-end. Threshold calibration: ~1 minute (75,000
+steps over the small L1-only model). All 12 eval chunks (2 checkpoints x 6
+chunks of 20): **36-40 minutes each**, ~7.4 hours total planning time, both
+checkpoints landing within a 4-minute band of each other per chunk despite
+one having a materially higher boost-trigger rate in principle -- the
+per-step boost-decision overhead wasn't separately instrumented in this run,
+so the actual boosted-step fraction for each condition isn't available to
+report (a gap worth closing before running this again). Total session
+length ~9 hours including environment setup (miniconda + mujoco-py +
+dependencies, ~10-15 min) and the two failed/retried versions' own setup
+time.

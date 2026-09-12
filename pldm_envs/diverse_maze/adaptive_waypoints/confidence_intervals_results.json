@@ -149,6 +149,122 @@
       }
     }
   },
+  "n120_l1adaptive": {
+    "conditions": {
+      "baseline": {
+        "label": "baseline, fixed L1 allocation (SS6b)",
+        "k": 96,
+        "n": 120,
+        "rate": 0.8,
+        "wilson_95": [
+          0.7196332649371805,
+          0.8617552352115975
+        ],
+        "bootstrap_95": [
+          0.725,
+          0.8666666666666667
+        ]
+      },
+      "baseline_error_adaptive": {
+        "label": "baseline, error-adaptive L1 allocation (SS7)",
+        "k": 96,
+        "n": 120,
+        "rate": 0.8,
+        "wilson_95": [
+          0.7196332649371805,
+          0.8617552352115975
+        ],
+        "bootstrap_95": [
+          0.725,
+          0.8666666666666667
+        ]
+      },
+      "adaptive_minseg8": {
+        "label": "adaptive min_seg=8, fixed L1 allocation (SS6b)",
+        "k": 111,
+        "n": 120,
+        "rate": 0.925,
+        "wilson_95": [
+          0.8635908239400624,
+          0.9600428846040397
+        ],
+        "bootstrap_95": [
+          0.875,
+          0.9666666666666667
+        ]
+      },
+      "adaptive_minseg8_error_adaptive": {
+        "label": "adaptive min_seg=8, error-adaptive L1 allocation (SS7)",
+        "k": 115,
+        "n": 120,
+        "rate": 0.9583333333333334,
+        "wilson_95": [
+          0.9061591476629647,
+          0.9820732831198906
+        ],
+        "bootstrap_95": [
+          0.9166666666666666,
+          0.9916666666666667
+        ]
+      }
+    },
+    "pairwise": {
+      "baseline_vs_baseline_error_adaptive": {
+        "diff": 0.0,
+        "newcombe_95_ci": [
+          -0.10135344681211958,
+          0.10135344681211958
+        ],
+        "permutation_p_two_sided": 1.0,
+        "significant_at_0.05": false
+      },
+      "adaptive_minseg8_vs_adaptive_minseg8_error_adaptive": {
+        "diff": -0.033333333333333326,
+        "newcombe_95_ci": [
+          -0.09917156022492482,
+          0.029516880761275358
+        ],
+        "permutation_p_two_sided": 0.4016,
+        "significant_at_0.05": false
+      },
+      "baseline_vs_adaptive_minseg8": {
+        "diff": -0.125,
+        "newcombe_95_ci": [
+          -0.21267448811387193,
+          -0.03790926581776828
+        ],
+        "permutation_p_two_sided": 0.0073,
+        "significant_at_0.05": true
+      },
+      "baseline_vs_adaptive_minseg8_error_adaptive": {
+        "diff": -0.15833333333333333,
+        "newcombe_95_ci": [
+          -0.242133078682145,
+          -0.07748870007666113
+        ],
+        "permutation_p_two_sided": 0.0001,
+        "significant_at_0.05": true
+      },
+      "baseline_error_adaptive_vs_adaptive_minseg8": {
+        "diff": -0.125,
+        "newcombe_95_ci": [
+          -0.21267448811387193,
+          -0.03790926581776828
+        ],
+        "permutation_p_two_sided": 0.0079,
+        "significant_at_0.05": true
+      },
+      "baseline_error_adaptive_vs_adaptive_minseg8_error_adaptive": {
+        "diff": -0.15833333333333333,
+        "newcombe_95_ci": [
+          -0.242133078682145,
+          -0.07748870007666113
+        ],
+        "permutation_p_two_sided": 0.0005,
+        "significant_at_0.05": true
+      }
+    }
+  },
   "n_bootstrap": 10000,
   "n_permutations": 10000
 }

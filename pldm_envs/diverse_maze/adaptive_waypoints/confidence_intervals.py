@@ -4,6 +4,14 @@
 Computed at both n=40 (original curated starts_targets_13_16.pt, seed=42) and
 n=120 (n=40 + 80 new trials, seed=20260910, combined per RESULTS.md SS6b).
 
+Also computed (RESULTS.md SS7): a fourth "n120_l1adaptive" scale crossing the
+two checkpoints that got a second hard-difficulty eval with error-adaptive L1
+resource allocation (baseline, adaptive_minseg8) against their existing
+fixed-allocation SS6b numbers -- 4 conditions, all 6 pairwise comparisons,
+with the two same-checkpoint pairs (fixed vs. error-adaptive) reported first
+and most prominently since those are the actual question this experiment
+asks; the cross-checkpoint pairs are secondary context.
+
 Run: python confidence_intervals.py
 Writes confidence_intervals_results.json alongside this script.
 
@@ -48,6 +56,25 @@ CONDITIONS_N120 = {
     "adaptive_minseg8": {"k": 111, "n": 120, "label": "adaptive min_seg=8 (2-epoch fine-tune)"},
     "fixed_stride_finetuned": {"k": 110, "n": 120, "label": "fixed-stride, 2-epoch fine-tune (control)"},
 }
+
+# SS7: baseline and adaptive_minseg8 each re-evaluated at hard difficulty,
+# n=120 (same 120 trials as SS6b), with error-adaptive L1 resource
+# allocation instead of fixed -- from results_hard_l1adaptive_final.json.
+CONDITIONS_N120_L1ADAPTIVE = {
+    "baseline": {"k": 96, "n": 120, "label": "baseline, fixed L1 allocation (SS6b)"},
+    "baseline_error_adaptive": {"k": 96, "n": 120, "label": "baseline, error-adaptive L1 allocation (SS7)"},
+    "adaptive_minseg8": {"k": 111, "n": 120, "label": "adaptive min_seg=8, fixed L1 allocation (SS6b)"},
+    "adaptive_minseg8_error_adaptive": {"k": 115, "n": 120, "label": "adaptive min_seg=8, error-adaptive L1 allocation (SS7)"},
+}
+
+# Reported first/most prominently within the n120_l1adaptive scale -- these
+# are the pairs this experiment actually asks about (same checkpoint, fixed
+# vs. error-adaptive L1 allocation). The other 4 of the 6 total pairs (cross-
+# checkpoint) are still computed, just printed/reported after.
+PRIORITY_PAIRS_L1ADAPTIVE = [
+    ("baseline", "baseline_error_adaptive"),
+    ("adaptive_minseg8", "adaptive_minseg8_error_adaptive"),
+]
 
 SCALES = {"n40": CONDITIONS_N40, "n120": CONDITIONS_N120}
 
@@ -113,7 +140,27 @@ def permutation_test(k1: int, n1: int, k2: int, n2: int, n_perm: int = N_PERMUTA
     return count_ge / n_perm
 
 
-def run_scale(conditions: dict) -> tuple:
+def _report_pair(pairwise: dict, conditions: dict, name_a: str, name_b: str):
+    a, b = conditions[name_a], conditions[name_b]
+    diff = a["k"] / a["n"] - b["k"] / b["n"]
+    ci = newcombe_diff_interval(a["k"], a["n"], b["k"], b["n"])
+    p = permutation_test(a["k"], a["n"], b["k"], b["n"])
+    sig = ci[0] > 0 or ci[1] < 0  # CI excludes 0
+    key = f"{name_a}_vs_{name_b}"
+    pairwise[key] = {
+        "diff": diff,
+        "newcombe_95_ci": ci,
+        "permutation_p_two_sided": p,
+        "significant_at_0.05": bool(sig),
+    }
+    label = f"{name_a} vs {name_b}"
+    print(
+        f"{label:<48} {diff:>+7.3f}   [{ci[0]:+.3f}, {ci[1]:+.3f}]      "
+        f"{p:>18.4f}  {'yes' if sig else 'no'}"
+    )
+
+
+def run_scale(conditions: dict, priority_pairs: list = None) -> tuple:
     results = {}
     print(f"{'condition':<28} {'k/n':>8} {'rate':>8}   {'wilson 95% CI':<22} {'bootstrap 95% CI':<22}")
     for name, c in conditions.items():
@@ -127,26 +174,25 @@ def run_scale(conditions: dict) -> tuple:
             f"[{w[0]:.3f}, {w[1]:.3f}]        [{b[0]:.3f}, {b[1]:.3f}]"
         )
 
-    print(f"\n{'pair':<48} {'diff':>7}   {'newcombe 95% CI':<20} {'perm. p (2-sided)':>18}  significant@.05")
     pairwise = {}
-    for name_a, name_b in itertools.combinations(conditions.keys(), 2):
-        a, b = conditions[name_a], conditions[name_b]
-        diff = a["k"] / a["n"] - b["k"] / b["n"]
-        ci = newcombe_diff_interval(a["k"], a["n"], b["k"], b["n"])
-        p = permutation_test(a["k"], a["n"], b["k"], b["n"])
-        sig = ci[0] > 0 or ci[1] < 0  # CI excludes 0
-        key = f"{name_a}_vs_{name_b}"
-        pairwise[key] = {
-            "diff": diff,
-            "newcombe_95_ci": ci,
-            "permutation_p_two_sided": p,
-            "significant_at_0.05": bool(sig),
-        }
-        label = f"{name_a} vs {name_b}"
-        print(
-            f"{label:<48} {diff:>+7.3f}   [{ci[0]:+.3f}, {ci[1]:+.3f}]      "
-            f"{p:>18.4f}  {'yes' if sig else 'no'}"
-        )
+    all_pairs = list(itertools.combinations(conditions.keys(), 2))
+
+    if priority_pairs:
+        print(f"\n--- priority pairs ---")
+        print(f"{'pair':<48} {'diff':>7}   {'newcombe 95% CI':<20} {'perm. p (2-sided)':>18}  significant@.05")
+        for name_a, name_b in priority_pairs:
+            _report_pair(pairwise, conditions, name_a, name_b)
+        remaining_pairs = [p for p in all_pairs if p not in priority_pairs and (p[1], p[0]) not in priority_pairs]
+        if remaining_pairs:
+            print(f"\n--- other pairs ---")
+            print(f"{'pair':<48} {'diff':>7}   {'newcombe 95% CI':<20} {'perm. p (2-sided)':>18}  significant@.05")
+            for name_a, name_b in remaining_pairs:
+                _report_pair(pairwise, conditions, name_a, name_b)
+    else:
+        print(f"\n{'pair':<48} {'diff':>7}   {'newcombe 95% CI':<20} {'perm. p (2-sided)':>18}  significant@.05")
+        for name_a, name_b in all_pairs:
+            _report_pair(pairwise, conditions, name_a, name_b)
+
     return results, pairwise
 
 
@@ -156,6 +202,10 @@ def main():
         print(f"\n{'=' * 20} {scale_name} {'=' * 20}")
         results, pairwise = run_scale(conditions)
         out[scale_name] = {"conditions": results, "pairwise": pairwise}
+
+    print(f"\n{'=' * 20} n120_l1adaptive {'=' * 20}")
+    results, pairwise = run_scale(CONDITIONS_N120_L1ADAPTIVE, priority_pairs=PRIORITY_PAIRS_L1ADAPTIVE)
+    out["n120_l1adaptive"] = {"conditions": results, "pairwise": pairwise}
 
     out["n_bootstrap"] = N_BOOTSTRAP
     out["n_permutations"] = N_PERMUTATIONS
