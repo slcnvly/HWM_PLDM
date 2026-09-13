@@ -115,23 +115,45 @@ def build_dataset(
             print(f"[dataset build: {data_path}] episode {ep_idx}/{n_episodes}", flush=True)
 
     errs = torch.cat(all_errs)
-    encodings = torch.cat(all_encs).flatten(1)  # (N, repr_dim)
+    # fp16 storage: repr_dim here is ~33k (flattened conv feature map), so a
+    # full fp32 (75000, 33k) tensor is already ~9.3GB resident in CPU RAM by
+    # itself -- every extra full-size fp32 copy downstream (standardized
+    # version, etc.) stacks on top of that and is what actually OOM-killed
+    # (exit 137, system RAM, not CUDA) the first cut of this fix. Halving
+    # the bulk storage to fp16 here, and never materializing another
+    # full-size copy anywhere downstream (see fit_standardization,
+    # standardize, train_variance_head, predict_variance_mlp,
+    # knn_predict_variance below -- all chunked now), is what keeps this
+    # kernel inside Kaggle's RAM budget.
+    encodings = torch.cat(all_encs).flatten(1).half()  # (N, repr_dim), fp16
     return errs, encodings, ep_boundaries, ep_indices
 
 
 # ---------------------------------------------------------------------------
-# Standardization (fit on train only, applied to both train/val -- no leakage)
+# Standardization (fit on train only, applied to both train/val -- no
+# leakage). Chunked throughout: encodings are fp16-stored (N, ~33k) tensors,
+# so a full-tensor fp32 upcast anywhere here would recreate the exact OOM
+# build_dataset's fp16 storage was meant to avoid.
 # ---------------------------------------------------------------------------
 
 
-def fit_standardization(train_encs: torch.Tensor):
-    mean = train_encs.mean(dim=0)
-    std = train_encs.std(dim=0).clamp_min(1e-6)
+def fit_standardization(train_encs: torch.Tensor, chunk_size: int = 5000):
+    n, d = train_encs.shape
+    sum_ = torch.zeros(d, dtype=torch.float64)
+    sumsq_ = torch.zeros(d, dtype=torch.float64)
+    for i in range(0, n, chunk_size):
+        chunk = train_encs[i : i + chunk_size].double()
+        sum_ += chunk.sum(dim=0)
+        sumsq_ += (chunk**2).sum(dim=0)
+    mean = (sum_ / n).float()
+    var = (sumsq_ / n - (sum_ / n) ** 2).float().clamp_min(1e-12)
+    std = var.sqrt().clamp_min(1e-6)
     return mean, std
 
 
 def standardize(x: torch.Tensor, mean: torch.Tensor, std: torch.Tensor) -> torch.Tensor:
-    return (x - mean) / std
+    """x may be a (small) fp16 chunk -- always returns fp32."""
+    return (x.float() - mean) / std
 
 
 # ---------------------------------------------------------------------------
@@ -229,9 +251,11 @@ def train_variance_head(
         target_scale: train's E[err^2], the normalization divisor.
         log: per-epoch train/val NLL (raw units) + which epoch was kept.
     """
+    # NOTE: train_encs/val_encs stay as the fp16, (N, ~33k) tensors
+    # build_dataset returns -- standardize() is applied per-batch below,
+    # never to the whole tensor at once (a full fp32 standardized copy of
+    # either is ~9-10GB and is what OOM-killed the first cut of this fix).
     input_mean, input_std = fit_standardization(train_encs)
-    train_encs_std = standardize(train_encs, input_mean, input_std)
-    val_encs_std = standardize(val_encs, input_mean, input_std)
 
     target_scale = float((train_errs.double() ** 2).mean())
     # beta_nll_loss/gaussian_nll_from_log_var square `target` internally
@@ -248,7 +272,7 @@ def train_variance_head(
     model = VarianceHead(input_dim, hidden=hidden, log_var_init=log_var_init).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
-    n_train = train_encs_std.shape[0]
+    n_train = train_encs.shape[0]
     best_val_nll = float("inf")
     best_state = None
     best_epoch = -1
@@ -259,7 +283,7 @@ def train_variance_head(
         perm = torch.randperm(n_train)
         for i in range(0, n_train, batch_size):
             idx = perm[i : i + batch_size]
-            x = train_encs_std[idx].to(device)
+            x = standardize(train_encs[idx], input_mean, input_std).to(device)
             y = train_target_norm_sqrt[idx].to(device)
             log_var = model(x)
             loss = beta_nll_loss(log_var, y, beta=beta)  # beta-weighted: gradient signal only
@@ -275,15 +299,15 @@ def train_variance_head(
         # NLL -- that mismatch was a bug in the first cut of this fix).
         model.eval()
         train_loss_sum, val_loss_sum = 0.0, 0.0
-        n_val = val_encs_std.shape[0]
+        n_val = val_encs.shape[0]
         with torch.no_grad():
             for i in range(0, n_train, batch_size):
-                x = train_encs_std[i : i + batch_size].to(device)
+                x = standardize(train_encs[i : i + batch_size], input_mean, input_std).to(device)
                 y = train_target_norm_sqrt[i : i + batch_size].to(device)
                 log_var = model(x)
                 train_loss_sum += gaussian_nll_from_log_var(log_var, y).item() * x.shape[0]
             for i in range(0, n_val, batch_size):
-                x = val_encs_std[i : i + batch_size].to(device)
+                x = standardize(val_encs[i : i + batch_size], input_mean, input_std).to(device)
                 y = val_target_norm_sqrt[i : i + batch_size].to(device)
                 log_var = model(x)
                 val_loss_sum += gaussian_nll_from_log_var(log_var, y).item() * x.shape[0]
@@ -324,13 +348,15 @@ def predict_variance_mlp(
     model, encs: torch.Tensor, input_mean, input_std, target_scale, device: str, batch_size: int = 2048
 ) -> torch.Tensor:
     """Raw-units sigma^2 predictions from the trained VarianceHead, chunked
-    to avoid the v1 CUDA-OOM (N x ~33k tensors are several GB moved whole)."""
+    to avoid the v1 CUDA-OOM (N x ~33k tensors are several GB moved whole)
+    -- standardization is also applied per-chunk, never to the whole tensor
+    (that full-size fp32 copy is what OOM-killed the system-RAM budget in
+    the first cut of this fix)."""
     model.eval()
-    encs_std = standardize(encs, input_mean, input_std)
     chunks = []
     with torch.no_grad():
-        for i in range(0, encs_std.shape[0], batch_size):
-            x = encs_std[i : i + batch_size].to(device)
+        for i in range(0, encs.shape[0], batch_size):
+            x = standardize(encs[i : i + batch_size], input_mean, input_std).to(device)
             log_var_norm = model(x)
             var_raw = torch.exp(log_var_norm).cpu() * target_scale
             chunks.append(var_raw)
@@ -343,48 +369,54 @@ def predict_variance_mlp(
 
 
 def knn_predict_variance(
-    train_encs_std: torch.Tensor,
+    train_encs: torch.Tensor,
     train_err_sq: torch.Tensor,
-    query_encs_std: torch.Tensor,
+    query_encs: torch.Tensor,
+    input_mean: torch.Tensor,
+    input_std: torch.Tensor,
     device: str,
     k: int = 50,
     exclude_self: bool = False,
     chunk_size: int = 1000,
 ) -> torch.Tensor:
-    """E[err^2 | state] via k-nearest-neighbor averaging in the (already
-    train-standardized) latent space. Neighbors are ALWAYS drawn from
-    train_encs_std only (query_encs_std may be val, or train itself for a
-    leave-one-out self-evaluation -- exclude_self=True assumes
-    query_encs_std IS train_encs_std in the same row order, and masks each
-    query's own index out of its own candidate neighbor set so val's
-    "neighbors from train only" framing is honestly mirrored for train's
-    self-evaluation too, rather than trivially returning err_sq itself at
-    distance 0).
+    """E[err^2 | state] via k-nearest-neighbor averaging in the standardized
+    latent space (standardization applied internally, per chunk -- see
+    below). Neighbors are ALWAYS drawn from train_encs only (query_encs may
+    be val, or train itself for a leave-one-out self-evaluation --
+    exclude_self=True assumes query_encs IS train_encs in the same row
+    order, and masks each query's own index out of its own candidate
+    neighbor set so val's "neighbors from train only" framing is honestly
+    mirrored for train's self-evaluation too, rather than trivially
+    returning err_sq itself at distance 0).
 
-    fp16 + chunked distance matmul: train_encs_std alone is ~9GB in fp32
-    (75000 x ~33k), which combined with a query chunk and the resulting
-    distance matrix risks the same OOM v1 hit -- fp16 halves the resident
-    train tensor and each chunk's distance matrix stays small regardless of
-    chunk_size.
+    train_encs/query_encs are the RAW fp16 tensors build_dataset returns
+    (unstandardized) -- standardization AND the fp16 GPU copy are both built
+    chunk-by-chunk here, never as a full-tensor intermediate. A full fp32
+    standardized copy of train_encs is ~9-10GB; doing that for both train
+    and val on top of the fp16 tensors already resident (build_dataset's own
+    fix) is exactly what OOM-killed (exit 137, system RAM) the first cut of
+    this fix, before it even reached this function.
     """
-    # Norms computed on CPU from the original fp32 tensor, in chunks --
-    # `train_t.float()` on the whole fp16 GPU tensor would materialize a
-    # second full-size fp32 copy (~9GB) just for this reduction, defeating
-    # the point of using fp16 for train_t in the first place.
-    norm_chunks = []
-    for i in range(0, train_encs_std.shape[0], chunk_size):
-        norm_chunks.append((train_encs_std[i : i + chunk_size].double() ** 2).sum(dim=1).float())
-    train_norm_sq = torch.cat(norm_chunks).to(device)
+    n_train = train_encs.shape[0]
 
-    train_t = train_encs_std.to(device=device, dtype=torch.float16)
+    train_norm_sq_chunks, train_t_chunks = [], []
+    for i in range(0, n_train, chunk_size):
+        std_chunk = standardize(train_encs[i : i + chunk_size], input_mean, input_std)
+        train_norm_sq_chunks.append((std_chunk.double() ** 2).sum(dim=1).float())
+        train_t_chunks.append(std_chunk.to(device=device, dtype=torch.float16))
+    train_norm_sq = torch.cat(train_norm_sq_chunks).to(device)
+    train_t = torch.cat(train_t_chunks, dim=0)  # (n_train, D) fp16, GPU-resident
+    del train_t_chunks, train_norm_sq_chunks
+
     train_err_sq_dev = train_err_sq.to(device)
 
     preds = []
-    n_q = query_encs_std.shape[0]
+    n_q = query_encs.shape[0]
     with torch.no_grad():
         for i in range(0, n_q, chunk_size):
-            q = query_encs_std[i : i + chunk_size].to(device=device, dtype=torch.float16)
-            q_norm_sq = (q.float() ** 2).sum(dim=1)
+            q_std = standardize(query_encs[i : i + chunk_size], input_mean, input_std)
+            q = q_std.to(device=device, dtype=torch.float16)
+            q_norm_sq = (q_std.double() ** 2).sum(dim=1).float().to(device)
             cross = (q @ train_t.T).float()  # (chunk, n_train), fp16 matmul, fp32 accumulate view
             dist_sq = q_norm_sq[:, None] + train_norm_sq[None, :] - 2 * cross
 
