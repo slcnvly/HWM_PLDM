@@ -6,10 +6,25 @@
 # variance -- both unavailable without retraining frozen level1
 # (ensemble_size=1, dropout=0.0 in every checkpoint this project has; see
 # RESULTS.md SS8 for the code-level confirmation of why those paths are
-# closed). Trains a small MLP to predict, from the frozen level1 latent
-# state, the expected magnitude of compute_changepoints.py's existing raw
-# one-step prediction error at that state -- entirely offline, no env/GPU
-# beyond a handful of small forward passes through the already-frozen model.
+# closed). Trains a small MLP (or, as a training-free alternative, a kNN
+# regressor) to predict, from the frozen level1 latent state, the expected
+# squared magnitude of compute_changepoints.py's existing raw one-step
+# prediction error at that state.
+#
+# v2 (this file): the v1 approach (softplus output, plain Gaussian NLL,
+# standard init) failed -- converged to a near-constant sigma^2 ~40x too
+# large (889 vs the true ~22.6), worse than the trivial constant-mean
+# baseline, because standard Gaussian NLL's gradient w.r.t. variance is
+# proportional to 1/sigma^2 and vanishes once sigma^2 overshoots into a
+# too-large region (see RESULTS.md SS8 for the full failure writeup). Fixed
+# here via: log-variance parameterization with an init that starts exactly
+# at the constant-optimal solution; standardized inputs / normalized
+# targets; beta-NLL (Seitzer et al. 2022, beta=0.5) so the loss weights
+# high-variance samples by stopgrad(sigma^2)^beta instead of letting their
+# gradient vanish; lower LR + gradient clipping + best-val-NLL checkpoint
+# selection instead of returning the final epoch.
+import math
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -104,25 +119,87 @@ def build_dataset(
     return errs, encodings, ep_boundaries, ep_indices
 
 
-class VarianceHead(nn.Module):
-    """2-hidden-layer MLP, softplus output (always positive). Predicts
-    sigma^2(latent state) -- see module docstring / RESULTS.md SS8 for what
-    this approximates and why."""
+# ---------------------------------------------------------------------------
+# Standardization (fit on train only, applied to both train/val -- no leakage)
+# ---------------------------------------------------------------------------
 
-    def __init__(self, input_dim: int, hidden: int = 128, eps: float = 1e-3):
+
+def fit_standardization(train_encs: torch.Tensor):
+    mean = train_encs.mean(dim=0)
+    std = train_encs.std(dim=0).clamp_min(1e-6)
+    return mean, std
+
+
+def standardize(x: torch.Tensor, mean: torch.Tensor, std: torch.Tensor) -> torch.Tensor:
+    return (x - mean) / std
+
+
+# ---------------------------------------------------------------------------
+# Constant-variance baseline (step A's "is this even worth doing" floor)
+# ---------------------------------------------------------------------------
+
+
+def constant_baseline_nll(train_err: torch.Tensor, eval_err: torch.Tensor):
+    """sigma^2 fixed at train's E[err^2] (the analytically-optimal constant
+    for the training set); reports its NLL on eval_err (val or train).
+    Everything in raw, unnormalized err^2 units."""
+    c = float((train_err.double() ** 2).mean())
+    nll = 0.5 * (np.log(c) + (eval_err.double() ** 2).mean().item() / c)
+    return c, float(nll)
+
+
+# ---------------------------------------------------------------------------
+# Trained variance head: log-variance parameterization + beta-NLL
+# ---------------------------------------------------------------------------
+
+
+class VarianceHead(nn.Module):
+    """2-hidden-layer MLP outputting log(sigma^2) directly (no softplus --
+    v1's softplus + plain-NLL combination is what produced the gradient-
+    vanishing failure mode; see module docstring). Final layer initialized
+    so the network's output AT INIT is exactly log_var_init (typically
+    log(E[err^2]) computed from the training cache) regardless of input --
+    i.e. training starts from the constant-optimal solution and only moves
+    away from it where the input actually helps."""
+
+    def __init__(self, input_dim: int, hidden: int = 128, log_var_init: float = 0.0):
         super().__init__()
-        self.eps = eps
-        self.net = nn.Sequential(
+        self.trunk = nn.Sequential(
             nn.Linear(input_dim, hidden),
             nn.ReLU(),
             nn.Linear(hidden, hidden),
             nn.ReLU(),
-            nn.Linear(hidden, 1),
         )
+        self.log_var_head = nn.Linear(hidden, 1)
+        with torch.no_grad():
+            self.log_var_head.weight.normal_(mean=0.0, std=1e-4)
+            self.log_var_head.bias.fill_(log_var_init)
 
     def forward(self, x):
-        raw = self.net(x).squeeze(-1)
-        return F.softplus(raw) + self.eps
+        """Returns log(sigma^2), shape (B,)."""
+        h = self.trunk(x)
+        return self.log_var_head(h).squeeze(-1)
+
+
+def beta_nll_loss(log_var: torch.Tensor, target: torch.Tensor, beta: float = 0.5):
+    """Seitzer et al. 2022: multiply the per-sample Gaussian NLL (mean fixed
+    at 0, so NLL_i = 0.5*(log_var_i + target_i^2/var_i)) by
+    stopgrad(var_i)^beta. Standard NLL (beta=0) has d(NLL)/d(theta) ~ 1/var
+    for the variance-shaping term, which vanishes once var overshoots into a
+    too-large region -- beta>0 compensates by up-weighting exactly those
+    high-variance-prediction samples, without changing what the loss
+    converges to (the multiplicative factor is detached)."""
+    var = torch.exp(log_var)
+    nll = 0.5 * (log_var + target**2 / var)
+    weight = var.detach() ** beta
+    return (weight * nll).mean()
+
+
+def gaussian_nll_from_log_var(log_var: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """Plain (beta=0) per-batch mean NLL -- used for validation/model
+    selection, never for the training gradient itself (see beta_nll_loss)."""
+    var = torch.exp(log_var)
+    return (0.5 * (log_var + target**2 / var)).mean()
 
 
 def train_variance_head(
@@ -132,101 +209,230 @@ def train_variance_head(
     val_encs: torch.Tensor,
     device: str,
     hidden: int = 128,
-    eps: float = 1e-3,
+    beta: float = 0.5,
     epochs: int = 30,
     batch_size: int = 1024,
-    lr: float = 1e-3,
+    lr: float = 1e-4,
+    grad_clip_norm: float = 1.0,
 ):
-    """Trains VarianceHead via Gaussian NLL: treats each err value as a
-    zero-mean Gaussian draw whose variance is sigma^2(state), i.e.
-    F.gaussian_nll_loss(input=0, target=err, var=sigma_sq) ==
-    0.5*(log(sigma_sq) + err**2/sigma_sq) -- so sigma_sq is trained to
-    approximate E[err^2 | state], matching the "expected squared error"
-    target the score in step 2 (err^2 / sigma_sq) assumes.
+    """Standardizes inputs (fit on train), normalizes the target err^2 by
+    train's global mean (keeps the loss landscape O(1)-scaled), trains via
+    beta-NLL, and returns the BEST-val-NLL checkpoint (not the final epoch --
+    v1's failure included a late destabilization spike it never recovered
+    from). All returned/reported NLL and variance values are un-normalized
+    back to raw err^2 units.
 
-    Returns the trained model plus a per-epoch log of train/val NLL, for
-    the overfitting check RESULTS.md SS8 reports.
+    Returns:
+        model: the trained VarianceHead (raw-space predict_variance below
+            handles standardization/un-normalization).
+        input_mean, input_std: standardization stats (fit on train).
+        target_scale: train's E[err^2], the normalization divisor.
+        log: per-epoch train/val NLL (raw units) + which epoch was kept.
     """
-    # NOTE: train_encs/val_encs are (N, repr_dim) with repr_dim in the tens
-    # of thousands (flattened conv feature map) -- moving the WHOLE tensor
-    # to GPU at once (75k-60k rows x ~33k floats) is several GB per tensor
-    # and reliably CUDA-OOMs. Keep everything CPU-resident; only ever move
-    # one batch to GPU at a time, for both training and validation.
+    input_mean, input_std = fit_standardization(train_encs)
+    train_encs_std = standardize(train_encs, input_mean, input_std)
+    val_encs_std = standardize(val_encs, input_mean, input_std)
+
+    target_scale = float((train_errs.double() ** 2).mean())
+    # beta_nll_loss/gaussian_nll_from_log_var square `target` internally
+    # (matching v1's "target=err" convention), so the value passed in here
+    # is err/sqrt(target_scale) -- err is already >=0 (it's itself a mean-
+    # of-squares), so this is exactly sqrt(err^2/target_scale), i.e. the
+    # normalized-target convention target_norm^2 = err^2/target_scale.
+    scale_sqrt = target_scale**0.5
+    train_target_norm_sqrt = train_errs / scale_sqrt
+    val_target_norm_sqrt = val_errs / scale_sqrt
+
     input_dim = train_encs.shape[1]
-    model = VarianceHead(input_dim, hidden=hidden, eps=eps).to(device)
+    log_var_init = 0.0  # normalized target has E[target_norm^2]=1 by construction -> log(1)=0
+    model = VarianceHead(input_dim, hidden=hidden, log_var_init=log_var_init).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
-    n_train = train_encs.shape[0]
-
+    n_train = train_encs_std.shape[0]
+    best_val_nll = float("inf")
+    best_state = None
+    best_epoch = -1
     log = []
+
     for epoch in range(epochs):
         model.train()
         perm = torch.randperm(n_train)
-        total_loss = 0.0
         for i in range(0, n_train, batch_size):
             idx = perm[i : i + batch_size]
-            x = train_encs[idx].to(device)
-            y = train_errs[idx].to(device)
-            var = model(x)
-            loss = F.gaussian_nll_loss(torch.zeros_like(y), y, var, full=False)
+            x = train_encs_std[idx].to(device)
+            y = train_target_norm_sqrt[idx].to(device)
+            log_var = model(x)
+            loss = beta_nll_loss(log_var, y, beta=beta)  # beta-weighted: gradient signal only
             opt.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_norm)
             opt.step()
-            total_loss += loss.item() * x.shape[0]
-        train_nll = total_loss / n_train
 
+        # Plain (beta=0) NLL on train and val, both no_grad, both same
+        # formula -- for a fair apples-to-apples train-vs-val comparison in
+        # the log (the training step above uses the beta-weighted loss for
+        # its gradient, which is NOT directly comparable to val's plain
+        # NLL -- that mismatch was a bug in the first cut of this fix).
         model.eval()
-        val_loss = 0.0
-        n_val = val_encs.shape[0]
+        train_loss_sum, val_loss_sum = 0.0, 0.0
+        n_val = val_encs_std.shape[0]
         with torch.no_grad():
+            for i in range(0, n_train, batch_size):
+                x = train_encs_std[i : i + batch_size].to(device)
+                y = train_target_norm_sqrt[i : i + batch_size].to(device)
+                log_var = model(x)
+                train_loss_sum += gaussian_nll_from_log_var(log_var, y).item() * x.shape[0]
             for i in range(0, n_val, batch_size):
-                x = val_encs[i : i + batch_size].to(device)
-                y = val_errs[i : i + batch_size].to(device)
-                var = model(x)
-                loss = F.gaussian_nll_loss(torch.zeros_like(y), y, var, full=False)
-                val_loss += loss.item() * x.shape[0]
-        val_nll = val_loss / n_val
+                x = val_encs_std[i : i + batch_size].to(device)
+                y = val_target_norm_sqrt[i : i + batch_size].to(device)
+                log_var = model(x)
+                val_loss_sum += gaussian_nll_from_log_var(log_var, y).item() * x.shape[0]
+        train_nll_norm = train_loss_sum / n_train
+        val_nll_norm = val_loss_sum / n_val
 
-        log.append({"epoch": epoch, "train_nll": train_nll, "val_nll": val_nll})
-        print(f"[variance head] epoch {epoch}: train_nll={train_nll:.4f} val_nll={val_nll:.4f}", flush=True)
+        # report in raw units too: NLL in normalized space differs from raw
+        # space by a constant additive term (0.5*log(target_scale)) since
+        # var_raw = var_norm * target_scale -- log(var_raw)=log(var_norm)+log(target_scale),
+        # and target_raw^2/var_raw = target_norm^2/var_norm (scale cancels).
+        raw_offset = 0.5 * math.log(target_scale)  # plain float -- np.log would leak numpy.float64 into the JSON-dumped log
+        train_nll_raw = train_nll_norm + raw_offset
+        val_nll_raw = val_nll_norm + raw_offset
 
-    return model, log
+        log.append({
+            "epoch": epoch,
+            "train_nll_raw": train_nll_raw,
+            "val_nll_raw": val_nll_raw,
+        })
+        print(
+            f"[variance head] epoch {epoch}: train_nll_raw={train_nll_raw:.4f} "
+            f"val_nll_raw={val_nll_raw:.4f}",
+            flush=True,
+        )
+
+        if val_nll_raw < best_val_nll:
+            best_val_nll = val_nll_raw
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            best_epoch = epoch
+
+    model.load_state_dict(best_state)
+    print(f"[variance head] kept epoch {best_epoch} (val_nll_raw={best_val_nll:.4f})", flush=True)
+
+    return model, input_mean, input_std, target_scale, {"per_epoch": log, "best_epoch": best_epoch, "best_val_nll_raw": best_val_nll}
 
 
-def _forward_var_in_chunks(model, encs: torch.Tensor, device: str, batch_size: int = 2048) -> torch.Tensor:
-    """model(encs) without ever moving the whole (N, repr_dim) tensor to GPU
-    at once -- see train_variance_head's docstring note on why."""
+def predict_variance_mlp(
+    model, encs: torch.Tensor, input_mean, input_std, target_scale, device: str, batch_size: int = 2048
+) -> torch.Tensor:
+    """Raw-units sigma^2 predictions from the trained VarianceHead, chunked
+    to avoid the v1 CUDA-OOM (N x ~33k tensors are several GB moved whole)."""
     model.eval()
+    encs_std = standardize(encs, input_mean, input_std)
     chunks = []
     with torch.no_grad():
-        for i in range(0, encs.shape[0], batch_size):
-            chunks.append(model(encs[i : i + batch_size].to(device)).cpu())
+        for i in range(0, encs_std.shape[0], batch_size):
+            x = encs_std[i : i + batch_size].to(device)
+            log_var_norm = model(x)
+            var_raw = torch.exp(log_var_norm).cpu() * target_scale
+            chunks.append(var_raw)
     return torch.cat(chunks)
 
 
-def correlation_stats(model, encs: torch.Tensor, errs: torch.Tensor, device: str):
-    """Pearson correlation between predicted variance and (a) the raw error
-    (b) the squared error the model was actually trained to match, plus
-    quantile summary of the predicted variance itself -- for the "is this
-    just reproducing the actual error" overfitting check."""
-    var = _forward_var_in_chunks(model, encs, device).numpy()
-    err = errs.numpy()
+# ---------------------------------------------------------------------------
+# kNN regression: training-free alternative
+# ---------------------------------------------------------------------------
 
-    def pearson(a, b):
-        a = a - a.mean()
-        b = b - b.mean()
-        denom = np.sqrt((a**2).sum() * (b**2).sum())
-        return float((a * b).sum() / denom) if denom > 0 else float("nan")
 
-    quantiles = np.percentile(var, [0, 25, 50, 75, 100])
+def knn_predict_variance(
+    train_encs_std: torch.Tensor,
+    train_err_sq: torch.Tensor,
+    query_encs_std: torch.Tensor,
+    device: str,
+    k: int = 50,
+    exclude_self: bool = False,
+    chunk_size: int = 1000,
+) -> torch.Tensor:
+    """E[err^2 | state] via k-nearest-neighbor averaging in the (already
+    train-standardized) latent space. Neighbors are ALWAYS drawn from
+    train_encs_std only (query_encs_std may be val, or train itself for a
+    leave-one-out self-evaluation -- exclude_self=True assumes
+    query_encs_std IS train_encs_std in the same row order, and masks each
+    query's own index out of its own candidate neighbor set so val's
+    "neighbors from train only" framing is honestly mirrored for train's
+    self-evaluation too, rather than trivially returning err_sq itself at
+    distance 0).
+
+    fp16 + chunked distance matmul: train_encs_std alone is ~9GB in fp32
+    (75000 x ~33k), which combined with a query chunk and the resulting
+    distance matrix risks the same OOM v1 hit -- fp16 halves the resident
+    train tensor and each chunk's distance matrix stays small regardless of
+    chunk_size.
+    """
+    # Norms computed on CPU from the original fp32 tensor, in chunks --
+    # `train_t.float()` on the whole fp16 GPU tensor would materialize a
+    # second full-size fp32 copy (~9GB) just for this reduction, defeating
+    # the point of using fp16 for train_t in the first place.
+    norm_chunks = []
+    for i in range(0, train_encs_std.shape[0], chunk_size):
+        norm_chunks.append((train_encs_std[i : i + chunk_size].double() ** 2).sum(dim=1).float())
+    train_norm_sq = torch.cat(norm_chunks).to(device)
+
+    train_t = train_encs_std.to(device=device, dtype=torch.float16)
+    train_err_sq_dev = train_err_sq.to(device)
+
+    preds = []
+    n_q = query_encs_std.shape[0]
+    with torch.no_grad():
+        for i in range(0, n_q, chunk_size):
+            q = query_encs_std[i : i + chunk_size].to(device=device, dtype=torch.float16)
+            q_norm_sq = (q.float() ** 2).sum(dim=1)
+            cross = (q @ train_t.T).float()  # (chunk, n_train), fp16 matmul, fp32 accumulate view
+            dist_sq = q_norm_sq[:, None] + train_norm_sq[None, :] - 2 * cross
+
+            if exclude_self:
+                rows = torch.arange(q.shape[0], device=device)
+                cols = torch.arange(i, i + q.shape[0], device=device)
+                dist_sq[rows, cols] = float("inf")
+
+            topk_idx = torch.topk(dist_sq, k, largest=False, dim=1).indices  # (chunk, k)
+            neighbor_vals = train_err_sq_dev[topk_idx]  # (chunk, k)
+            preds.append(neighbor_vals.mean(dim=1).cpu())
+
+    del train_t
+    torch.cuda.empty_cache()
+    return torch.cat(preds)
+
+
+# ---------------------------------------------------------------------------
+# Step B/C diagnostics: operate on a precomputed raw-units variance tensor,
+# agnostic to whether it came from the MLP or the kNN estimator.
+# ---------------------------------------------------------------------------
+
+
+def _spearman(a: np.ndarray, b: np.ndarray) -> float:
+    ar = np.argsort(np.argsort(a)).astype(np.float64)
+    br = np.argsort(np.argsort(b)).astype(np.float64)
+    ar -= ar.mean()
+    br -= br.mean()
+    denom = np.sqrt((ar**2).sum() * (br**2).sum())
+    return float((ar * br).sum() / denom) if denom > 0 else float("nan")
+
+
+def variance_distribution_stats(var: torch.Tensor, err: torch.Tensor):
+    """Step B: distribution of predicted variance (mean, quartiles, max/min
+    ratio) + Spearman rank correlation between predicted variance and actual
+    err^2 -- the "is this still effectively constant" check."""
+    v = var.numpy()
+    e_sq = (err.numpy()) ** 2
+
+    q0, q25, q50, q75, q100 = np.percentile(v, [0, 25, 50, 75, 100])
+    iqr_over_mean = float((q75 - q25) / v.mean()) if v.mean() != 0 else float("nan")
+
     return {
-        "corr_var_vs_err": pearson(var, err),
-        "corr_var_vs_err_sq": pearson(var, err**2),
-        "r2_err_sq": float(
-            1 - np.sum((err**2 - var) ** 2) / np.sum((err**2 - (err**2).mean()) ** 2)
-        ),
-        "var_mean": float(var.mean()),
-        "var_quantiles_0_25_50_75_100": [float(q) for q in quantiles],
+        "var_mean": float(v.mean()),
+        "var_quantiles_0_25_50_75_100": [float(q0), float(q25), float(q50), float(q75), float(q100)],
+        "var_iqr_over_mean": iqr_over_mean,
+        "var_max_over_min": float(q100 / q0) if q0 > 0 else float("inf"),
+        "spearman_var_vs_err_sq": _spearman(v, e_sq),
     }
 
 
@@ -237,28 +443,20 @@ def load_variance_head_for_l1only(config_path: str, checkpoint_path: str, device
 
 
 def diagnose_changepoint_overlap(
-    model,
+    var: torch.Tensor,
     errs: torch.Tensor,
-    encs: torch.Tensor,
     ep_boundaries: list,
-    device: str,
     n_boundaries: int = 5,
     min_seg: int = 8,
     eps: float = 1e-3,
     near_tol: int = 2,
 ):
-    """Step 3: for every episode, re-run the exact same greedy peak-picking
+    """Step C: for every episode, re-run the exact same greedy peak-picking
     (pick_changepoints, unchanged) on two scores -- the existing raw error
     and the new err^2/(sigma_sq+eps) -- and report how much they agree.
-
-    Returns a dict with per-episode overlap counts plus aggregate stats:
-    exact-index overlap (literal same step chosen) and near-match overlap
-    (within near_tol steps, since a peak can shift by a step or two without
-    being a materially different changepoint).
+    Takes a precomputed raw-units variance tensor (agnostic to estimator).
     """
     from pldm_envs.diverse_maze.adaptive_waypoints.segmentation import pick_changepoints
-
-    var = _forward_var_in_chunks(model, encs, device)
 
     exact_overlaps, near_overlaps = [], []
     for start, end in ep_boundaries:
