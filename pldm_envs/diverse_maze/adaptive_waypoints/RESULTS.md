@@ -460,3 +460,212 @@ report (a gap worth closing before running this again). Total session
 length ~9 hours including environment setup (miniconda + mujoco-py +
 dependencies, ~10-15 min) and the two failed/retried versions' own setup
 time.
+
+## 8. Post-hoc variance head: toward a real "degree of surprise" signal
+
+SS7's threshold is a single fixed number (mean + 2*std of the r50 error
+distribution) applied uniformly to every state. This section asks whether a
+genuinely *state-dependent* surprise signal -- how uncertain is level1's
+one-step prediction *right here*, not just "is this error bigger than a
+global constant" -- changes which points changepoint segmentation (and, by
+extension, SS7's resource-allocation trigger) would flag. The two standard
+ways to get this (ensemble variance, MC-dropout variance) are both
+unavailable without retraining: every checkpoint in this project was trained
+with `ensemble_size=1` and `dropout=0.0` (confirmed by inspecting
+`PredictorConfig`'s defaults in `pldm/models/predictors/enums.py` and
+grepping every yaml this project uses for overrides -- none exist; see
+`pldm/models/predictors/ensemble_predictors.py` for the real deep-ensemble
+mechanism that a `ensemble_size>1` checkpoint would have used, and
+`pldm/models/predictors/predictors.py`'s `forced_dropout` flag, hardcoded
+`False`, for a similar train-time-only MC-dropout hook that doesn't apply to
+a model trained with `dropout=0.0` in the first place). This section
+approximates the same idea post-hoc: a small model, trained *after the fact*
+on the frozen level1's already-observed prediction errors, learns to predict
+how large that error will be from the state alone.
+
+### 8.1 v1: complete failure (near-constant sigma^2, ~40x too large)
+
+First attempt: a 2-hidden-layer (128-unit) MLP, softplus output (forces
+sigma^2 > 0), standard init, trained via plain Gaussian NLL
+(`0.5*(log(sigma^2) + err^2/sigma^2)`, err treated as a zero-mean residual)
+on r50 main (train) / probe (val), reusing `compute_changepoints.py`'s exact
+per-step error computation and windowing so the (state, error) pairs match
+what changepoint computation already implicitly scores over.
+
+**Result: converged to sigma^2 ~= 889 (train), ~896 (val) -- a near-constant
+value ~40x larger than the true E[err^2] ~= 22.6** (computable directly from
+SS7's own threshold calibration: mean=4.634, std=1.076, so
+E[err^2]=std^2+mean^2=22.6). Predicted variance's interquartile range was
+only ~3-4% of its mean (882.7-913.1 out of an 888.9 mean on train) --
+essentially a flat constant, not a function of state at all. Training NLL
+(~3.41-3.45 at convergence) was *worse* than the trivial "always predict the
+constant c=E[err^2]" baseline would have achieved (~2.06) -- the model
+didn't even match the simplest possible non-learned solution.
+
+**Root cause: standard Gaussian NLL's gradient with respect to sigma^2 is
+proportional to `1/sigma^2`.** Early training (large initial loss from a
+near-zero-variance softplus output) pushes sigma^2 up sharply to reduce the
+`err^2/sigma^2` term; once sigma^2 overshoots past the true optimum, that
+same gradient term shrinks (the `1/sigma^2` factor vanishes), so the
+opposing pull back down (from the weaker, slowly-varying `log(sigma^2)`
+term) is too weak to correct it in reasonable time. A training-log
+destabilization event at epoch 18 (a spike from 3.12 back up to 5.00 that
+was never recovered from) compounded this, and the code at the time
+returned the *final* epoch's weights rather than the best one.
+
+**Consequence: this made the "step 3" overlap diagnostic run first (before
+this failure was caught) meaningless.** With sigma^2 nearly constant,
+`err^2/(sigma^2+eps)` is just `err^2` divided by a near-fixed number --
+peak-picking on it necessarily returns nearly the same boundaries as raw
+`err^2` (monotonic transforms of a ranking don't change which points are
+local maxima). The resulting 88.9-89.9% exact-boundary overlap was an
+artifact of the collapsed variance, not evidence that "degree of surprise"
+and "raw error" are actually similar.
+
+### 8.2 v2 fix: log-variance parameterization + beta-NLL
+
+Diagnosis and fix both specified explicitly (by the user) after reviewing
+v1's failure:
+
+1. **Output log(sigma^2) directly (no softplus), with the final layer
+   initialized so the network starts EXACTLY at the constant-optimal
+   solution** -- near-zero final-layer weights, bias = log(E[err^2]) (in
+   practice, after normalizing the target by its own train-set mean, this
+   reduces to bias=log(1)=0) -- so training only moves away from the
+   trivial baseline where the input actually helps, rather than starting
+   from an arbitrary point and needing to fight its way there.
+2. **Standardized inputs (fit on train, applied to both splits) and a
+   target normalized by train's E[err^2]**, keeping the loss landscape
+   O(1)-scaled.
+3. **Beta-NLL (Seitzer et al. 2022, beta=0.5):** multiplies the per-sample
+   NLL by `stopgrad(sigma^2)^beta`, compensating for the `1/sigma^2`
+   gradient decay that caused v1's stall -- samples the model currently
+   predicts as high-variance keep a meaningful gradient signal instead of
+   losing it.
+4. **Lower learning rate (1e-4, was 1e-3), gradient clipping (max norm
+   1.0), and best-validation-NLL checkpoint selection** instead of
+   returning the final epoch.
+
+Also added, as a training-free cross-check: **k=50 nearest-neighbor
+regression** for `E[err^2 | state]` directly on the (standardized) cached
+latent states, neighbors always drawn from train only (train's own
+leave-one-out self-evaluation excludes each point from its own neighbor
+search, so it isn't trivially "predicting" itself at distance 0).
+
+### 8.3 Infra debugging: two OOMs before real numbers landed
+
+Both were system/GPU-memory issues in the *evaluation/training-loop
+plumbing*, not the modeling approach -- worth recording since they cost two
+full kernel iterations each:
+
+- **CUDA OOM** moving the whole (N, ~33k) encoding tensor (a flattened conv
+  feature map -- level1's `spatial_repr_dim` is large) to GPU at once: a
+  single (75000, 33308) fp32 tensor is ~9.3GB, (60000, 33308) ~7.4GB --
+  fixed by chunking every GPU transfer (training batches, validation passes,
+  correlation/overlap diagnostics) so only one small batch is ever GPU-
+  resident at a time.
+- **System-RAM OOM** (`Killed`, exit 137 -- the Linux OOM killer, not a
+  catchable CUDA exception, same signature as the training-time OOM
+  documented in kaggle-infra-gotchas memory): even after the CUDA fix,
+  `train_variance_head` was creating a *standardized copy* of both train and
+  val encodings on top of the originals already held by the caller -- four
+  ~8-10GB tensors resident in CPU RAM simultaneously (~33GB total), before
+  `knn_predict_variance` even added its own copies. Fixed by (a) storing
+  encodings as fp16 in `build_dataset` (halves the baseline footprint) and
+  (b) never materializing a full-size standardized copy anywhere --
+  `standardize()` is now applied per-batch/per-chunk everywhere (training,
+  validation, `predict_variance_mlp`, `knn_predict_variance`'s internal
+  fp16 GPU tensor construction), computed from statistics (`mean`/`std`)
+  fit via chunked accumulation rather than a whole-tensor upcast.
+
+### 8.4 v4 (real result): step A passes, step B passes, step C is a real,
+      interpretable divergence from raw error
+
+Same r50 main (train, 75000 pairs) / probe (val, 60000 pairs) split as
+throughout this document.
+
+**Step A -- constant baseline vs. trained MLP vs. kNN (val NLL, raw
+err^2 units):**
+
+| Estimator | Val NLL | Train NLL | Notes |
+|---|---|---|---|
+| Constant baseline (sigma^2 = train E[err^2] = 22.629) | 2.1158 | 2.0596 | the "is this even worth it" floor |
+| Trained MLP (beta-NLL, best checkpoint) | **2.1044** | 2.0386 | best epoch: **1** (of 30) |
+| kNN (k=50, training-free) | 2.1134 | 2.0326 | no training at all |
+
+**Both estimators beat the constant baseline** -- the MLP more clearly
+(-0.0114 nats, ~0.5% relative) than kNN (-0.0024 nats, more marginal but
+still in the right direction). Two independent methods (a trained
+parametric model and a non-parametric nearest-neighbor average) agreeing on
+*some* real state-dependent signal, even a modest one, is more convincing
+than either alone. Per the user's own stop condition ("둘 다 상수 기준선을
+의미 있게 못 이기면 여기서 멈추고") this does not trigger a stop -- level1's
+error is not effectively homoscedastic at this level of analysis.
+
+**The MLP's training log shows a sharp, early overfit** -- val NLL is best
+at epoch 1 (2.1044) and gets monotonically *worse* every epoch after
+(2.1511 by epoch 20, 2.1711 by epoch 29) while train NLL keeps improving
+throughout (2.0402 -> 2.0180) -- classic overfitting, not the "still
+improving, needs more epochs" pattern that would have suggested v2's fix
+was too conservative. Best-checkpoint selection (part of the v2 fix) is
+what makes this run usable at all -- returning the final epoch, as v1's code
+did, would have thrown away the one real generalizing point and likely
+reproduced something closer to v1's failure.
+
+**Step B -- is the winning estimator's variance actually state-dependent
+(not still effectively constant)?** MLP wins step A, so it's evaluated here
+(val set):
+
+| Stat | MLP | kNN (for reference) |
+|---|---|---|
+| Mean | 24.26 | 22.52 |
+| Quartiles (0/25/50/75/100) | 13.6 / 22.0 / 24.1 / 26.2 / 48.3 | 12.2 / 19.4 / 22.1 / 25.2 / 52.5 |
+| IQR / mean | **17.5%** | 26.0% |
+| Max / min | 3.54x | 4.32x |
+| Spearman(sigma^2, err^2) | **0.434** | 0.303 |
+
+IQR/mean is well above the user's 5% "still effectively constant" cutoff for
+both estimators (contrast with v1's 3-4%), and both show a real positive
+rank correlation with actual err^2. Step B passes -- proceed to step C.
+
+**Step C -- changepoint overlap, now actually interpretable:**
+
+| | Exact-boundary overlap | Within-2-steps overlap |
+|---|---|---|
+| MLP (val, n=1000 episodes) | **40.2%** | 70.7% |
+| MLP (train, n=1250 episodes) | 41.6% | 72.3% |
+| kNN (val) | 27.3% | 62.4% |
+| kNN (train) | 33.5% | 66.2% |
+
+A stark contrast with v1's 88.9-89.9% (itself an artifact of the collapsed
+variance, SS8.1). With a genuinely state-dependent variance estimate, the
+new `err^2/sigma^2` score disagrees with raw `err^2` on **roughly 6 of every
+10 boundaries** (exact-match basis) -- normalizing by predicted uncertainty
+meaningfully changes which points in a trajectory look most "surprising,"
+not just rescaling the same ranking.
+
+**Bottom line: both of the user's own stop conditions are cleared.** Step A:
+a real (if modest) state-dependent signal exists and both a trained model
+and a training-free nonparametric method detect it independently. Step B:
+that signal is not just noise dressed up as variance -- 17.5% IQR/mean and
+Spearman 0.434 are well past "effectively constant." Step C: the resulting
+changepoint score is substantively different from the raw-error score used
+throughout SS1-7, not a relabeling of the same ranking. **Per the original
+request, step 4 (fine-tuning + hard-difficulty re-eval with this new
+changepoint score) was intentionally not run -- this section stops here for
+review before any further compute is spent**, as instructed.
+
+Kaggle kernel: `hwm-variance-head` (`experiments/kaggle_variance_head/`).
+Real (v4) diagnostics: `variance_head_diagnostics_v2.json`. v1's failed run
+used a different, now-superseded script version -- its numbers are recorded
+here (SS8.1) rather than as a separate artifact file. Total kernel time for
+the successful v4 run: ~16 minutes for the diagnostics script itself (data
+loading + training + kNN + step B/C), ~6-7 minutes of environment setup on
+top (same lightweight, no-mujoco/d4rl/gym recipe as `compute_changepoints`'s
+own kernel) -- four kernel versions total to get here (kernel v1: CUDA OOM
+moving the whole encoding tensor to GPU at once, in the original
+softplus/plain-NLL script; kernel v2: same script, chunked GPU transfers,
+completed cleanly -- this is the run SS8.1's failure numbers came from;
+kernel v3: the beta-NLL rewrite's own system-RAM OOM, caught only after the
+constant baseline itself computed correctly; kernel v4: the fp16/chunked-
+standardization fix, clean run, this section's numbers).
