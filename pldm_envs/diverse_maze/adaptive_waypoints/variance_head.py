@@ -147,25 +147,26 @@ def train_variance_head(
     Returns the trained model plus a per-epoch log of train/val NLL, for
     the overfitting check RESULTS.md SS8 reports.
     """
+    # NOTE: train_encs/val_encs are (N, repr_dim) with repr_dim in the tens
+    # of thousands (flattened conv feature map) -- moving the WHOLE tensor
+    # to GPU at once (75k-60k rows x ~33k floats) is several GB per tensor
+    # and reliably CUDA-OOMs. Keep everything CPU-resident; only ever move
+    # one batch to GPU at a time, for both training and validation.
     input_dim = train_encs.shape[1]
     model = VarianceHead(input_dim, hidden=hidden, eps=eps).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
-    train_encs = train_encs.to(device)
-    train_errs = train_errs.to(device)
-    val_encs = val_encs.to(device)
-    val_errs = val_errs.to(device)
     n_train = train_encs.shape[0]
-    zeros_val = torch.zeros_like(val_errs)
 
     log = []
     for epoch in range(epochs):
         model.train()
-        perm = torch.randperm(n_train, device=device)
+        perm = torch.randperm(n_train)
         total_loss = 0.0
         for i in range(0, n_train, batch_size):
             idx = perm[i : i + batch_size]
-            x, y = train_encs[idx], train_errs[idx]
+            x = train_encs[idx].to(device)
+            y = train_errs[idx].to(device)
             var = model(x)
             loss = F.gaussian_nll_loss(torch.zeros_like(y), y, var, full=False)
             opt.zero_grad()
@@ -175,9 +176,16 @@ def train_variance_head(
         train_nll = total_loss / n_train
 
         model.eval()
+        val_loss = 0.0
+        n_val = val_encs.shape[0]
         with torch.no_grad():
-            val_var = model(val_encs)
-            val_nll = F.gaussian_nll_loss(zeros_val, val_errs, val_var, full=False).item()
+            for i in range(0, n_val, batch_size):
+                x = val_encs[i : i + batch_size].to(device)
+                y = val_errs[i : i + batch_size].to(device)
+                var = model(x)
+                loss = F.gaussian_nll_loss(torch.zeros_like(y), y, var, full=False)
+                val_loss += loss.item() * x.shape[0]
+        val_nll = val_loss / n_val
 
         log.append({"epoch": epoch, "train_nll": train_nll, "val_nll": val_nll})
         print(f"[variance head] epoch {epoch}: train_nll={train_nll:.4f} val_nll={val_nll:.4f}", flush=True)
@@ -185,14 +193,23 @@ def train_variance_head(
     return model, log
 
 
+def _forward_var_in_chunks(model, encs: torch.Tensor, device: str, batch_size: int = 2048) -> torch.Tensor:
+    """model(encs) without ever moving the whole (N, repr_dim) tensor to GPU
+    at once -- see train_variance_head's docstring note on why."""
+    model.eval()
+    chunks = []
+    with torch.no_grad():
+        for i in range(0, encs.shape[0], batch_size):
+            chunks.append(model(encs[i : i + batch_size].to(device)).cpu())
+    return torch.cat(chunks)
+
+
 def correlation_stats(model, encs: torch.Tensor, errs: torch.Tensor, device: str):
     """Pearson correlation between predicted variance and (a) the raw error
     (b) the squared error the model was actually trained to match, plus
     quantile summary of the predicted variance itself -- for the "is this
     just reproducing the actual error" overfitting check."""
-    model.eval()
-    with torch.no_grad():
-        var = model(encs.to(device)).cpu().numpy()
+    var = _forward_var_in_chunks(model, encs, device).numpy()
     err = errs.numpy()
 
     def pearson(a, b):
@@ -241,9 +258,7 @@ def diagnose_changepoint_overlap(
     """
     from pldm_envs.diverse_maze.adaptive_waypoints.segmentation import pick_changepoints
 
-    model.eval()
-    with torch.no_grad():
-        var = model(encs.to(device)).cpu()
+    var = _forward_var_in_chunks(model, encs, device)
 
     exact_overlaps, near_overlaps = [], []
     for start, end in ep_boundaries:
