@@ -76,6 +76,21 @@ PRIORITY_PAIRS_L1ADAPTIVE = [
     ("adaptive_minseg8", "adaptive_minseg8_error_adaptive"),
 ]
 
+# SS8 step 4: a checkpoint fine-tuned on changepoints picked by the
+# validated post-hoc variance head's "surprise" score (err^2/sigma^2)
+# instead of raw error, same fine-tuning recipe as adaptive_minseg8
+# otherwise -- from results_hard_surprise_final.json. NOTE: per-trial
+# outcomes failed to extract for this run (a bug -- extract_per_trial ran
+# under Kaggle's system Python, which can't unpickle the pldm-typed
+# MPCReport object; see RESULTS.md SS8.5) and the existing
+# adaptive_minseg8 comparison group never retained per-trial data either
+# (SS6b/SS7) -- so this comparison is unpaired (Newcombe + permutation on
+# k/n) rather than the requested paired McNemar's/Mann-Whitney.
+CONDITIONS_N120_SURPRISE = {
+    "adaptive_minseg8": {"k": 111, "n": 120, "label": "adaptive min_seg=8, raw-error changepoints (SS6b/SS7)"},
+    "surprise_minseg8": {"k": 109, "n": 120, "label": "adaptive min_seg=8, surprise-score changepoints (SS8 step 4)"},
+}
+
 SCALES = {"n40": CONDITIONS_N40, "n120": CONDITIONS_N120}
 
 
@@ -206,6 +221,10 @@ def main():
     print(f"\n{'=' * 20} n120_l1adaptive {'=' * 20}")
     results, pairwise = run_scale(CONDITIONS_N120_L1ADAPTIVE, priority_pairs=PRIORITY_PAIRS_L1ADAPTIVE)
     out["n120_l1adaptive"] = {"conditions": results, "pairwise": pairwise}
+
+    print(f"\n{'=' * 20} n120_surprise {'=' * 20}")
+    results, pairwise = run_scale(CONDITIONS_N120_SURPRISE)
+    out["n120_surprise"] = {"conditions": results, "pairwise": pairwise}
 
     out["n_bootstrap"] = N_BOOTSTRAP
     out["n_permutations"] = N_PERMUTATIONS

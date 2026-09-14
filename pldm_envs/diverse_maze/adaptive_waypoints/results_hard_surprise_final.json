@@ -1,0 +1,16 @@
+{
+  "surprise_minseg8_finetuned": {
+    "k": 109,
+    "n": 120,
+    "rate": 0.9083333333333333,
+    "avg_steps": 146.247704322185,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "adaptive_minseg8_finetuned_fixed_alloc_reference": {
+    "k": 111,
+    "n": 120,
+    "rate": 0.925,
+    "avg_steps": 155.1
+  }
+}

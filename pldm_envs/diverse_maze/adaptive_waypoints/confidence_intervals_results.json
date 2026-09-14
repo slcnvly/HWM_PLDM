@@ -265,6 +265,49 @@
       }
     }
   },
+  "n120_surprise": {
+    "conditions": {
+      "adaptive_minseg8": {
+        "label": "adaptive min_seg=8, raw-error changepoints (SS6b/SS7)",
+        "k": 111,
+        "n": 120,
+        "rate": 0.925,
+        "wilson_95": [
+          0.8635908239400624,
+          0.9600428846040397
+        ],
+        "bootstrap_95": [
+          0.875,
+          0.9666666666666667
+        ]
+      },
+      "surprise_minseg8": {
+        "label": "adaptive min_seg=8, surprise-score changepoints (SS8 step 4)",
+        "k": 109,
+        "n": 120,
+        "rate": 0.9083333333333333,
+        "wilson_95": [
+          0.843291530273291,
+          0.9480428171514347
+        ],
+        "bootstrap_95": [
+          0.8583333333333333,
+          0.9583333333333334
+        ]
+      }
+    },
+    "pairwise": {
+      "adaptive_minseg8_vs_surprise_minseg8": {
+        "diff": 0.01666666666666672,
+        "newcombe_95_ci": [
+          -0.056462875991963896,
+          0.09054792211534855
+        ],
+        "permutation_p_two_sided": 0.8157,
+        "significant_at_0.05": false
+      }
+    }
+  },
   "n_bootstrap": 10000,
   "n_permutations": 10000
 }

@@ -1,0 +1,50 @@
+{
+  "chunk0": {
+    "n": 20,
+    "k": 17,
+    "rate": 0.85,
+    "avg_steps": 143.23529052734375,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "chunk1": {
+    "n": 20,
+    "k": 18,
+    "rate": 0.9,
+    "avg_steps": 118.94444274902344,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "chunk2": {
+    "n": 20,
+    "k": 19,
+    "rate": 0.95,
+    "avg_steps": 151.57894897460938,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "chunk3": {
+    "n": 20,
+    "k": 18,
+    "rate": 0.9,
+    "avg_steps": 162.0,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "chunk4": {
+    "n": 20,
+    "k": 18,
+    "rate": 0.9,
+    "avg_steps": 157.3333282470703,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  },
+  "chunk5": {
+    "n": 20,
+    "k": 19,
+    "rate": 0.95,
+    "avg_steps": 144.05262756347656,
+    "per_trial_success": null,
+    "per_trial_steps": null
+  }
+}

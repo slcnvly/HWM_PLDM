@@ -669,3 +669,148 @@ completed cleanly -- this is the run SS8.1's failure numbers came from;
 kernel v3: the beta-NLL rewrite's own system-RAM OOM, caught only after the
 constant baseline itself computed correctly; kernel v4: the fp16/chunked-
 standardization fix, clean run, this section's numbers).
+
+### 8.5 Step 4: does it actually change the trained agent?
+
+SS8.4 established that the surprise score picks substantially different
+changepoints from raw error. This section asks the question that actually
+matters: does *training on* those different changepoints produce a
+different (better/worse/same) planning agent, compared against the existing
+adaptive min_seg=8 checkpoint (SS6b/SS7's `adaptive_minseg8_finetuned`,
+which used raw-error changepoints)?
+
+**Design.** Three stages, run unattended in one Kaggle session
+(`experiments/kaggle_surprise_finetune/`):
+
+1. **Preprocess.** Recompute changepoints for r50 main and probe using the
+   winning MLP variance head (SS8.4's best-epoch=1 checkpoint) instead of
+   raw error: same score (`err^2/(sigma^2+eps)`), same
+   `pick_changepoints`, same `min_seg=8`, `n_boundaries=5`, 60-step window,
+   10-step linear interpolation for the action encoder -- nothing about the
+   segmentation *mechanism* changed, only which signal ranks the peaks.
+   Written to new directories (symlinked `data.p`/`images.npy`, new
+   `changepoints_minseg8.pt`) so the original raw-error cache stays intact
+   for reuse/comparison. The probe split's cache isn't actually consumed by
+   training (only `data.d4rl_config`'s main-split cache drives level2
+   sample construction) but was computed anyway, matching
+   `compute_changepoints.py`'s own practice of processing both splits.
+2. **Fine-tune.** Byte-identical recipe to how `adaptive_minseg8_finetuned`
+   was originally produced (`experiments/kaggle_finetune_compare`'s Phase
+   B): same pretrained HF checkpoint
+   (`load_from_l1248-seed248_epoch=5_sample_step=10789632.ckpt`),
+   `load_l1_only=false`, `adaptive_min_seg=8`, 2 epochs, `base_lr` at 0.1x
+   the icml yaml's default, `wandb=false`. **The only thing that differs is
+   which directory `data.d4rl_config.path` points at** -- the surprise-based
+   cache from stage 1, instead of the original raw-error one.
+3. **Eval.** Same recipe as SS6b/SS7's hard-difficulty sweeps: D13-16,
+   n=120 (the identical 120 instances throughout this document -- existing
+   40, seed=42, + 80 new, seed=20260910, reused byte-identically from
+   `hwm-hard-n120`'s `extra80_full.pt`), `n_steps=500`,
+   `level2.mppi.num_samples=200`, **fixed** L1 resource allocation (not
+   SS7's error-adaptive one -- the user's request was explicit that this
+   comparison isolates the changepoint-score question, not stack it with
+   SS7's separate question). 6 resumable chunks of 20.
+
+Unattended-overnight requirements: per-stage completion markers (skip
+already-done stages on a same-session re-entry), an OOM-retry wrapper
+around every `pldm.train` call (halves the relevant batch-size override --
+`data.d4rl_config.batch_size` for fine-tuning,
+`eval_cfg.h_d4rl_planning.n_envs_batch_size` for eval -- and retries once if
+the failed attempt's output contains an OOM signature), and per-stage/
+per-chunk start-end timestamps logged to `stage_timing.json`. Two real bugs
+surfaced and were fixed before a clean run landed (kernel v1, v2 both
+failed; v2's fix is what actually ran):
+- **v1: CPU/CUDA device mismatch in stage 1.** Loading the variance-head
+  checkpoint with `map_location=device` moved `input_mean`/`input_std`
+  onto CUDA, but the per-episode encoding tensor stays CPU until
+  `standardize()` is done with it (the established convention elsewhere in
+  `variance_head.py`: CPU-resident stats, `.to(device)` applied to the
+  *result*, not the inputs). Fixed by loading with `map_location="cpu"`.
+
+**Results (hard difficulty, n=120):**
+
+| Checkpoint | Changepoint score | Success | Avg steps (successes) |
+|---|---|---|---|
+| `adaptive_minseg8_finetuned` | raw error (SS6b/SS7) | 92.5% (111/120) | 155.1 |
+| `surprise_minseg8_finetuned` | surprise = err²/σ² (this section) | 90.8% (109/120) | **146.2** |
+
+Success rate is essentially a wash (-1.7pp, 2 fewer successes out of 120) --
+Wilson 95% CI for the new condition is [0.843, 0.948] against the existing
+condition's [0.864, 0.960], and the pairwise comparison (Newcombe interval
+on the difference + permutation test, same method as SS5-8) is nowhere near
+significant: diff +0.017 (favoring the existing raw-error checkpoint),
+Newcombe 95% CI [-0.056, +0.091] (includes 0), permutation p=0.816. **Avg
+steps-to-goal among successful trials is ~5.7% lower** for the
+surprise-based checkpoint (146.2 vs 155.1) -- the same *direction* and
+similar *magnitude* as SS8.4's step-B/C finding that the surprise score
+picks meaningfully different boundaries, but reported here only as a
+difference in aggregate means, not a tested distributional claim (see
+below for why).
+
+**On the requested McNemar's/Mann-Whitney tests -- not possible, for two
+compounding reasons, one anticipated and one a bug caught only now:**
+1. *Anticipated, flagged before this run started:* the existing
+   `adaptive_minseg8_finetuned` comparison group's raw per-trial outcomes
+   were never retained from its original SS6b/SS7 runs -- each chunk's
+   `planning_l2_mpc_report_*` was deleted right after extracting the
+   aggregate summary, to avoid exhausting `/kaggle/working`'s disk. Only
+   k/n and mean-steps survived.
+2. *Not anticipated -- a real bug in this run's own retention code.* This
+   kernel was written specifically to retain full per-trial success/steps
+   for the *new* condition (so at least future comparisons against *this*
+   run could be paired), via an `extract_per_trial()` function that loads
+   the raw `MPCReport` object with `torch.load`. That function runs inside
+   `run.py` itself, which executes under **Kaggle's system Python** (the
+   same distinction `kaggle_compute_changepoints`'s own docstring already
+   documents for a different reason -- system Python enforces stricter
+   dataclass validation than the project's Python 3.9 conda env). `MPCReport`
+   is a `pldm`-defined NamedTuple, and `pldm` is only installed in the
+   conda env (`ENV_PY`), not system Python -- so every extraction attempt
+   failed with `No module named 'pldm'` (visible in the kernel log, 6/6
+   chunks), silently leaving `per_trial_success`/`per_trial_steps` as
+   `null` in every chunk's progress entry. By the time this was noticed
+   (after the kernel completed), each chunk's raw output directory had
+   already been deleted by the same per-chunk disk-cleanup step that
+   deletes the historical runs' data too -- **this run's per-trial data is
+   just as unrecoverable as SS6b/SS7's.** The fix for next time is
+   mechanical (run the extraction through `ENV_PY` via a small subprocess
+   call, the same way every other `pldm`-typed object in this pipeline is
+   touched, instead of importing it into the orchestration script's own
+   system-Python process) but doesn't help retroactively.
+
+Given both, the success-rate comparison above uses the same unpaired
+Newcombe-interval + permutation-test method as SS5-8 (on k/n counts, not
+matched per-instance outcomes), and the steps-to-goal difference is
+reported as a plain aggregate-mean comparison with no significance test --
+a proper two-sample test (Mann-Whitney U or otherwise) needs the raw
+per-trial values from *both* groups, and neither is available.
+
+**Bottom line: switching to surprise-based changepoints, holding everything
+else in the fine-tuning recipe fixed, produces a checkpoint that is
+statistically indistinguishable from the existing raw-error checkpoint on
+success rate, with a moderate (untested-for-significance) efficiency gain
+in steps-to-goal among successes.** This is a meaningfully more modest outcome
+than SS8.4's step A/B/C findings alone might have suggested -- a real,
+detectably-different changepoint score (SS8.4) does not straightforwardly
+translate into a detectably-different *planning success rate* after
+fine-tuning on it, at n=120. The steps-to-goal direction is consistent with
+SS8.4's other findings and with the general pattern already seen in SS7
+(resource/attention reallocation tends to show up in efficiency metrics
+before it shows up in success rate at this sample size), but stops short of
+a tested claim.
+
+**Timing** (from `stage_timing.json`, all faster than pre-run estimates):
+setup + mounting ~7.4 min, stage 1 (preprocess) ~2.1 min, stage 2
+(fine-tune) ~46.1 min (well under the ~2h estimated from the original
+`adaptive_minseg8` fine-tune's precedent), stage 3 (6 eval chunks) ~36-37
+min each (~219 min / 3.65h total, consistent with SS7's per-chunk timing).
+Total kernel wall-clock: **~4h35m**, against a pre-run estimate of
+6.5-7h -- the overestimate came almost entirely from stage 2's timing
+precedent turning out to be pessimistic for this run.
+
+Kaggle kernel: `hwm-surprise-finetune-eval`
+(`experiments/kaggle_surprise_finetune/`). Artifacts:
+`results_hard_surprise_final.json`, `results_hard_surprise_progress.json`,
+`stage_timing.json`, `changepoints_minseg8_surprise_main.pt`/`_probe.pt`.
+`confidence_intervals.py` extended with a `n120_surprise` scale for the
+Wilson/Newcombe/permutation numbers above.
