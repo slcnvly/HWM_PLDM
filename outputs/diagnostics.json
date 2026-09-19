@@ -1,0 +1,43 @@
+{
+  "input": {
+    "n_episodes": 200,
+    "T": 60,
+    "min_seg": 8,
+    "n_boundaries": 5,
+    "seed": 0
+  },
+  "waypoint_intervals": {
+    "n_gaps": 1200,
+    "mean": 10.0,
+    "median": 9.0,
+    "std": 2.7282473006187202,
+    "min": 1.0,
+    "max": 20.0,
+    "frac_gap_1_to_2": 0.006666666666666667,
+    "cv": 0.272824730061872
+  },
+  "surprise_distribution": {
+    "n_samples": 12000,
+    "mean": 1.0197146733601887,
+    "median": 1.0322265625,
+    "std": 0.3479368835793226,
+    "kde_bandwidth_silverman": 0.047852731116179915,
+    "kde_n_local_maxima": 2,
+    "kde_n_local_minima": 1,
+    "kde_local_minima_x": [
+      0.28648212231301984
+    ],
+    "bimodality_coefficient": 0.30662381035834846,
+    "bimodality_coefficient_note": "SAS rule of thumb: >0.555 suggests possible bimodality"
+  },
+  "threshold_sensitivity": {
+    "threshold_min": 0.053985595703125,
+    "threshold_p99": 1.828125,
+    "n_above_at_effective_cutoff": 11413,
+    "effective_cutoff": 0.449462890625
+  },
+  "interpretation": {
+    "q1_natural_cutoff_in_surprise_distribution": "KDE 곡선에 지역 극소값이 1개 있음 (x=[0.28648212231301984]) -- 분포가 다봉(multimodal)일 가능성이 있고, 이 극소점(들)이 '배경 노이즈'와 '진짜 surprise'를 구분하는 자연스러운 절단점의 후보가 된다. Bimodality coefficient=0.307 (<= 0.555 rule-of-thumb).",
+    "q2_waypoint_interval_structure": "간격의 변동계수(CV=std/mean)=0.273, min_seg=8 바로 그 값에 걸린 간격 비율=38.8%. CV가 낮아 간격이 비교적 좁은 범위에 몰려 있음 -- 신호 기반 배치이지만 실질적으로는 균일 배치에 가까운 구조를 보인다. (참고: 간격 1~2스텝 비율=0.7% -- min_seg=8에서는 구조상 0%에 가까워야 정상.)"
+  }
+}
