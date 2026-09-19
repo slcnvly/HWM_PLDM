@@ -49,6 +49,14 @@ class CausalWaypointTrigger:
         self.vhead_input_mean, self.vhead_input_std, self.vhead_target_scale = (
             vckpt["input_mean"], vckpt["input_std"], vckpt["target_scale"]
         )
+        # unlike student_labels.py/extract_embeddings.py (which keep stats on CPU because
+        # their input encodings are already .cpu()-routed via compute_error_and_encoding_series),
+        # this class computes encodings directly from a live forward_posterior call and keeps
+        # them GPU-resident for low online latency -- so the stats need to live on `device` too,
+        # or standardize()'s `x - mean` mismatches devices (exactly the bug RESULTS.md SS8.5
+        # documents hitting once already, in the offline surprise-preprocessing script).
+        self.vhead_input_mean = self.vhead_input_mean.to(device)
+        self.vhead_input_std = self.vhead_input_std.to(device)
         self.vhead = VarianceHead(self.vhead_input_mean.shape[0], hidden=128)
         self.vhead.load_state_dict(vckpt["model_state"])
         self.vhead.to(device).eval()
