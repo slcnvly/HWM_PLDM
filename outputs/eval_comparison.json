@@ -1,0 +1,35 @@
+{
+  "n": 120,
+  "conditions": {
+    "a_baseline": {
+      "label": "(a) baseline",
+      "detail": "fixed stride, no fine-tune",
+      "success_rate": 0.8,
+      "n_success": 96,
+      "n_total": 120,
+      "avg_steps": 169.6
+    },
+    "b_oracle": {
+      "label": "(b) oracle",
+      "detail": "pick_changepoints, non-causal",
+      "success_rate": 0.925,
+      "n_success": 111,
+      "n_total": 120,
+      "avg_steps": 155.1
+    },
+    "c_causal_student": {
+      "label": "(c) causal student",
+      "detail": "online trigger",
+      "success_rate": 0.9083333333333333,
+      "n_success": 109,
+      "n_total": 120,
+      "avg_steps": 163.1
+    }
+  },
+  "headline": {
+    "c_minus_a_success_rate_pp": 10.83,
+    "b_minus_c_success_rate_pp": 1.67,
+    "pct_of_a_to_b_gap_closed_by_c": 86.7,
+    "c_beats_a": true
+  }
+}

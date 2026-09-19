@@ -28,8 +28,8 @@ OUT_DIR = os.path.join(REPO_ROOT, "outputs")
 CAUSAL_RESULT_PATH = os.path.join(OUT_DIR, "causal_student_eval_final.json")
 
 # RESULTS.md SS6b, n=120 hard difficulty -- see module docstring for citation.
-BASELINE = {"label": "(a) baseline\n(fixed stride, no fine-tune)", "success_rate": 96 / 120, "n_success": 96, "n_total": 120, "avg_steps": 169.6}
-ORACLE = {"label": "(b) oracle\n(pick_changepoints, non-causal)", "success_rate": 111 / 120, "n_success": 111, "n_total": 120, "avg_steps": 155.1}
+BASELINE = {"label": "(a) baseline", "detail": "fixed stride, no fine-tune", "success_rate": 96 / 120, "n_success": 96, "n_total": 120, "avg_steps": 169.6}
+ORACLE = {"label": "(b) oracle", "detail": "pick_changepoints, non-causal", "success_rate": 111 / 120, "n_success": 111, "n_total": 120, "avg_steps": 155.1}
 
 
 def load_causal_result():
@@ -41,7 +41,8 @@ def load_causal_result():
     with open(CAUSAL_RESULT_PATH) as f:
         d = json.load(f)
     return {
-        "label": "(c) causal student\n(online trigger)",
+        "label": "(c) causal student",
+        "detail": "online trigger",
         "success_rate": d["k"] / d["n"],
         "n_success": d["k"],
         "n_total": d["n"],
@@ -101,7 +102,10 @@ def main():
     axes[1].set_ylabel("avg steps-to-goal (successes)")
     axes[1].set_title("Planning cost")
 
-    fig.tight_layout()
+    caption = "  |  ".join(f"{c['label']}: {c['detail']}" for c in conditions)
+    fig.text(0.5, 0.01, caption, ha="center", fontsize=8, color="#555555")
+
+    fig.tight_layout(rect=[0, 0.06, 1, 1])
     fig.savefig(os.path.join(OUT_DIR, "eval_comparison.png"), dpi=150)
     plt.close(fig)
 
