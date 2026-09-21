@@ -319,11 +319,16 @@ class Evaluator:
             )
             from pldm.planning.d4rl.enums import HierarchicalD4RLMPCConfig
 
-            evaluator_cls = (
-                ErrorAdaptiveHierarchicalD4RLMPCEvaluator
-                if getattr(mpc_config, "error_adaptive_l1", False)
-                else HierarchicalD4RLMPCEvaluator
-            )
+            if getattr(mpc_config, "error_adaptive_l1", False):
+                evaluator_cls = ErrorAdaptiveHierarchicalD4RLMPCEvaluator
+            elif getattr(mpc_config, "arrival_based_termination", False):
+                from eval.arrival_based_termination import (
+                    ArrivalBasedHierarchicalD4RLMPCEvaluator,
+                )
+
+                evaluator_cls = ArrivalBasedHierarchicalD4RLMPCEvaluator
+            else:
+                evaluator_cls = HierarchicalD4RLMPCEvaluator
             planning_evaluator = evaluator_cls(
                 config=mpc_config,
                 normalizer=self.normalizer,

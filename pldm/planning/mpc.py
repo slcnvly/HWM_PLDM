@@ -346,6 +346,34 @@ class MPCEvaluator(ABC):
                 f"Unknown cost entity {self.config.level2.cost_entity}"
             )
 
+    def _compute_replan_mask(
+        self,
+        i: int,
+        bs: int,
+        obs_t: torch.Tensor,
+        planner,
+        local_offset: torch.Tensor,
+        envs,
+    ) -> torch.Tensor:
+        """Which envs (of the batch) should trigger a fresh `planner.plan()`
+        call this step. Default: the original, unchanged full-batch lockstep
+        behavior -- every env replans together every `replan_every` steps.
+
+        `local_offset[j]` is how many steps env j has executed since its own
+        last replan (0 right after replanning) -- exposed so an override can
+        implement e.g. a minimum-gap-before-replanning rule without needing
+        separate state. `obs_t` is the real current observation (already
+        updated from the previous step's env.step(), or the initial reset at
+        i=0); `envs` is exposed alongside it so an override can also pull
+        proprio/location (`e.get_proprio_vel(...)` etc, matching how the
+        block below builds `curr_proprio_vel`/`curr_locations`) if the
+        model's backbone needs them to encode obs_t consistently with how
+        planning itself encodes it. See eval/arrival_based_termination.py
+        for the override used to test arrival-based (vs. this fixed-cadence)
+        subgoal termination.
+        """
+        return torch.full((bs,), i % self.config.replan_every == 0, dtype=torch.bool)
+
     def _perform_mpc(
         self,
         planner,
@@ -437,8 +465,32 @@ class MPCEvaluator(ABC):
         else:
             max_steps = self.config.n_steps
 
+        bs = len(envs)
+        # Per-env replan bookkeeping (needed so `_compute_replan_mask` can be
+        # overridden for per-env-independent timing, e.g. arrival-based
+        # termination -- see eval/arrival_based_termination.py -- without
+        # touching the batched planner.plan() call itself, which always
+        # plans for the whole batch in one forward pass). Default behavior
+        # (`_compute_replan_mask` unmodified) reproduces the original
+        # lockstep `i % replan_every == 0` exactly.
+        local_offset = torch.zeros(bs, dtype=torch.long)
+        current_actions_list = [None] * bs  # per-env (T_j, action_dim), from that env's own last replan
+
         for i in tqdm(range(max_steps), desc="Planning steps"):
-            if i % self.config.replan_every == 0:
+            replan_mask = self._compute_replan_mask(i, bs, obs_t, planner, local_offset, envs)
+            # safety net, independent of whatever a _compute_replan_mask
+            # override decides: never let an env run past the end of its own
+            # stored plan.
+            overflow = torch.tensor(
+                [
+                    current_actions_list[j] is None
+                    or int(local_offset[j]) >= current_actions_list[j].shape[0]
+                    for j in range(bs)
+                ]
+            )
+            replan_mask = replan_mask | overflow
+
+            if replan_mask.any():
                 if self.model.level1.using_proprio_pos:
                     curr_proprio_pos = [
                         e.get_proprio_pos(normalized=True) for e in envs
@@ -486,6 +538,14 @@ class MPCEvaluator(ABC):
                     planning_result_l2 = planning_result.level2
                     planning_result = planning_result.level1
 
+                # adopt the fresh plan only for envs that actually needed one
+                # this step; envs not in replan_mask keep executing their own
+                # existing plan from an earlier step (see _compute_replan_mask)
+                for j in range(bs):
+                    if replan_mask[j]:
+                        current_actions_list[j] = planning_result.actions[j].detach()
+                        local_offset[j] = 0
+
             if bilevel_planning:
                 pred = self._get_relevant_pred(
                     planning_result_l2,
@@ -522,11 +582,18 @@ class MPCEvaluator(ABC):
                 )
                 ensemble_proprio_var_history.append(ensemble_proprio_var)
 
-            planned_actions = (
-                planning_result.actions[:, i % self.config.replan_every :]
-                .detach()
-                .cpu()
-            )
+            # per-env: just the single next action from that env's own stored
+            # plan (shape (bs, 1, action_dim)). Downstream code only ever
+            # reads index 0 of the time dimension (env.step() below, and
+            # plotting.py's `action_history[i][idx, 0]`), so this is exactly
+            # equivalent to the original shrinking-window slice for those
+            # consumers, but well-defined per-env even when envs are on
+            # staggered replan schedules (where a shared-offset slice like
+            # the original `planning_result.actions[:, i % replan_every:]`
+            # would be wrong for envs on a different schedule).
+            planned_actions = torch.stack(
+                [current_actions_list[j][local_offset[j]] for j in range(bs)]
+            ).unsqueeze(1).detach().cpu()
 
             if self.config.random_actions:
                 results = [
@@ -540,6 +607,8 @@ class MPCEvaluator(ABC):
                     )
                     for j in range(len(envs))
                 ]
+
+            local_offset = local_offset + 1  # counts this step; reset to 0 happened above for replanned envs
 
             assert len(results[0]) == 5
             current_obs = torch.from_numpy(np.stack([r[0] for r in results])).float()

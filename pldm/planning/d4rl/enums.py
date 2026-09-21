@@ -31,6 +31,14 @@ class HierarchicalD4RLMPCConfig(D4RLMPCConfig):
     error_adaptive_l1_checkpoint_path: str = ""
     error_adaptive_l1_num_samples_multiplier: float = 2.0
     error_adaptive_l1_horizon_multiplier: float = 1.5
+    # Arrival-based subgoal termination (this session's experiment, eval-only,
+    # no training-code changes). Unrelated to error_adaptive_l1 above -- this
+    # replaces the fixed replan_every cadence with a per-env arrival check.
+    # See eval/arrival_based_termination.py.
+    arrival_based_termination: bool = False
+    arrival_epsilon: float = 0.0
+    arrival_max_k: int = 20
+    arrival_min_gap: int = 2
 
 
 class MPCReport(NamedTuple):
