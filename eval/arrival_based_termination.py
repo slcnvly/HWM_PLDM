@@ -63,7 +63,14 @@ def encode_real_obs(model, obs_t: torch.Tensor, envs) -> torch.Tensor:
         # two_lvl_planner.py:48-50 calls (self.l1_planner.model.backbone),
         # just reached via HJEPA.level1 instead of a planner's own .model ref.
         backbone_output = model.level1.backbone(obs_t.cuda(), proprio=proprio_l1, locations=locations_cuda)
-    enc = backbone_output.encodings
+    # BUG FIX #2 (caught by the second real Kaggle run): target_enc is NOT the
+    # full combined encoding -- hjepa.py's forward_posterior feeds level2's
+    # predictor (and hence pred_obs, what reset_targets stores) the OBS-ONLY
+    # component (`backbone_output.obs_component`, excludes proprio channels)
+    # whenever `level2.backbone.using_proprio` is True (hjepa.py:175-186,
+    # confirmed by this run's shape mismatch: 33282 = full encodings,
+    # 29584 = obs_component only). Match that space, not .encodings.
+    enc = backbone_output.obs_component
     enc = flatten_conv_output(enc) if enc.dim() >= 3 else enc
     return enc
 
