@@ -58,7 +58,11 @@ def encode_real_obs(model, obs_t: torch.Tensor, envs) -> torch.Tensor:
         locations_cuda = curr_locations.cuda()
 
     with torch.no_grad():
-        backbone_output = model.backbone(obs_t.cuda(), proprio=proprio_l1, locations=locations_cuda)
+        # BUG FIX (caught by the first real Kaggle run): HJEPA has no top-level
+        # .backbone -- only .level1.backbone / .level2.backbone. Same object
+        # two_lvl_planner.py:48-50 calls (self.l1_planner.model.backbone),
+        # just reached via HJEPA.level1 instead of a planner's own .model ref.
+        backbone_output = model.level1.backbone(obs_t.cuda(), proprio=proprio_l1, locations=locations_cuda)
     enc = backbone_output.encodings
     enc = flatten_conv_output(enc) if enc.dim() >= 3 else enc
     return enc
