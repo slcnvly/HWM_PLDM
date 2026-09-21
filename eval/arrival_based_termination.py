@@ -122,6 +122,16 @@ class ArrivalBasedHierarchicalD4RLMPCEvaluator(HierarchicalD4RLMPCEvaluator):
         return report
 
     def _compute_replan_mask(self, i, bs, obs_t, planner, local_offset, envs):
+        # BUG FIX (caught by the 3rd real Kaggle run): _perform_mpc is also
+        # called in "Stage 2" flat-L1 mode (final_trans_steps, the non-
+        # hierarchical tail of an episode -- see mpc.py's _perform_h_mpc),
+        # where bilevel_planning=False and `planner` is the bare MPPIPlanner
+        # (no .l1_planner attribute -- that only exists on TwoLvlPlanner).
+        # This override only makes sense for the hierarchical/bilevel call;
+        # fall back to the exact default (fixed replan_every) otherwise.
+        if not hasattr(planner, "l1_planner"):
+            return super()._compute_replan_mask(i, bs, obs_t, planner, local_offset, envs)
+
         if i == 0:
             self.advance_reason_counts["initial"] += bs
             return torch.full((bs,), True, dtype=torch.bool)
