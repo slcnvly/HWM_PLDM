@@ -1,22 +1,30 @@
 # HWM_PLDM 원본 대비 추가된 실험 코드 (fork: slcnvly/HWM_PLDM, branch: causal-waypoint-student).
 # Kaggle GPU에서 실행. 도달 기반 종료(eval/arrival_based_termination.py)의 ε 후보를
-# 학습 데이터에서 계산한다: "구간 마지막 스텝의 실제 latent"와 "level2가 그 구간에
-# 대해 예측한 latent" 사이 거리 분포의 25/50/75 퍼센타일.
+# 학습 데이터에서 계산한다.
+#
+# v2 (실제 Kaggle 실행에서 잡힌 버그 2개 수정):
+#   1. 온라인 도달 체크는 level2 예측의 "obs_component"만 본다 (level1의
+#      backbone_output.obs_component -- proprio 채널 제외, 33282 대신 29584차원,
+#      encode_real_obs의 shape-mismatch 버그로 확인됨). level2 predictor 출력도
+#      마찬가지로 pred_output.obs_component가 이미 분리된 필드로 존재한다
+#      (sequence_predictor.py:396-399, PredictorOutput -- pred_output.predictions는
+#      proprio까지 합쳐진 전체 공간이라 다른 스케일). v1은 실수로 .predictions/
+#      .encodings(전체 공간)를 썼음 -- v2는 .obs_component로 수정.
+#   2. ε는 "구간이 끝나는 시점"이 아니라 실제 온라인 체크가 일어나는 창
+#      (재계획 직후 min_gap~max_k 스텝, 기본 2~8) 안에서 측정해야 한다. v1은
+#      구간 끝(최대 20+ 스텝 뒤)의 거리로 ε를 잡아서, max_k=8 창 안에서는
+#      한 번도 도달 못 하는 ε가 나왔다(실제 실행에서 3개 ε 후보 전부
+#      arrival=0으로 확인됨). v2는 각 구간 시작 이후 1..max_k 스텝 지점마다
+#      "그 시점의 실제 latent"와 "그 구간의 level2 예측 타겟" 사이 거리를 다
+#      모아서 분포를 낸다 -- 이게 온라인 트리거가 실제로 보는 것과 같다.
 #
 # level2는 raw pixel을 직접 안 보고 level1의 latent(identity_encoder로 pass-through)만
-# 본다 (조사 결과 확인, hjepa.py:65-73/162-187). 그래서 HJEPA.forward_posterior를
-# l2_states/l2_actions로 호출하면 내부에서
-#   1) model.level1.forward_posterior(l2_states, actions=None, proprio_vel=..., encode_only=True)
-#      로 각 경계 프레임을 인코딩하고
-#   2) model.level2.forward_posterior(l1_obs, proprio=l1_proprio, actions=l2_actions, goal=None)
-#      로 그 latent 시퀀스에 대해 구간별 one-segment-ahead 예측을 만든다
-# (hjepa.py:158-187). l2_actions는 d4rl_adaptive.py::_build_l2_sample과 똑같이
-# boundaries_to_segments + resample_to_fixed_length로 만든 고정 10스텝 청크다 --
-# 학습 때와 완전히 같은 입력 구성이라야 "학습 시점 예측 오차" 분포가 맞다.
+# 본다 (hjepa.py:65-73/162-187). l2_actions는 d4rl_adaptive.py::_build_l2_sample과
+# 똑같이 boundaries_to_segments + resample_to_fixed_length로 만든 고정 10스텝 청크다.
 #
-# 체크포인트: surprise_minseg8_finetuned (재학습 없음, disable_l2=False로 로드해서
-# level2 가중치까지 씀 -- compute_changepoints.py::load_level1은 L1-only라 여긴 못 씀).
+# 체크포인트: surprise_minseg8_finetuned (재학습 없음, disable_l2=False로 로드).
 import argparse
+import json
 import os
 import re
 import sys
@@ -38,9 +46,6 @@ _ENUM_STR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*$")
 
 
 def _strip_enum_prefixes(obj):
-    """Same as compute_changepoints.py's own helper -- replicated here (not
-    imported) since that module's load_level1 is L1-only and we don't want
-    to couple this script to it changing later."""
     if isinstance(obj, dict):
         for k, v in obj.items():
             if isinstance(v, str) and _ENUM_STR_RE.match(v):
@@ -56,9 +61,6 @@ def _strip_enum_prefixes(obj):
 
 
 def load_full_hjepa(config_path: str, checkpoint_path: str, device: str):
-    """Like compute_changepoints.py::load_level1, but disable_l2=False and
-    keeps level2/posterior weights (only decoder is stripped) -- mirrors
-    Trainer.maybe_load_model's load_l1_only=False branch (pldm/train.py:369-407)."""
     full = OmegaConf.load(config_path)
     full_dict = OmegaConf.to_container(full, resolve=True)
     _strip_enum_prefixes(full_dict)
@@ -73,8 +75,6 @@ def load_full_hjepa(config_path: str, checkpoint_path: str, device: str):
     state_dict = checkpoint["model_state_dict"]
     state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}
     for k in list(state_dict.keys()):
-        # same decoder-stripping as compute_changepoints.py::load_level1, minus
-        # its "level2"/"posterior" conditions (we want those weights this time)
         if "decoder.converter" in k or "decoder" in k:
             del state_dict[k]
     res = model.load_state_dict(state_dict, strict=False)
@@ -87,13 +87,9 @@ def load_full_hjepa(config_path: str, checkpoint_path: str, device: str):
     return model
 
 
-def compute_segment_gap(model, l2_states, l2_actions, l2_proprio_vel, device):
-    """l2_states: (n_anchors,1,3,98,98), l2_actions: (n_segments,1,10,2),
-    l2_proprio_vel: (n_anchors,1,2). Returns (n_segments,) Euclidean distance
-    between level2's predicted encoding for each segment and the actual
-    encoding at that segment's end anchor -- same metric (torch.norm, no
-    reduction beyond the feature dim) as eval/arrival_based_termination.py's
-    online arrival check, for a directly comparable epsilon scale."""
+def compute_segment_targets(model, l2_states, l2_actions, l2_proprio_vel, device):
+    """Returns (n_segments, repr_dim) -- level2's predicted obs_component
+    target for each segment (what reset_targets would store online)."""
     with torch.no_grad():
         result = model.forward_posterior(
             l2_states=l2_states.to(device),
@@ -103,10 +99,25 @@ def compute_segment_gap(model, l2_states, l2_actions, l2_proprio_vel, device):
             goal=None,
         )
     l2_result = result.level2
-    predictions = l2_result.pred_output.predictions[1:]  # (n_segments,1,repr_dim)
-    encodings = l2_result.backbone_output.encodings[1:]  # (n_segments,1,repr_dim)
-    dist = torch.norm(predictions - encodings, dim=-1).squeeze(1).cpu()  # (n_segments,)
-    return dist
+    targets = l2_result.pred_output.obs_component[1:]  # (n_segments,1,repr_dim) -- obs-only, matches target_enc's space
+    return targets.squeeze(1).cpu()  # (n_segments, repr_dim)
+
+
+def encode_frames_obs_component(model, img_seq, proprio_vel, frame_indices, device, batch_size=32):
+    """img_seq: (window,3,98,98) raw frames, proprio_vel: (window,2). Encodes
+    the requested frame indices one small batch at a time via level1's
+    backbone alone (single-frame, causal -- matches
+    eval/arrival_based_termination.py::encode_real_obs's online convention),
+    returns (len(frame_indices), repr_dim) obs_component encodings."""
+    outs = []
+    for i in range(0, len(frame_indices), batch_size):
+        idx = frame_indices[i : i + batch_size]
+        obs_batch = img_seq[idx].to(device)  # (b,3,98,98)
+        proprio_batch = proprio_vel[idx].to(device)  # (b,2)
+        with torch.no_grad():
+            backbone_output = model.level1.backbone(obs_batch, proprio=proprio_batch, locations=None)
+        outs.append(backbone_output.obs_component.flatten(1).cpu())
+    return torch.cat(outs, dim=0)
 
 
 def main():
@@ -118,6 +129,8 @@ def main():
     parser.add_argument("--out_path", type=str, default="outputs/epsilon_candidates.json")
     parser.add_argument("--l2_step_skip", type=int, default=10)
     parser.add_argument("--l2_n_steps", type=int, default=6)
+    parser.add_argument("--max_k", type=int, default=8, help="online arrival check window -- must match arrival_max_k")
+    parser.add_argument("--min_gap", type=int, default=2, help="online arrival check window start -- must match arrival_min_gap")
     parser.add_argument("--limit_episodes", type=int, default=None)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
@@ -139,7 +152,8 @@ def main():
     ep_indices = sorted(boundaries_by_ep.keys())
     if args.limit_episodes is not None:
         ep_indices = ep_indices[: args.limit_episodes]
-    print(f"{len(ep_indices)} episodes with cached surprise changepoints", flush=True)
+    print(f"{len(ep_indices)} episodes with cached surprise changepoints, "
+          f"measuring within reachable window [{args.min_gap},{args.max_k}] steps post-replan", flush=True)
 
     all_dists = []
     for count, ep_idx in enumerate(ep_indices):
@@ -150,12 +164,13 @@ def main():
         start = 0 if ep_idx == 0 else cum_lengths[ep_idx - 1]
 
         obs = splits[ep_idx]["observations"][:window]
+        proprio_vel_all = torch.from_numpy(obs[:, 2:4]).float()  # (window,2)
         actions_raw = torch.from_numpy(splits[ep_idx]["actions"][:action_len]).float()
-        img_seq = torch.from_numpy(np.array(images[start : start + window])).float().permute(0, 3, 1, 2)
+        img_seq = torch.from_numpy(np.array(images[start : start + window])).float().permute(0, 3, 1, 2)  # (window,3,98,98)
 
         anchor_idx = [0] + list(boundaries) + [window - 1]
         l2_states = img_seq[anchor_idx].unsqueeze(1)  # (n_anchors,1,3,98,98)
-        l2_proprio_vel = torch.from_numpy(obs[anchor_idx, 2:4]).float().unsqueeze(1)  # (n_anchors,1,2)
+        l2_proprio_vel = proprio_vel_all[anchor_idx].unsqueeze(1)  # (n_anchors,1,2)
 
         segments = boundaries_to_segments(boundaries, action_len)
         assert len(segments) == args.l2_n_steps
@@ -164,7 +179,22 @@ def main():
             dim=0,
         ).unsqueeze(1)  # (n_segments,1,10,2)
 
-        dist = compute_segment_gap(model, l2_states, l2_actions, l2_proprio_vel, device)
+        targets = compute_segment_targets(model, l2_states, l2_actions, l2_proprio_vel, device)  # (n_segments, repr_dim)
+
+        # for each segment, gather the raw frame indices within the reachable window
+        query_frame_idx, query_seg_idx = [], []
+        for seg_i, (s, e) in enumerate(segments):
+            hi = min(s + args.max_k, e, window - 1)
+            lo = min(s + args.min_gap, hi)
+            for t in range(lo, hi + 1):
+                query_frame_idx.append(t)
+                query_seg_idx.append(seg_i)
+        if not query_frame_idx:
+            continue
+
+        encs = encode_frames_obs_component(model, img_seq, proprio_vel_all, query_frame_idx, device)  # (n_queries, repr_dim)
+        seg_idx_t = torch.tensor(query_seg_idx, dtype=torch.long)
+        dist = torch.norm(encs - targets[seg_idx_t], dim=-1)  # (n_queries,)
         all_dists.append(dist)
 
         if count % 100 == 0:
@@ -173,20 +203,20 @@ def main():
     all_dists = torch.cat(all_dists).numpy()
     p25, p50, p75 = np.percentile(all_dists, [25, 50, 75])
     print(
-        f"n_segments={len(all_dists)} mean={all_dists.mean():.4f} std={all_dists.std():.4f} "
+        f"n_samples={len(all_dists)} mean={all_dists.mean():.4f} std={all_dists.std():.4f} "
         f"p25={p25:.4f} p50={p50:.4f} p75={p75:.4f}",
         flush=True,
     )
-
-    import json
 
     os.makedirs(os.path.dirname(args.out_path) or ".", exist_ok=True)
     with open(args.out_path, "w") as f:
         json.dump(
             {
-                "n_segments": int(len(all_dists)),
+                "n_samples": int(len(all_dists)),
                 "mean": float(all_dists.mean()),
                 "std": float(all_dists.std()),
+                "max_k": args.max_k,
+                "min_gap": args.min_gap,
                 "epsilon_candidates": {"p25": float(p25), "p50": float(p50), "p75": float(p75)},
             },
             f,
