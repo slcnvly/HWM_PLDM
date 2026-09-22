@@ -37,7 +37,24 @@ class HierarchicalD4RLMPCConfig(D4RLMPCConfig):
     # See eval/arrival_based_termination.py.
     arrival_based_termination: bool = False
     arrival_epsilon: float = 0.0
-    arrival_max_k: int = 20
+    # ARCHITECTURE CONSTRAINT (discovered by the 4th real Kaggle run): L1's
+    # own plan is only ever computed for `l2_step_skip` (=10) raw steps --
+    # two_lvl_planner.py:77-83 hardcodes `plan_size=self.l2_step_skip` on
+    # every L1 plan() call, unconditionally, whether or not arrival-based
+    # termination is active. mpc.py's overflow safety net (added for THIS
+    # feature) forces a replan once local_offset reaches that 10-step plan's
+    # length regardless of max_k, so any max_k > ~10 is unreachable -- this
+    # class's own max_k check never gets to fire first. Confirmed by a real
+    # run where max_k=20 produced IDENTICAL success/steps for all three
+    # epsilon candidates: mpc.py's overflow-driven replans (every ~10 steps,
+    # invisible to this class's advance_reason_counts, which only sees what
+    # ITS OWN _compute_replan_mask returned before mpc.py ORs in overflow)
+    # dominated every trial, because the arrival distance never happened to
+    # drop below any candidate epsilon within the only window that's
+    # actually reachable before overflow fires (steps min_gap..10). Default
+    # lowered to fit inside that real window so max_k (not overflow) is the
+    # effective cap, and so advance_reason_counts is accurate again.
+    arrival_max_k: int = 8
     arrival_min_gap: int = 2
 
 
