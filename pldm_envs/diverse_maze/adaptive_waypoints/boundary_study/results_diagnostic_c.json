@@ -1,0 +1,11 @@
+{
+  "n_episodes": 2250,
+  "pearson_err1_vs_dist_from_start": {
+    "r": 0.4363712668418884,
+    "p": 0.0
+  },
+  "spearman_err1_vs_dist_from_start": {
+    "rho": 0.43643455845990586,
+    "p": 0.0
+  }
+}

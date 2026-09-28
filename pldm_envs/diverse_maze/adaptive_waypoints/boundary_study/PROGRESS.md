@@ -159,12 +159,17 @@ stop condition (§8).
   `current_state` is always the PREVIOUS step's own prediction
   (`current_state = pred_output.prediction`, line 321) except at i=0.
   Empirically confirmed: a fresh 1-step call re-anchored at the REAL t=10
-  encoding (`err_via_rollout=2.04`) differs from the in-window value at the
-  same index (`err_direct=4.95`, part of the 60-step chain that has already
-  compounded drift since frame 0) -- if `compute_posterior` genuinely
-  switched behavior, these would need not match either way, but the
-  *mechanism* difference (fresh real anchor vs. accumulated rollout) is what
-  explains the gap, not the flag itself.
+  encoding gives `err1b[10]=2.04`, vs. `err1[10]=5.70` (signal 1, part of
+  the 60-step chain that has already compounded drift since frame 0) for
+  the exact same episode/t -- a real, mechanism-driven gap. **Correction to
+  this note's first draft:** the original `_smoke_rollout.py` one-off script
+  computed its own `err_direct` comparison with an off-by-one
+  (`predictions[t]` instead of `predictions[t+1]`), giving a since-corrected
+  wrong number (4.95); `signal1_common.py`'s `err1` (used everywhere from
+  here on) was checked line-by-line against `compute_error_series` itself
+  and matches it exactly (max abs diff 0.0 on a real episode) -- the
+  `_smoke_rollout.py` bug never affected anything beyond that one throwaway
+  print statement.
   **This is consistent with training, not a bug:** `pldm/objectives/
   prediction.py`'s `PredictionObjective` consumes whatever `forward_posterior`
   produces, and `jepa.py`'s own internal call hardcodes `compute_posterior=
@@ -186,13 +191,84 @@ stop condition (§8).
   the rollout is non-degenerate (step-to-step mean squared deltas:
   `[2.05, 0.18, 0.054, 0.015, 0.005]` -- evolving and decaying, not frozen or
   exploding).
+- [x] **Diagnostics (a)-(c) requested before Stage 2 design -- all three run
+  at full scale (main+probe, N=2250 episodes for (a)/(c); N=50 for (b)).**
+  Scripts: `diagnostic_a_position_dependency.py`, `diagnostic_b_rollout_
+  stopping.py`, `diagnostic_c_distance_confound.py`. Raw numbers in
+  `results_diagnostic_{a,b,c}.json`, plots in `plots/`.
+
+  **(a) Position dependency -- confirmed, large effect for signal 1, gone
+  for signal 1b.** Pooled Spearman correlation between the signal's value
+  and the window index `t` itself (N=2250 episodes x 60 steps =135,000
+  pairs): **signal 1: rho=0.573 (p~0)** -- a strong, unambiguous structural
+  dependence on elapsed window position. **Signal 1b: rho=-0.029** (p is
+  tiny only because N is huge; the effect size itself is negligible) -- the
+  re-anchored version shows essentially no such dependence, as expected if
+  it's a genuine local one-step quantity. The reconstructed boundary-
+  position histogram (signal 1, min_seg=8, 5 boundaries/episode, same
+  algorithm S5/S6b's original cache used -- that exact cached file was
+  never persisted locally, so this is a deterministic same-checkpoint,
+  same-data reconstruction, not a different computation) is in
+  `plots/diagnostic_a_position_dependency.png` alongside the mean-error-vs-t
+  curves for both signals.
+
+  **(b) Rollout "stopping" -- NOT confirmed in the hypothesized form; a
+  different, still-important pattern found instead.** Mean open-loop
+  predicted step size `||ẑ_{k+1}-ẑ_k||` (N=50 episodes) does *not* decay
+  toward zero -- it does the opposite of "freezing": `k=0: 1.46` (a huge,
+  one-off overshoot -- ~11x the real trajectory's own step size at k=0,
+  `0.13`), then drops sharply and **stabilizes around 0.13-0.16 for k=3
+  through k=19** -- almost exactly matching the real trajectory's typical
+  step size for the rest of the window (`pred/real` ratio 1.06 at k=19).
+  So the rollout is not stalling in latent-*magnitude* terms. **Combined
+  with (a) and (c), the likely explanation for signal 1's growth over `t`
+  is compounding *directional* error (the open-loop rollout takes
+  steps of roughly the right size but the wrong direction once it can no
+  longer see the real trajectory, so positional error random-walks upward)
+  rather than the rollout's magnitude collapsing.** This changes the
+  framing from "detects staleness" to "detects accumulated dead-reckoning
+  drift" -- still a confound relative to local dynamics, just a different
+  mechanism than hypothesized. Full curve in
+  `plots/diagnostic_b_rollout_stopping.png`.
+
+  **(c) Distance-from-start confound -- confirmed, moderate.** Pooled
+  Pearson r = Spearman rho = **0.436** (p~0, N=2250 episodes) between
+  signal 1 and `||z_{t+1}-z_0||` (latent distance traveled since the window
+  start). Moderate, not dominant (r=0.436 -> ~19% of variance) -- real
+  evidence for "adaptive was partly following how far the trajectory has
+  drifted from the window's start," consistent with (a)'s window-index
+  finding (distance and elapsed time are themselves correlated) and (b)'s
+  directional-drift explanation, but signal 1 is not *purely* a distance
+  proxy either. Scatter in `plots/diagnostic_c_distance_confound.png`.
+
+  **Bottom line for Stage 2 design:** signal 1 (what S5-S8 actually used)
+  is confirmed to carry a real, non-trivial structural confound with
+  elapsed window position/distance, via compounding directional drift in
+  the open-loop rollout -- not a subtle effect (rho=0.57 on t, r=0.44 on
+  distance). Signal 1b (and by extension 2b/3b/9b) does not share this
+  confound. **This means signal 1 and 1b should be treated as testing
+  genuinely different hypotheses in Stage 2-4, not as near-duplicates** --
+  and any result where signal 1 "wins" on metric A/B should be checked
+  against whether it's just recovering the fixed-interval baseline's own
+  behavior indirectly (since elapsed-time correlates with position in a
+  60-step episode window too).
+- [ ] Retrain §8's variance head on **1b's** errors (not the original
+  signal 1's), per the user's item 3 -- save the trained weights to disk
+  and commit them this time (the original run's weights were never
+  persisted). Not started yet.
+- [ ] Bug-impact-scope check (item 4): find every caller of `obs_to_ij`/
+  `sample_nearby_grid_location_v2` in the repo, check whether the buggy
+  10.2-divisor conversion was used for start/goal sampling in S6b's actual
+  eval instances (seed=42, seed=20260910), and if so, what fraction of
+  those points land in or adjacent to a wall cell. Not started yet.
 - [ ] Run `event_labels.py` at full scale via `run_stage1_events.py` (main+
-  probe, all ~2250 episodes) -- next up. Not yet run at full scale; only
-  the grid-conversion piece it depends on has been validated so far.
-- [ ] Compute and persist the map-based selection/report split
-  (`data_split.py`) -- written, not yet run.
-- [ ] Log per-event-type frequency table + 10 random trajectory/event
-  overlay plots to wandb (`hwm-boundary-study`, offline for now).
+  probe, all ~2250 episodes) -- not yet run at full scale; only the
+  grid-conversion piece it depends on has been validated so far. Per the
+  user's item 5, log to wandb in **online** mode this time (see "Infra
+  facts" above -- login already succeeded with a real API key; the user's
+  "offline for now, I'll sync when I log in" instruction predates knowing
+  that, flagged to them, proceeding online since it's strictly better and
+  matches their actual goal).
 
 ## Stage 2: Candidate signal computation -- NOT STARTED
 
