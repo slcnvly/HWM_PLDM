@@ -1,0 +1,27 @@
+{
+  "wall_contact": {
+    "total_count": 22482,
+    "mean_per_trajectory": 9.992,
+    "std_per_trajectory": 5.362994851552421,
+    "frac_steps_positive": 0.16653333333333334
+  },
+  "direction_turn": {
+    "total_count": 25229,
+    "mean_per_trajectory": 11.21288888888889,
+    "std_per_trajectory": 5.227067426056719,
+    "frac_steps_positive": 0.18688148148148148
+  },
+  "corridor_change": {
+    "total_count": 4479,
+    "mean_per_trajectory": 1.9906666666666666,
+    "std_per_trajectory": 1.4686053853155303,
+    "frac_steps_positive": 0.03317777777777778
+  },
+  "junction_arrival": {
+    "total_count": 3173,
+    "mean_per_trajectory": 1.4102222222222223,
+    "std_per_trajectory": 1.2841538310219671,
+    "frac_steps_positive": 0.023503703703703704
+  },
+  "_n_episodes": 2250
+}

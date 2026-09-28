@@ -3,7 +3,7 @@
 Read this file first if resuming after a session break. Update it at the end
 of every stage (or sub-step within a long stage) -- commit + push each time.
 
-## Status: Stage 1 checkpoints verified (grid fix + rollout API confirmed); full-corpus event labeling next
+## Status: Stage 1 COMPLETE (incl. Amendment 1 + diagnostics a-c + bug-impact-scope). Paused before Stage 2 for user review, per their explicit request.
 
 ## Execution-outage report (resolved)
 
@@ -315,14 +315,45 @@ stop condition (§8).
   this lightweight analysis venv, and installing them just for this check
   wasn't judged worth the risk/effort) -- not included. Full per-point
   detail in `results_bug_impact_scope.json`. No original file modified.
-- [ ] Run `event_labels.py` at full scale via `run_stage1_events.py` (main+
-  probe, all ~2250 episodes) -- not yet run at full scale; only the
-  grid-conversion piece it depends on has been validated so far. Per the
-  user's item 5, log to wandb in **online** mode this time (see "Infra
-  facts" above -- login already succeeded with a real API key; the user's
-  "offline for now, I'll sync when I log in" instruction predates knowing
-  that, flagged to them, proceeding online since it's strictly better and
-  matches their actual goal).
+- [x] **Full-scale event labeling run, item 5 -- DONE.** `run_stage1_events.py`
+  on all 2250 episodes (main 1250 + probe 1000), ~17s wall-clock (pure
+  numpy, no model forward pass needed for event labels). Logged online to
+  `hwm-boundary-study` (see "Infra facts" above re: proceeding online
+  despite the user's "offline for now" instruction predating their own
+  login). Run: https://wandb.ai/goodwon01-chung-ang-university/hwm-boundary-study/runs/n0bqfkjw
+
+  **Per-event-type rates (N=2250 episodes, 60 steps each), all plausible
+  and non-degenerate (none near 0% or 100%):**
+  | event | total count | mean/trajectory | frac. of steps positive |
+  |---|---|---|---|
+  | wall_contact | 22,482 | 9.99 | 16.7% |
+  | direction_turn | 25,229 | 11.21 | 18.7% |
+  | corridor_change | 4,479 | 1.99 | 3.3% |
+  | junction_arrival | 3,173 | 1.41 | 2.4% |
+
+  10 random trajectory/event overlay plots rendered and logged
+  (`plots/event_overlay_ep*.png`) -- spot-checked a few by eye, event
+  markers land on plausible-looking wall-hits/turns along the plotted
+  paths, not obviously misaligned. Raw numbers in
+  `results_stage1_events.json`.
+
+## Stage 1: COMPLETE. Summary before Stage 2 (per the user's explicit stop request)
+
+All 5 requested items done: (1) preregistration amendment with 1b/2b/3b/9b,
+(2) diagnostics (a)-(c), (3) 1b-based variance head retrained+saved, (4)
+bug-impact-scope check, (5) full event labeling run. **Headline finding:**
+signal 1 (everything S5-S8 built on) is confirmed structurally confounded
+with elapsed window position/distance (Spearman rho=0.57 vs t, r=0.44 vs
+distance-from-start) via compounding directional drift in its open-loop
+rollout (not magnitude collapse, diagnostic (b)'s more nuanced result) --
+signal 1b does not share this confound. The wall-violation bug itself did
+not taint S5-S8's actual hard-difficulty instances (they bypassed the buggy
+live code path via a pre-saved file), but would misclassify ~2.5% of real
+valid points as wall collisions if anything else in the pipeline relies on
+the buggy conversion. Stopping here for the user's review before Stage 2
+(candidate signal scoring) as requested -- Stage 2 design should treat
+signal 1 and 1b (and their 2b/3b/9b derivatives) as testing genuinely
+different hypotheses, not near-duplicates, per Amendment 1.
 
 ## Stage 2: Candidate signal computation -- NOT STARTED
 
