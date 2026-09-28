@@ -252,10 +252,24 @@ stop condition (§8).
   against whether it's just recovering the fixed-interval baseline's own
   behavior indirectly (since elapsed-time correlates with position in a
   60-step episode window too).
-- [ ] Retrain §8's variance head on **1b's** errors (not the original
-  signal 1's), per the user's item 3 -- save the trained weights to disk
-  and commit them this time (the original run's weights were never
-  persisted). Not started yet.
+- [x] **Variance head retrained on signal 1b** (`train_variance_head_1b.py`),
+  reusing `variance_head.py`'s `VarianceHead`/`beta_nll_loss`/
+  `train_variance_head` unchanged -- only the dataset-building step differs
+  (1b's re-anchored errors + the real `z_t` each was computed from, instead
+  of signal 1's window-start-anchored errors). Memory-safe subsample: 500
+  train episodes (main, 30,000 samples), 400 val episodes (probe, 24,000
+  samples) -- this machine has ~14GB free RAM (`free -h`), well under what
+  the original SS8 Kaggle run had (which OOM'd twice even there); full
+  main+probe would be ~8.7GB of fp16 encodings alone, too close to the
+  edge to risk. **Result: constant baseline val_nll=1.2259 (sigma^2=3.680)
+  vs. trained MLP val_nll=1.2126, best epoch 1 of 30** -- a modest
+  improvement (~0.013 nats, ~1.1% relative), same early-epoch-overfit
+  pattern as the original SS8.4 run on signal 1 (which also picked epoch 1
+  of 30 and improved by a similarly modest ~0.011 nats/~0.5%). **Unlike the
+  original run, the trained weights are saved and committed this time**:
+  `variance_head_1b.pt` (17MB -- state_dict + input_mean/std + target_scale,
+  everything needed to reload and call `predict_variance_mlp` later for
+  signal 2b). Full per-epoch log in `results_variance_head_1b.json`.
 - [ ] Bug-impact-scope check (item 4): find every caller of `obs_to_ij`/
   `sample_nearby_grid_location_v2` in the repo, check whether the buggy
   10.2-divisor conversion was used for start/goal sampling in S6b's actual
