@@ -620,12 +620,48 @@ code.**
 Full numbers: `results_gate_check_1b.json`. Script: `gate_check_1b.py`
 (now memory-safe/resumable, see infra note above).
 
-## Stage 2: Candidate signal computation -- NOT STARTED
+## Stage 2: predictor-free signals (6/7/8/10) + Metric B baselines -- DONE
 
-10 signals, §3 of PREREGISTRATION.md. Signal 2 (surprise) needs a fresh
-variance-head MLP retrain first (original §8 weights were never saved to
-disk -- only the JSON diagnostics summary survived). Expensive signals
-(4, 5, 6) capped at 300 episodes/half, stratified by map.
+Per the user's option-3 decision after Amendment 2 (predictor-based
+signals 2,2b,3,3b,4,5,9,9b on hold). Script: `run_stage2_predictor_free.py`
+(+ `metric_b.py`, `signals_predictor_free.py`). 300 episodes sampled from
+main (selection set), stratified across all 25 maps (12/map). PCA for
+signal 6 fit on 3660 samples from 60 of those episodes, 10 components,
+71.8% explained variance (a lossy projection -- noted as a limitation of
+this specific BOCPD approximation, not swept further per the
+preregistered "fixed before scoring" rule).
+
+**Metric B results (piecewise-linear reconstruction error, mean over 300
+episodes -- see PREREGISTRATION.md SS6 for the exact definition):**
+
+| | mean Metric B | vs. fixed | vs. oracle |
+|---|---|---|---|
+| oracle (DP upper bound) | 0.05814 | +31.3% | 100% (by definition) |
+| **fixed (10,20,30,40,50)** | **0.08462** | 0% (reference) | 0% |
+| random (20 seeds) | 0.08525 | -0.7% | -2.3% |
+| signal_10 (action delta) | 0.09661 | -14.2% | -45.3% |
+| signal_6 (BOCPD) | 0.09828 | -16.1% | -51.6% |
+| signal_8 (direction change) | 0.10437 | -23.3% | -74.5% |
+| signal_7 (latent speed) | 0.10727 | -26.8% | -85.5% |
+
+**All four predictor-free signals are WORSE than fixed-interval placement
+on Metric B, and worse than the random baseline too** (random is
+essentially at parity with fixed, -0.7%). None comes close to the stop
+condition's bar (PREREGISTRATION.md SS8: "beats fixed-interval on both
+metrics") -- on this metric alone, none beats it at all. Ranked from least
+to most bad: action delta > BOCPD > direction change > latent speed.
+
+**Not yet done:** Metric A (event-alignment) for these same 4 signals --
+the user's request here was specifically "Stage 2 진행 + 지표 B용
+oracle/기준선," so Metric A wasn't computed this round. Full bootstrap
+(n=10,000) CIs per PREREGISTRATION.md SS6 also not run yet -- these are
+point estimates only. Both would be needed before treating this as a
+final Stage 3 scoring pass; flagged as the natural next step if the user
+wants the full picture (Metric A might tell a different story, e.g. signal
+8/7 could still align with physical events despite bad latent
+reconstruction).
+
+Raw numbers: `results_stage2_predictor_free.json`.
 
 ## Stage 3: Scoring -- NOT STARTED
 

@@ -1,0 +1,54 @@
+{
+  "summary": {
+    "signal_6_bocpd": {
+      "mean_metric_b": 0.09827904264311815,
+      "median_metric_b": 0.08952732306019898,
+      "improvement_over_fixed": -0.16137709822269225,
+      "oracle_reachability": -0.5155981494721927,
+      "n_episodes": 300
+    },
+    "signal_7_speed": {
+      "mean_metric_b": 0.10726649146059138,
+      "median_metric_b": 0.09484151217216105,
+      "improvement_over_fixed": -0.2675830292874157,
+      "oracle_reachability": -0.8549249940060881,
+      "n_episodes": 300
+    },
+    "signal_8_direction": {
+      "mean_metric_b": 0.10436627408349942,
+      "median_metric_b": 0.09062597768805931,
+      "improvement_over_fixed": -0.2333107576917996,
+      "oracle_reachability": -0.7454254429079309,
+      "n_episodes": 300
+    },
+    "signal_10_action_delta": {
+      "mean_metric_b": 0.09661281880864053,
+      "median_metric_b": 0.08778293828351647,
+      "improvement_over_fixed": -0.14168709972624668,
+      "oracle_reachability": -0.4526888091773997,
+      "n_episodes": 300
+    },
+    "fixed": {
+      "mean_metric_b": 0.08462285229622575,
+      "median_metric_b": 0.07591916031927703,
+      "improvement_over_fixed": 0.0,
+      "oracle_reachability": 0.0,
+      "n_episodes": 300
+    },
+    "random": {
+      "mean_metric_b": 0.08524520945020807,
+      "median_metric_b": 0.07748801510076961,
+      "improvement_over_fixed": -0.007354480936233753,
+      "oracle_reachability": -0.023497490057839146,
+      "n_episodes": 300
+    },
+    "oracle": {
+      "mean_metric_b": 0.05813674027105273,
+      "median_metric_b": 0.053505765851486684,
+      "improvement_over_fixed": 0.3129900648167389,
+      "oracle_reachability": 1.0,
+      "n_episodes": 300
+    }
+  },
+  "n_episodes_sampled": 300
+}
