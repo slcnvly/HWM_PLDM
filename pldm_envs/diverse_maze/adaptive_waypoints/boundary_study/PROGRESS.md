@@ -355,6 +355,93 @@ the buggy conversion. Stopping here for the user's review before Stage 2
 signal 1 and 1b (and their 2b/3b/9b derivatives) as testing genuinely
 different hypotheses, not near-duplicates, per Amendment 1.
 
+## Amendment 2 gate check: is 1b measuring what we think? -- DONE, TRIGGERED
+
+Full writeup in PREREGISTRATION.md "Amendment 2". Summary:
+
+**Infra note (fix this if touching `gate_check_1b.py` again):** the first
+two attempts at this script held the full (N=135000, D=33282) float32
+arrays for z_t/z_tp1/pred in RAM simultaneously (~54GB) -- this machine has
+~14GB free. Both attempts died silently around episode 600/2250, and both
+times the WSL2 VM itself had rebooted (`uptime` showed "up 0 min", journal
+logs showed "corrupted or uncleanly shut down") -- almost certainly the
+memory blowup triggering severe system-wide pressure that took the whole
+VM down with it, not (or not only) a Windows-sleep coincidence. **Fixed**:
+rewrote as a memory-safe, two-pass, checkpointed/resumable streaming
+script -- per-episode scalars only in RAM, the one array that genuinely
+needs a global reduction (`pred_err`, for the bias vector) goes to an
+on-disk `np.memmap` (`gate_check_pred_err_fused.f32.memmap`, ~18GB scratch,
+deleted on successful completion), with a `.npz` checkpoint every 100
+episodes (`gate_check_checkpoint.npz`, also deleted on completion) so a
+future interruption resumes instead of restarting. Ran clean end-to-end
+after the fix, no further crashes. Separately, also flagged to the user:
+if interruptions recur, check Windows sleep/power settings, since `nohup`
+protects a process from terminal hangup but not from the whole WSL2 VM
+being suspended/killed by the host OS.
+
+**(4) Code citations (see PREREGISTRATION.md Amendment 2 for full detail):**
+- Predictor residual handling: `pldm/models/predictors/conv_predictors.py:
+  534-550` -- `pred_output.prediction` is always the absolute next-state
+  by the time it's returned (residual addition, when `config.residual=
+  true`, happens internally before returning).
+- **Real training objectives**: `large_diverse_25maps_l2.yaml:113-115` ->
+  `PredictionObs` (`pred_attr="obs"`, 16ch) + `PredictionProprio`
+  (`pred_attr="proprio"`, 2ch), both `global_coeff=2.416154262252218`
+  (yaml:131-134) -- NOT the fused `pred_attr="state"` space signal 1/1b
+  have used throughout. `encodings = cat([obs_component(16ch),
+  proprio_component(2ch)])` confirmed exactly via `torch.allclose`.
+- **MPPI planner cost space**: `pldm/planning/planners/enums.py:60`
+  (`cost_entity: str = "obs_component"`, default, no yaml override) +
+  `enums.py:58` (`proprio_cost: bool = False`, default) +
+  `pldm/planning/planners/mppi_planner.py:221-270` (`RunningCost.__call__`,
+  plain MSE) -- planning cost uses **obs_component only, proprio fully
+  excluded**, by two independent defaults.
+
+**(5):** manual fused-space MSE matches `PredictionObjective(pred_attr=
+"state")` exactly (`torch.allclose`, 3/3 episodes) -- no reimplementation
+bug. But `pred_attr="state"` was never actually trained on, so this
+confirms internal consistency, not that fused is the right comparison
+space.
+
+**(1)-(3), full corpus (N=135,000 samples):**
+
+| | fused (original 1b) | obs-only (training+planner space) | proprio-only (training space) |
+|---|---|---|---|
+| ratio pred/copy (of means) | **8.83** | **20.37** | **1.01** |
+| bias as % of pred error | 94.0% | 94.7% | 31.7% |
+| residual-after-debias, % orig | 34.0% | 32.3% | 97.3% |
+| direction cosine, mean | 0.020 | 0.0007 | 0.444 |
+
+**Verdict: TRIGGERED.** Redefining 1b to match the planner's actual cost
+space (obs-only) makes it WORSE (20.4x vs 8.8x), ruling out "wrong space"
+as the sole explanation. The obs channel's fresh one-step prediction is
+~95% a fixed, input-independent bias vector with ~zero direction
+correlation (cosine 0.0007, 50.1% positive = indistinguishable from
+random) -- the proprio channel degrades far more gracefully (31.7% bias,
+cosine 0.44) but proprio is exactly what the planner ignores.
+
+**Leading hypothesis:** the frozen predictor, per Amendment 1, is only
+ever trained/evaluated as a single continuous rollout anchored on frame 0
+of each window (no `prior_model`/`posterior_model` to re-anchor on later
+real frames) -- it may never see "a real observation as `current_state` at
+t>0" during training at all, making 1b's re-anchoring an off-training-
+distribution query. Not separately ablated to 100% confirmation, but
+well-supported by the code-level findings and the obs-vs-proprio
+asymmetry.
+
+**Consequence, not yet acted on -- needs the user's call:** every
+predictor-based Stage 2 signal (2, 2b, 3, 3b, 4, 5, 9, 9b) re-anchors on a
+real state at potentially large `t`, so all of them inherit this same
+risk, not just 1b. Options put to the user: (a) only re-anchor near small
+`t`, (b) gate-check each predictor-based signal individually before
+trusting it, or (c) deprioritize predictor-based signals in favor of
+6/7/8/10 (no predictor calls) pending further investigation. **Stopped
+here, per the user's explicit request, before writing any Stage 2 signal
+code.**
+
+Full numbers: `results_gate_check_1b.json`. Script: `gate_check_1b.py`
+(now memory-safe/resumable, see infra note above).
+
 ## Stage 2: Candidate signal computation -- NOT STARTED
 
 10 signals, §3 of PREREGISTRATION.md. Signal 2 (surprise) needs a fresh

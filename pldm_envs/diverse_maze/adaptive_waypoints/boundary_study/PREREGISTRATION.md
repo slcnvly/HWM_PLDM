@@ -303,3 +303,123 @@ data (Stage 1 -- event labeling -- was still in progress), so it does not
 constitute post-hoc reframing around a result; it's disclosed here, with
 the reasoning, per the same transparency standard as the original
 preregistration.
+
+## Amendment 2 (2026-09-28, gate check before Stage 2's predictor-based signals)
+
+**Trigger.** Amendment 1 found signal 1b uncorrelated with window position
+(rho=-0.029) and its variance head barely beating a constant baseline
+(1.226 vs 1.213 val NLL) -- both consistent with 1b being dominated by a
+near-constant bias rather than genuine local one-step prediction. Before
+building any Stage 2 signal on top of a fresh single-step predictor call
+(2, 2b, 3, 3b, 4, 5, 9, 9b), ran a gate check on whether 1b measures what
+it's assumed to measure. Full corpus, N=135,000 samples (2250 episodes x
+60 steps); code: `gate_check_1b.py`.
+
+**(4) Code citations (all read, none modified):**
+- `pldm/models/predictors/conv_predictors.py:534-550` (`ConvPredictor.
+  forward`): the raw conv-net output is added to `current_state` when
+  `config.residual=True` (`large_diverse_25maps_l2.yaml:64`, level1) --
+  `pred_output.prediction` is always the absolute next-state estimate by
+  the time it's returned; no separate external addition is needed anywhere
+  downstream (this repo's own convention already handles it internally).
+- `pldm/objectives/prediction.py:44-46,77` (`PredictionObjective.__call__`):
+  plain MSE, `(encodings - predictions).pow(2).mean()`, no normalization/
+  projector/dim-selection when `pred_attr="state"`.
+- **`pldm/configs/diverse_maze/icml/large_diverse_25maps_l2.yaml:113-115`:
+  `objectives: [ObjectiveType.PredictionObs, ObjectiveType.
+  PredictionProprio]`** -- the checkpoint was NOT trained with plain
+  `Prediction` (`pred_attr="state"`, the fused 18-channel space
+  `compute_error_series`/signal 1/1b have used throughout this whole
+  project). It was trained with two SEPARATE losses: `PredictionObs`
+  (`pred_attr="obs"`, 16 channels) and `PredictionProprio` (`pred_attr=
+  "proprio"`, 2 channels), both `global_coeff=2.416154262252218`
+  (yaml:131-134, identical for both -- no differential weighting).
+  Empirically confirmed `encodings = cat([obs_component(16ch),
+  proprio_component(2ch)], dim=2)` exactly (`torch.allclose`, both
+  channel-order and values).
+- **Level1 MPPI planner's cost function**, confirmed via three locations,
+  no yaml override found for any of them:
+  - `pldm/planning/planners/enums.py:60`: `PlannerConfig.cost_entity: str
+    = "obs_component"` (class default).
+  - `pldm/planning/planners/enums.py:58`: `proprio_cost: bool = False`
+    (class default) -- proprio is excluded from planning cost by a
+    *second*, independent default, not just `cost_entity`.
+  - `pldm/planning/planners/mppi_planner.py:221-270` (`RunningCost.
+    __call__`): `diff = (state - target).pow(2); return diff.mean(dim=-1)`
+    -- plain MSE, same convention as everywhere else, `state`/`target`
+    sliced by `cost_dim_range` (default `"0:99999999"`, i.e. no slicing)
+    and optionally `self.projector` (`nn.Identity()` unless
+    `projected_cost=True`, not set in this yaml).
+  - **So: training uses obs+proprio as two separate, equally-weighted MSE
+    losses; planning cost uses obs_component ONLY (proprio fully
+    excluded, by two independent defaults). Neither matches the fused
+    "state" space signal 1/1b have been computed in all along.**
+
+**(5) Consistency check:** manual fused-space MSE recomputation matches
+`PredictionObjective(pred_attr="state")`'s own output exactly
+(`torch.allclose`, 3/3 episodes checked) -- no bug in this project's
+manual reimplementation. But since `pred_attr="state"` itself was never
+the training objective (see above), this confirms internal consistency,
+not that the fused space is the right one to evaluate in.
+
+**(1)-(3) Gate results, N=135,000, three spaces:**
+
+| | fused (original 1b) | obs-only (training + planner space) | proprio-only (training space) |
+|---|---|---|---|
+| copy baseline L2, mean | 29.28 | 12.58 | 24.38 |
+| pred error L2, mean | 258.51 | 256.33 | 24.65 |
+| **ratio (pred/copy, of means)** | **8.83** | **20.37** | **1.01** |
+| bias vector norm | 242.87 | 242.74 | 7.81 |
+| bias as % of pred error | 94.0% | 94.7% | 31.7% |
+| residual-after-debias, % of original | 34.0% | 32.3% | 97.3% |
+| direction cosine, mean | 0.020 | 0.0007 | 0.444 |
+| direction cosine, frac positive | 0.652 | 0.501 | 0.797 |
+
+**Verdict: TRIGGERED, decisively, and redefining 1b to match the planner's
+own cost space (obs-only) makes it WORSE, not better** (20.4x vs 8.8x
+ratio) -- this rules out "wrong space" as the (sole) explanation, contrary
+to what the contingency plan anticipated finding.
+
+**Interpretation.** The obs-channel one-step prediction -- the channel
+both training (`PredictionObs`) and the planner (`cost_entity=
+"obs_component"`) actually depend on -- is, when freshly re-anchored on a
+real mid-trajectory encoding, dominated almost entirely by a fixed,
+input-independent bias (94.7% of its error magnitude is a single constant
+vector) and shows essentially zero correlation with the real movement
+direction (cosine mean=0.0007, 50.1% positive -- indistinguishable from
+random). The proprio channel, by contrast, degrades far more gracefully
+under the same re-anchoring (bias only 31.7% of magnitude, cosine 0.44,
+positive direction agreement 79.7%) -- but proprio is exactly the channel
+the planner ignores.
+
+**Root-cause hypothesis (well-supported by the Amendment-1 finding, not
+separately ablated further here):** `forward_multiple`'s per-episode
+computation, confirmed in Amendment 1, only ever receives ONE real
+anchor -- frame 0 of each 60-step window -- since `prior_model`/
+`posterior_model` are both `None` and every subsequent step feeds the
+network its OWN prior prediction as `current_state`, never a later frame's
+real encoding. **The frozen level1 predictor may never have been exposed,
+during training, to "a real observation as `current_state` at t>0"** --
+every real mid-trajectory encoding it ever received during training was
+immediately superseded by the network's own rollout for all later steps
+in that window. If so, 1b's re-anchoring (`state_encs=z_t[None]` for real
+t>0) queries the network in a regime it was never trained on, and the
+near-constant, direction-blind output is a plausible symptom of that
+distribution shift -- not evidence that "the model can't predict
+one-step dynamics" in the regime it actually operates in (frame-0-anchored
+rollout, matching both training and how planning would use it if a
+control loop always re-plans from the true current state, i.e. effectively
+t=0 of a fresh planning window each time).
+
+**Consequence for Stage 2.** Signals 2, 2b, 3, 3b, 4, 5, 9, 9b all involve
+at least one predictor call re-anchored on a real state at potentially
+large `t` (not just `t=0`) -- **every one of them inherits this same risk**
+until shown otherwise, not just 1b specifically. Recommended before
+building any of them: either (a) restrict predictor-based signals to
+re-anchoring only at small `t` (close to a window/segment start, closer to
+the training distribution), (b) run this same gate check (copy-baseline
+ratio + bias fraction + direction cosine) for each predictor-based signal
+before trusting its output, or (c) deprioritize predictor-based signals in
+favor of 6/7/8/10 (which don't call the predictor at all) pending further
+investigation. This is a design decision for the user, not made
+unilaterally here -- flagged and stopped per their explicit request.

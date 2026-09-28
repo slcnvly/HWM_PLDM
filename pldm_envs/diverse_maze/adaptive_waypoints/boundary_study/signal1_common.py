@@ -73,6 +73,40 @@ def compute_episode(model, ep, images, ep_start, device="cpu"):
     return err1.numpy(), err1b.numpy(), encodings_flat.numpy()
 
 
+def compute_episode_full(model, ep, images, ep_start, device="cpu"):
+    """Like compute_episode, but also returns the raw vectors needed for the
+    Amendment-2 gate checks: z_t (60,D), z_{t+1} (60,D), predicted_next_1b
+    (60,D) = f(z_t,a_t), and the raw ForwardResult (for a direct
+    PredictionObjective consistency check)."""
+    obs = ep["observations"][:WINDOW]
+    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(device)
+    img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+    states = img_seq.unsqueeze(1).to(device)
+    actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1).to(device)
+
+    with torch.no_grad():
+        result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)
+
+    full_encodings = result.backbone_output.encodings  # (61, 1, C, H, W)
+    proprio_component = result.backbone_output.proprio_component
+
+    state_encs_b = full_encodings[:60].squeeze(1).unsqueeze(0)
+    actions_b = actions[:60].squeeze(1).unsqueeze(0)
+    proprio_b = None
+    if proprio_component is not None:
+        proprio_b = proprio_component[:60].squeeze(1).unsqueeze(0)
+
+    with torch.no_grad():
+        pred_out_b = model.level1.predictor.forward_multiple(
+            state_encs=state_encs_b, actions=actions_b, T=1, proprio=proprio_b, compute_posterior=False
+        )
+    predicted_next = pred_out_b.predictions[1].flatten(1).cpu().numpy()  # (60, D)
+    z_t = full_encodings[:60].squeeze(1).flatten(1).cpu().numpy()  # (60, D)
+    z_tp1 = full_encodings[1:61].squeeze(1).flatten(1).cpu().numpy()  # (60, D)
+
+    return z_t, z_tp1, predicted_next, result
+
+
 def iter_episodes(split_name, limit=None):
     """Yields (ep_idx, ep_dict, images_memmap, ep_start_offset) for a split."""
     splits = torch.load(os.path.join(DATA_ROOT, split_name, "data.p"), weights_only=False)
