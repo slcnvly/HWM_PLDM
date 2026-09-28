@@ -3,9 +3,89 @@
 Read this file first if resuming after a session break. Update it at the end
 of every stage (or sub-step within a long stage) -- commit + push each time.
 
-## Status: Stage 1 COMPLETE. Root-cause investigation running in background. Stage 2 (predictor-free signals) code written, not yet run. Session paused (low context) -- see "RESUME HERE" below.
+## Status: Stage 1 COMPLETE. Root-cause investigation DONE (see diagnostic below). Stage 2 (predictor-free signals) code written; driver script + run still pending.
 
-## RESUME HERE (paused mid-task, low context budget)
+## Root-cause investigation (user's 3 follow-up checks, post-Amendment-2) -- DONE, diagnostic only (not Amendment 3)
+
+Script: `investigate_1b_bias.py`. Full corpus (N=135,000 samples) for (2)/(3)
+1-step, 300 episodes for (3) 5-step. Raw numbers: `results_investigate_1b_bias.json`.
+
+**User's pushback on Amendment 2's hypothesis, and why it's right:** the
+"frozen predictor never sees a real state at t>0 during training" story has
+two holes -- (a) if training windows start at arbitrary in-episode
+positions, a real observation at ANY t is exactly what SOME training
+window's own first frame looks like, and (b) the rollout diagnostic showed
+the very FIRST predicted step (k=0, the same situation as training) already
+overshoots real movement by 11x -- so "never trained on this" can't be the
+whole story either. Investigated exactly 3 things, no further, per the
+user's explicit scope:
+
+**(1) Training window start position -- REFUTES the Amendment-2 hypothesis,
+confirmed.** `pldm_envs/diverse_maze/d4rl.py:236-237`
+(`D4RLDataset.__getitem__`): `episode_idx = np.searchsorted(self.
+cum_lengths, idx, side="right")`, `start_idx = idx - self.cum_lengths[
+episode_idx-1]` -- `idx` indexes a FLAT cumulative range over every
+(episode, frame) pair in the dataset. With a shuffling DataLoader, training
+windows start at arbitrary in-episode positions, not just frame 0. The
+user's counter-example (a) is correct and the original Amendment-2
+mechanistic hypothesis is retracted.
+
+**(2) Normalization layers -- no discrepancy, confirmed both by code and
+empirically at full scale.** `pldm/models/utils.py:46-84` (`build_conv`,
+used by both the MeNet6 encoder's conv trunk and `ConvPredictor`'s conv
+layers): always `nn.GroupNorm` (per-sample statistics, batch-independent),
+never `nn.BatchNorm2d`, regardless of `BackboneConfig.backbone_norm=
+"batch_norm"`'s default value (`encoders/enums.py:28` -- not actually
+consumed by this architecture's conv-building path). No Dropout in
+`ConvPredictor` either. Empirical check (`check_2_eval_vs_train`, real
+batch, deep-copied model, `model.eval()` vs `model.train()`, no_grad):
+**max|encodings_eval - encodings_train| = 0.0, max|predictions_eval -
+predictions_train| = 0.0 -- exactly identical.** Rules out a train/eval
+statistics mismatch entirely.
+
+**(3) Action-shuffle baseline + bias-corrected cosine + R², obs/proprio
+separately, full corpus:**
+
+| | obs | proprio |
+|---|---|---|
+| real-action pred L2 mean | 256.33 | 24.65 |
+| shuffled-action pred L2 mean | 256.34 | 29.04 |
+| **ratio real/shuffled (1-step)** | **1.0000** | 0.849 |
+| **ratio real/shuffled (5-step, N=300 eps)** | **1.0004** | 0.998 |
+| direction cosine (real action) | 0.0007 | 0.444 |
+| direction cosine, bias-corrected | 0.0149 | 0.424 |
+| R² (debiased) | 0.873 | 0.860 |
+
+**New, concrete finding (not previously characterized): the obs-channel
+prediction is statistically indistinguishable whether given the real
+action or a randomly shuffled one, at both 1-step and 5-step (ratio =
+1.0000 / 1.0004)** -- the obs branch's output does not respond to action
+identity at all when re-anchored on a real state. Bias-correcting the
+cosine barely moves it (0.0007 -> 0.0149, still ~0) -- even the *residual*
+variation after removing the average predicted direction carries no real
+directional signal. Proprio is different again: real actions give a
+real (if modest) 15% error reduction over shuffled ones at 1-step, but
+that advantage is gone by 5 steps (ratio -> 0.998) -- whatever
+action-sensitivity proprio has doesn't survive compounding.
+
+**On R² looking high (~0.87) despite Amendment 2's "~95% is bias" finding
+-- not a contradiction, different denominators:** R² is 1 minus the
+debiased residual's sum of squares over the TARGET's own total variance
+across the whole dataset (which is huge -- different episodes/maps/times
+span very different parts of the maze). Amendment 2's bias-fraction is
+relative to the PREDICTION ERROR's own magnitude specifically. A
+prediction can be "mostly a fixed bias relative to its own error size" and
+still have high R² simply because the target varies enormously across the
+full dataset -- these are both true at once, not in tension.
+
+**Bottom line:** hypotheses (1) and (2) are ruled out by direct evidence,
+exactly as the user argued. What actually characterizes the failure,
+established here: the obs-channel one-step (and 5-step) prediction from a
+freshly re-anchored real state is **action-invariant** -- it doesn't
+change based on which action is given, real or shuffled, at either
+horizon. The deeper mechanistic *why* behind that action-invariance was
+explicitly out of scope for this round ("이 이상은 파고들지 마") and is
+not investigated further here.
 
 **User's decision after the Amendment-2 gate check:** go with option 3 --
 proceed with predictor-free signals 6/7/8/10 for Stage 2 (+ oracle/fixed/
