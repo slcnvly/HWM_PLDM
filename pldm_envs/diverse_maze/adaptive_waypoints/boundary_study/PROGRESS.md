@@ -270,11 +270,51 @@ stop condition (§8).
   `variance_head_1b.pt` (17MB -- state_dict + input_mean/std + target_scale,
   everything needed to reload and call `predict_variance_mlp` later for
   signal 2b). Full per-epoch log in `results_variance_head_1b.json`.
-- [ ] Bug-impact-scope check (item 4): find every caller of `obs_to_ij`/
-  `sample_nearby_grid_location_v2` in the repo, check whether the buggy
-  10.2-divisor conversion was used for start/goal sampling in S6b's actual
-  eval instances (seed=42, seed=20260910), and if so, what fraction of
-  those points land in or adjacent to a wall cell. Not started yet.
+- [x] **Bug-impact-scope check (item 4).** All callers of `obs_to_ij`/
+  `sample_nearby_grid_location_v2` in the repo (`bug_impact_scope.py`'s
+  header comment has the full grep): (1) `wrappers.py:104-110` (`xy_to_ij`,
+  used by `find_shortest_path`'s BFS shortest-path/turn-counting), and (2)
+  `evaluation/maze2d_envs_generator.py:53`
+  (`Maze2DEnvsGenerator._sample_nearby_location` -> `sample_nearby_grid_
+  location_v2`, using RENDER_STATS's buggy `obs_range_total`, feeding
+  directly into `env.set_target()`).
+
+  **But S5-S8's actual hard-difficulty (D13-16) instances did NOT go
+  through path (2) at eval time.** The icml yaml
+  (`large_diverse_25maps_l2.yaml`, `h_d4rl_planning.hard`) sets
+  `set_start_target_path=".../maze2d_large_diverse_probe/
+  starts_targets_13_16.pt"` with `override_config: true` -- the 40
+  seed=42 instances are pre-saved and just loaded, not generated live.
+  **This exact file was recoverable locally, byte-identical** (found under
+  a cached Kaggle kernel output dir -- see `bug_impact_scope.py`'s
+  `STARTS_TARGETS_PATH`), so this check uses the REAL instances directly,
+  not a reproduction.
+
+  **Result (all 40 instances = 80 points, starts+targets), using the
+  corrected conversion for ground truth:** `on_wall_fixed_count = 0` --
+  none of the real 40 hard-difficulty instances are actually inside a wall.
+  (The naive "adjacent to a wall" check came back 100% for both starts and
+  targets, but this is a maze-corridor artifact, not a finding -- verified
+  separately that 36/36, i.e. 100%, of map 0's own open cells touch >=1
+  wall cell regardless of any bug; flagged explicitly in the JSON so it
+  isn't misread.) **The metric that actually isolates the bug's effect:**
+  buggy vs. corrected conversion disagree on which grid cell 3/80 points
+  (3.75%) belong to, and for **2 of those 3, the buggy conversion would
+  have wrongly classified a real, physically-valid point as being inside a
+  wall** (`on_wall_buggy=True`, `on_wall_fixed=False`) -- both on `start`
+  points (idx 20, idx 36), zero false negatives. **So: these specific 40
+  instances were never at risk (they bypassed the buggy code path
+  entirely), but this quantifies that *if* something downstream ever
+  validated points via the buggy `obs_to_ij` (e.g. `wrappers.py`'s
+  `xy_to_ij`/`find_shortest_path`, used for turn-counting/BFS -- not
+  checked further here, out of scope), it would wrongly reject ~2.5% of
+  real, valid points as wall collisions.** The 80 extra seed=20260910
+  instances (`kaggle_hard_n120`) were NOT recoverable locally (not in any
+  cached `_output_.zip`; reproducing them exactly would need
+  `Maze2DEnvsGenerator -> ant_draw -> gym`, none of which are installed in
+  this lightweight analysis venv, and installing them just for this check
+  wasn't judged worth the risk/effort) -- not included. Full per-point
+  detail in `results_bug_impact_scope.json`. No original file modified.
 - [ ] Run `event_labels.py` at full scale via `run_stage1_events.py` (main+
   probe, all ~2250 episodes) -- not yet run at full scale; only the
   grid-conversion piece it depends on has been validated so far. Per the

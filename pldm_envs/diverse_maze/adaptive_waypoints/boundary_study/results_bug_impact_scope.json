@@ -1,0 +1,1713 @@
+{
+  "summary": {
+    "n_instances": 40,
+    "n_points_total": 80,
+    "on_wall_fixed_count": 0,
+    "adjacent_to_wall_only_fixed_count": 80,
+    "either_fixed_count": 80,
+    "either_fixed_fraction": 1.0,
+    "ij_differs_buggy_vs_fixed_count": 3,
+    "ij_differs_fraction": 0.0375,
+    "starts": {
+      "n": 40,
+      "either_count": 40,
+      "either_fraction": 1.0
+    },
+    "targets": {
+      "n": 40,
+      "either_count": 40,
+      "either_fraction": 1.0
+    },
+    "adjacent_to_wall_metric_caveat": "either_fixed_fraction=1.0 (100%) is NOT evidence of a problem -- verified separately that 36/36 (100%) of map 0's own open cells touch >=1 wall cell, i.e. this maze's corridors are narrow enough that nearly every open cell qualifies as 'adjacent to a wall' regardless of the bug. The metric below is the one that actually isolates the bug's effect.",
+    "buggy_vs_fixed_disagreement": {
+      "ij_differs_count": 3,
+      "ij_differs_fraction": 0.0375,
+      "buggy_false_positive_wall_count": 2,
+      "buggy_false_positive_wall_note": "count of real, physically-valid points (on_wall_fixed=False) that the BUGGY conversion would have wrongly flagged as inside a wall (on_wall_buggy=True) -- i.e. if anything downstream used the buggy obs_to_ij to validate these exact points, it would incorrectly reject them.",
+      "buggy_false_negative_wall_count": 0
+    },
+    "note": "These 40 instances came from a pre-saved file (starts_targets_13_16.pt, set_start_target_path in the icml yaml's hard: block, override_config=true) -- Maze2DEnvsGenerator's live sample_nearby_grid_location_v2 call (which DOES use the buggy obs_range_total) was NOT invoked to produce these specific instances. This checks the pre-saved file's actual physical validity directly, using the corrected conversion, and separately reports what the buggy conversion would have concluded, for reference. The 80 extra seed=20260910 instances (kaggle_hard_n120) were NOT recoverable locally (not in any locally-cached _output_.zip; reproducing them would need Maze2DEnvsGenerator -> ant_draw -> gym, none of which are installed in this lightweight analysis venv) -- not included in this check."
+  },
+  "per_point": [
+    {
+      "idx": 0,
+      "point": "start",
+      "xy": [
+        4.846911500419761,
+        4.7697738200007915
+      ],
+      "ij_fixed": [
+        5,
+        5
+      ],
+      "ij_buggy": [
+        5,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 0,
+      "point": "target",
+      "xy": [
+        2.1279795169830322,
+        4.955789566040039
+      ],
+      "ij_fixed": [
+        2,
+        5
+      ],
+      "ij_buggy": [
+        2,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 1,
+      "point": "start",
+      "xy": [
+        7.7146089975673355,
+        4.830138041723626
+      ],
+      "ij_fixed": [
+        8,
+        5
+      ],
+      "ij_buggy": [
+        8,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 1,
+      "point": "target",
+      "xy": [
+        1.9214658737182617,
+        8.15102767944336
+      ],
+      "ij_fixed": [
+        2,
+        8
+      ],
+      "ij_buggy": [
+        2,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 2,
+      "point": "start",
+      "xy": [
+        2.0267162648560824,
+        1.7713676460016057
+      ],
+      "ij_fixed": [
+        2,
+        2
+      ],
+      "ij_buggy": [
+        2,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 2,
+      "point": "target",
+      "xy": [
+        8.067081451416016,
+        2.643359899520874
+      ],
+      "ij_fixed": [
+        8,
+        3
+      ],
+      "ij_buggy": [
+        8,
+        3
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 3,
+      "point": "start",
+      "xy": [
+        2.166452972672782,
+        6.514163990437976
+      ],
+      "ij_fixed": [
+        2,
+        7
+      ],
+      "ij_buggy": [
+        2,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 3,
+      "point": "target",
+      "xy": [
+        1.9805604219436646,
+        3.8582708835601807
+      ],
+      "ij_fixed": [
+        2,
+        4
+      ],
+      "ij_buggy": [
+        2,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 4,
+      "point": "start",
+      "xy": [
+        2.4309133826986127,
+        0.8003877876199814
+      ],
+      "ij_fixed": [
+        3,
+        1
+      ],
+      "ij_buggy": [
+        3,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 4,
+      "point": "target",
+      "xy": [
+        1.9498982429504395,
+        5.7289581298828125
+      ],
+      "ij_fixed": [
+        2,
+        6
+      ],
+      "ij_buggy": [
+        2,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 5,
+      "point": "start",
+      "xy": [
+        1.6124777751160766,
+        1.7272295483513656
+      ],
+      "ij_fixed": [
+        2,
+        2
+      ],
+      "ij_buggy": [
+        2,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 5,
+      "point": "target",
+      "xy": [
+        5.70009183883667,
+        7.013855934143066
+      ],
+      "ij_fixed": [
+        6,
+        7
+      ],
+      "ij_buggy": [
+        6,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 6,
+      "point": "start",
+      "xy": [
+        0.4767177711463144,
+        1.8281498869600008
+      ],
+      "ij_fixed": [
+        1,
+        2
+      ],
+      "ij_buggy": [
+        1,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 6,
+      "point": "target",
+      "xy": [
+        7.795793533325195,
+        8.081744194030762
+      ],
+      "ij_fixed": [
+        8,
+        8
+      ],
+      "ij_buggy": [
+        8,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 7,
+      "point": "start",
+      "xy": [
+        8.016837289681693,
+        4.17349036556503
+      ],
+      "ij_fixed": [
+        8,
+        4
+      ],
+      "ij_buggy": [
+        8,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 7,
+      "point": "target",
+      "xy": [
+        1.0645813941955566,
+        4.963136672973633
+      ],
+      "ij_fixed": [
+        1,
+        5
+      ],
+      "ij_buggy": [
+        1,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 8,
+      "point": "start",
+      "xy": [
+        4.601177046810355,
+        3.5121706730178435
+      ],
+      "ij_fixed": [
+        5,
+        4
+      ],
+      "ij_buggy": [
+        5,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 8,
+      "point": "target",
+      "xy": [
+        0.7968131899833679,
+        7.861597061157227
+      ],
+      "ij_fixed": [
+        1,
+        8
+      ],
+      "ij_buggy": [
+        1,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 9,
+      "point": "start",
+      "xy": [
+        3.10462015108741,
+        7.723426276991653
+      ],
+      "ij_fixed": [
+        3,
+        8
+      ],
+      "ij_buggy": [
+        3,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 9,
+      "point": "target",
+      "xy": [
+        8.117951393127441,
+        1.0732182264328003
+      ],
+      "ij_fixed": [
+        8,
+        1
+      ],
+      "ij_buggy": [
+        8,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 10,
+      "point": "start",
+      "xy": [
+        3.2769165090308796,
+        7.691548195446329
+      ],
+      "ij_fixed": [
+        3,
+        8
+      ],
+      "ij_buggy": [
+        3,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 10,
+      "point": "target",
+      "xy": [
+        4.657915115356445,
+        0.9450509548187256
+      ],
+      "ij_fixed": [
+        5,
+        1
+      ],
+      "ij_buggy": [
+        5,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 11,
+      "point": "start",
+      "xy": [
+        6.149257268845005,
+        5.335051861612807
+      ],
+      "ij_fixed": [
+        6,
+        6
+      ],
+      "ij_buggy": [
+        6,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": true
+    },
+    {
+      "idx": 11,
+      "point": "target",
+      "xy": [
+        0.8125085234642029,
+        6.890996932983398
+      ],
+      "ij_fixed": [
+        1,
+        7
+      ],
+      "ij_buggy": [
+        1,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 12,
+      "point": "start",
+      "xy": [
+        6.110594173567399,
+        0.4014164255340713
+      ],
+      "ij_fixed": [
+        6,
+        1
+      ],
+      "ij_buggy": [
+        6,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 12,
+      "point": "target",
+      "xy": [
+        3.067403793334961,
+        6.89694356918335
+      ],
+      "ij_fixed": [
+        3,
+        7
+      ],
+      "ij_buggy": [
+        3,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 13,
+      "point": "start",
+      "xy": [
+        6.062865881384859,
+        2.043380199156182
+      ],
+      "ij_fixed": [
+        6,
+        2
+      ],
+      "ij_buggy": [
+        6,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 13,
+      "point": "target",
+      "xy": [
+        0.8141205310821533,
+        7.682222366333008
+      ],
+      "ij_fixed": [
+        1,
+        8
+      ],
+      "ij_buggy": [
+        1,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 14,
+      "point": "start",
+      "xy": [
+        7.08638542028783,
+        8.180109676587884
+      ],
+      "ij_fixed": [
+        7,
+        8
+      ],
+      "ij_buggy": [
+        7,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 14,
+      "point": "target",
+      "xy": [
+        2.013960838317871,
+        0.7203141450881958
+      ],
+      "ij_fixed": [
+        2,
+        1
+      ],
+      "ij_buggy": [
+        2,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 15,
+      "point": "start",
+      "xy": [
+        4.974350670884991,
+        1.9839962643074796
+      ],
+      "ij_fixed": [
+        5,
+        2
+      ],
+      "ij_buggy": [
+        5,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 15,
+      "point": "target",
+      "xy": [
+        2.6482911109924316,
+        8.071481704711914
+      ],
+      "ij_fixed": [
+        3,
+        8
+      ],
+      "ij_buggy": [
+        3,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 16,
+      "point": "start",
+      "xy": [
+        5.6681292217807995,
+        3.1675538397712995
+      ],
+      "ij_fixed": [
+        6,
+        3
+      ],
+      "ij_buggy": [
+        6,
+        3
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 16,
+      "point": "target",
+      "xy": [
+        0.9202255010604858,
+        7.162435054779053
+      ],
+      "ij_fixed": [
+        1,
+        7
+      ],
+      "ij_buggy": [
+        1,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 17,
+      "point": "start",
+      "xy": [
+        8.156541060334487,
+        6.982144263568984
+      ],
+      "ij_fixed": [
+        8,
+        7
+      ],
+      "ij_buggy": [
+        8,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 17,
+      "point": "target",
+      "xy": [
+        1.6946344375610352,
+        1.8848788738250732
+      ],
+      "ij_fixed": [
+        2,
+        2
+      ],
+      "ij_buggy": [
+        2,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 18,
+      "point": "start",
+      "xy": [
+        8.113185576876512,
+        2.846526439333779
+      ],
+      "ij_fixed": [
+        8,
+        3
+      ],
+      "ij_buggy": [
+        8,
+        3
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 18,
+      "point": "target",
+      "xy": [
+        0.8587239980697632,
+        2.755683183670044
+      ],
+      "ij_fixed": [
+        1,
+        3
+      ],
+      "ij_buggy": [
+        1,
+        3
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 19,
+      "point": "start",
+      "xy": [
+        6.760548616187152,
+        5.497087771857753
+      ],
+      "ij_fixed": [
+        7,
+        6
+      ],
+      "ij_buggy": [
+        7,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 19,
+      "point": "target",
+      "xy": [
+        5.665562152862549,
+        1.855105996131897
+      ],
+      "ij_fixed": [
+        6,
+        2
+      ],
+      "ij_buggy": [
+        6,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 20,
+      "point": "start",
+      "xy": [
+        6.401516264285449,
+        6.833833688873027
+      ],
+      "ij_fixed": [
+        7,
+        7
+      ],
+      "ij_buggy": [
+        6,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": true,
+      "adjacent_to_wall_buggy": false,
+      "ij_differs": true
+    },
+    {
+      "idx": 20,
+      "point": "target",
+      "xy": [
+        6.790576457977295,
+        0.7608098387718201
+      ],
+      "ij_fixed": [
+        7,
+        1
+      ],
+      "ij_buggy": [
+        7,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 21,
+      "point": "start",
+      "xy": [
+        7.730953550387185,
+        2.127968456487985
+      ],
+      "ij_fixed": [
+        8,
+        2
+      ],
+      "ij_buggy": [
+        8,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 21,
+      "point": "target",
+      "xy": [
+        2.028615951538086,
+        4.839721202850342
+      ],
+      "ij_fixed": [
+        2,
+        5
+      ],
+      "ij_buggy": [
+        2,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 22,
+      "point": "start",
+      "xy": [
+        5.099910792254862,
+        4.418146606800149
+      ],
+      "ij_fixed": [
+        5,
+        5
+      ],
+      "ij_buggy": [
+        5,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 22,
+      "point": "target",
+      "xy": [
+        1.7223001718521118,
+        1.0726933479309082
+      ],
+      "ij_fixed": [
+        2,
+        1
+      ],
+      "ij_buggy": [
+        2,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 23,
+      "point": "start",
+      "xy": [
+        3.953537163671085,
+        4.843405567727701
+      ],
+      "ij_fixed": [
+        4,
+        5
+      ],
+      "ij_buggy": [
+        4,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 23,
+      "point": "target",
+      "xy": [
+        0.6523033380508423,
+        5.110464572906494
+      ],
+      "ij_fixed": [
+        1,
+        5
+      ],
+      "ij_buggy": [
+        1,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 24,
+      "point": "start",
+      "xy": [
+        7.948530338549946,
+        1.1221043463874063
+      ],
+      "ij_fixed": [
+        8,
+        1
+      ],
+      "ij_buggy": [
+        8,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 24,
+      "point": "target",
+      "xy": [
+        0.6659260988235474,
+        2.0139055252075195
+      ],
+      "ij_fixed": [
+        1,
+        2
+      ],
+      "ij_buggy": [
+        1,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 25,
+      "point": "start",
+      "xy": [
+        6.220924384923555,
+        6.091513872088983
+      ],
+      "ij_fixed": [
+        6,
+        6
+      ],
+      "ij_buggy": [
+        6,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 25,
+      "point": "target",
+      "xy": [
+        2.770745038986206,
+        6.126847267150879
+      ],
+      "ij_fixed": [
+        3,
+        6
+      ],
+      "ij_buggy": [
+        3,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 26,
+      "point": "start",
+      "xy": [
+        3.2026106776556547,
+        4.8318137603311735
+      ],
+      "ij_fixed": [
+        3,
+        5
+      ],
+      "ij_buggy": [
+        3,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 26,
+      "point": "target",
+      "xy": [
+        5.820124626159668,
+        1.7438634634017944
+      ],
+      "ij_fixed": [
+        6,
+        2
+      ],
+      "ij_buggy": [
+        6,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 27,
+      "point": "start",
+      "xy": [
+        6.1124095292458,
+        2.1310981476632573
+      ],
+      "ij_fixed": [
+        6,
+        2
+      ],
+      "ij_buggy": [
+        6,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 27,
+      "point": "target",
+      "xy": [
+        3.6839468479156494,
+        7.723211288452148
+      ],
+      "ij_fixed": [
+        4,
+        8
+      ],
+      "ij_buggy": [
+        4,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 28,
+      "point": "start",
+      "xy": [
+        6.5244982757697265,
+        3.6877450867652763
+      ],
+      "ij_fixed": [
+        7,
+        4
+      ],
+      "ij_buggy": [
+        7,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 28,
+      "point": "target",
+      "xy": [
+        7.7890849113464355,
+        5.886949062347412
+      ],
+      "ij_fixed": [
+        8,
+        6
+      ],
+      "ij_buggy": [
+        8,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 29,
+      "point": "start",
+      "xy": [
+        4.569584509604062,
+        4.4063361426618135
+      ],
+      "ij_fixed": [
+        5,
+        5
+      ],
+      "ij_buggy": [
+        5,
+        5
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 29,
+      "point": "target",
+      "xy": [
+        7.864530563354492,
+        7.891409397125244
+      ],
+      "ij_fixed": [
+        8,
+        8
+      ],
+      "ij_buggy": [
+        8,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 30,
+      "point": "start",
+      "xy": [
+        3.0930973529544787,
+        3.815639525314483
+      ],
+      "ij_fixed": [
+        3,
+        4
+      ],
+      "ij_buggy": [
+        3,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 30,
+      "point": "target",
+      "xy": [
+        5.881871223449707,
+        6.118844985961914
+      ],
+      "ij_fixed": [
+        6,
+        6
+      ],
+      "ij_buggy": [
+        6,
+        6
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 31,
+      "point": "start",
+      "xy": [
+        7.688273107213249,
+        2.5314139917403784
+      ],
+      "ij_fixed": [
+        8,
+        3
+      ],
+      "ij_buggy": [
+        8,
+        3
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 31,
+      "point": "target",
+      "xy": [
+        4.838192939758301,
+        8.089837074279785
+      ],
+      "ij_fixed": [
+        5,
+        8
+      ],
+      "ij_buggy": [
+        5,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 32,
+      "point": "start",
+      "xy": [
+        8.083468670118332,
+        6.938461083211835
+      ],
+      "ij_fixed": [
+        8,
+        7
+      ],
+      "ij_buggy": [
+        8,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 32,
+      "point": "target",
+      "xy": [
+        8.010807037353516,
+        3.886681079864502
+      ],
+      "ij_fixed": [
+        8,
+        4
+      ],
+      "ij_buggy": [
+        8,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 33,
+      "point": "start",
+      "xy": [
+        3.485112596364252,
+        8.055339692622987
+      ],
+      "ij_fixed": [
+        4,
+        8
+      ],
+      "ij_buggy": [
+        4,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 33,
+      "point": "target",
+      "xy": [
+        8.034241676330566,
+        2.0291881561279297
+      ],
+      "ij_fixed": [
+        8,
+        2
+      ],
+      "ij_buggy": [
+        8,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 34,
+      "point": "start",
+      "xy": [
+        6.8630937988647975,
+        3.9963573577567657
+      ],
+      "ij_fixed": [
+        7,
+        4
+      ],
+      "ij_buggy": [
+        7,
+        4
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 34,
+      "point": "target",
+      "xy": [
+        1.8205702304840088,
+        0.8687200546264648
+      ],
+      "ij_fixed": [
+        2,
+        1
+      ],
+      "ij_buggy": [
+        2,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 35,
+      "point": "start",
+      "xy": [
+        8.061669878855202,
+        1.1969117843796013
+      ],
+      "ij_fixed": [
+        8,
+        1
+      ],
+      "ij_buggy": [
+        8,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 35,
+      "point": "target",
+      "xy": [
+        2.7788209915161133,
+        7.155480861663818
+      ],
+      "ij_fixed": [
+        3,
+        7
+      ],
+      "ij_buggy": [
+        3,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 36,
+      "point": "start",
+      "xy": [
+        8.102957241511843,
+        7.402605505063731
+      ],
+      "ij_fixed": [
+        8,
+        8
+      ],
+      "ij_buggy": [
+        8,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": true,
+      "adjacent_to_wall_buggy": false,
+      "ij_differs": true
+    },
+    {
+      "idx": 36,
+      "point": "target",
+      "xy": [
+        0.9071923494338989,
+        6.8785176277160645
+      ],
+      "ij_fixed": [
+        1,
+        7
+      ],
+      "ij_buggy": [
+        1,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 37,
+      "point": "start",
+      "xy": [
+        3.9972256846271645,
+        7.04766369120083
+      ],
+      "ij_fixed": [
+        4,
+        7
+      ],
+      "ij_buggy": [
+        4,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 37,
+      "point": "target",
+      "xy": [
+        8.114702224731445,
+        1.0333260297775269
+      ],
+      "ij_fixed": [
+        8,
+        1
+      ],
+      "ij_buggy": [
+        8,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 38,
+      "point": "start",
+      "xy": [
+        0.5449437581803918,
+        0.4033016827538714
+      ],
+      "ij_fixed": [
+        1,
+        1
+      ],
+      "ij_buggy": [
+        1,
+        1
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 38,
+      "point": "target",
+      "xy": [
+        0.862503707408905,
+        7.8899335861206055
+      ],
+      "ij_fixed": [
+        1,
+        8
+      ],
+      "ij_buggy": [
+        1,
+        8
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 39,
+      "point": "start",
+      "xy": [
+        4.450426488398743,
+        1.9275346886503166
+      ],
+      "ij_fixed": [
+        5,
+        2
+      ],
+      "ij_buggy": [
+        5,
+        2
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    },
+    {
+      "idx": 39,
+      "point": "target",
+      "xy": [
+        6.777956962585449,
+        6.938138008117676
+      ],
+      "ij_fixed": [
+        7,
+        7
+      ],
+      "ij_buggy": [
+        7,
+        7
+      ],
+      "on_wall_fixed": false,
+      "adjacent_to_wall_fixed": true,
+      "on_wall_buggy": false,
+      "adjacent_to_wall_buggy": true,
+      "ij_differs": false
+    }
+  ]
+}
