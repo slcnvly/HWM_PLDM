@@ -52,10 +52,13 @@ No environment/data problem was ever found; nothing needed fixing here.
 - `compute_error_series` (reused from `compute_changepoints.py`) verified:
   ~0.125s/episode on CPU. Full main+probe corpus (~2250 eps) costs ~5 min for
   the base error series alone.
-- **wandb not logged in on this machine.** Log with `WANDB_MODE=offline` for
-  now; ask the user to either run `wandb login` (suggest they use `!wandb
-  login` in the session) or supply an API key before Stage 4's final upload.
-  Runs so far: none yet.
+- **wandb: logged in** (`/home/goodwon01/.venvs/pldm_boundary/bin/wandb
+  login <key>`, key supplied by the user directly). Credentials cached in
+  `~/.netrc`. `wandb.Api().default_entity` = `goodwon01-chung-ang-university`.
+  `run_stage1_events.py`'s earlier forced `WANDB_MODE=offline` default has
+  been removed -- runs now log online to project `hwm-boundary-study`
+  directly. Runs so far: none yet (Stage 1 event labeling hasn't been run
+  at full scale yet).
 
 ## Stage 0: Preregistration -- DONE
 

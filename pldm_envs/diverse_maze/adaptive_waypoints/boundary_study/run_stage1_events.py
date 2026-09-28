@@ -16,7 +16,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from pldm_envs.diverse_maze.adaptive_waypoints.boundary_study.event_labels import label_episode
 from pldm_envs.diverse_maze.adaptive_waypoints.boundary_study.grid_utils import obs_to_ij
 
-os.environ.setdefault("WANDB_MODE", "offline")  # not logged in yet -- see PROGRESS.md
 
 HERE = os.path.dirname(__file__)
 DATA_ROOT = os.path.join(HERE, "..", "..", "datasets", "r50_local", "r50_dataset")
