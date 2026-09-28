@@ -3,7 +3,105 @@
 Read this file first if resuming after a session break. Update it at the end
 of every stage (or sub-step within a long stage) -- commit + push each time.
 
-## Status: Stage 1 COMPLETE (incl. Amendment 1 + diagnostics a-c + bug-impact-scope). Paused before Stage 2 for user review, per their explicit request.
+## Status: Stage 1 COMPLETE. Root-cause investigation running in background. Stage 2 (predictor-free signals) code written, not yet run. Session paused (low context) -- see "RESUME HERE" below.
+
+## RESUME HERE (paused mid-task, low context budget)
+
+**User's decision after the Amendment-2 gate check:** go with option 3 --
+proceed with predictor-free signals 6/7/8/10 for Stage 2 (+ oracle/fixed/
+random baselines for Metric B), predictor-based signals (2,2b,3,3b,4,5,9,9b)
+on hold. User pushed back on the "off-training-distribution" root-cause
+hypothesis with two concrete counter-examples and asked for exactly 3
+follow-up checks (no further digging beyond these), recorded as a
+diagnostic here, NOT a new preregistration amendment.
+
+**1. Background job still running (check this first):**
+`investigate_1b_bias.py`, launched via `nohup ... > investigate_1b_bias.log
+2>&1 &`, PID was 1950 (check `ps aux | grep investigate_1b_bias` -- if
+gone, check the log's last line and `results_investigate_1b_bias.json`).
+It's checkpointed every 100 episodes (`investigate_checkpoint.npz` +
+`investigate_*.memmap` scratch files, all gitignored, ~54GB disk) -- if it
+died, just rerun `nohup /home/goodwon01/.venvs/pldm_boundary/bin/python
+investigate_1b_bias.py > investigate_1b_bias.log 2>&1 &` from the
+`boundary_study/` dir and it resumes from the last checkpoint
+automatically (don't delete the memmap/checkpoint files unless starting
+fully over). At last check it was at 1300/2250 episodes. When it finishes,
+it writes `results_investigate_1b_bias.json` and deletes its own
+memmap/checkpoint scratch files.
+
+**What it computes (all 3 checks the user asked for, plus the carried-over
+bias-corrected cosine and R²):**
+- (1) already answered by reading code, no run needed: `pldm_envs/
+  diverse_maze/d4rl.py:236-237` (`D4RLDataset.__getitem__`) -- training
+  windows start at ARBITRARY in-episode positions (idx indexes a flat
+  cumulative range over all (episode,frame) pairs), not just frame 0. This
+  REFUTES the Amendment-2 "only ever anchored at t=0" hypothesis, as the
+  user correctly argued.
+- (2) already answered by reading code (`pldm/models/utils.py:46-84`,
+  `build_conv`, used by both the MeNet6 encoder and ConvPredictor): always
+  `nn.GroupNorm` (batch-independent), never BatchNorm, no Dropout either --
+  so model.eval() vs model.train() should be numerically identical. The
+  script's `check_2_eval_vs_train()` empirically confirms this on a real
+  batch (deep-copied model, no_grad) -- **already confirmed IDENTICAL
+  (0.0 max diff) in a 1-episode smoke test**, full-corpus confirmation
+  pending only in the sense that it reruns the same check.
+- (3) action-shuffle baseline (real action vs. a random permutation of
+  actions, 1-step full corpus + 5-step on 300 episodes) + bias-corrected
+  direction cosine (subtract the GLOBAL mean predicted-step vector, then
+  recheck cosine against real movement) + R² (debiased residual variance
+  vs. the target's own total variance) -- for obs and proprio separately.
+  **10-episode smoke test already showed a very informative pattern** (see
+  git history / rerun to confirm at scale): obs-channel real/shuffled
+  ratio ~1.0 (model's prediction is ESSENTIALLY INDEPENDENT of which
+  action is given, both 1-step and 5-step), proprio ratio ~0.82 (some real
+  action-sensitivity). R² was high (~0.88 obs, ~0.865 proprio) despite the
+  Amendment-2 finding that ~95% of obs error is bias -- **these aren't
+  contradictory**: R² is relative to the TARGET's own huge variance across
+  the whole dataset, bias-fraction is relative to the PREDICTION ERROR's
+  own magnitude -- different denominators. Explain this clearly when
+  writing up the final numbers so it doesn't read as inconsistent.
+
+**Once it finishes:** write up these 3 findings as a PROGRESS.md diagnostic
+entry (not Amendment 3, per the user's instruction), commit, push.
+
+**2. Stage 2 (predictor-free signals) -- code written, NOT yet run:**
+- `metric_b.py`: piecewise-linear reconstruction error, oracle DP (exact,
+  respects min_seg=8 against 0/T too), random baseline, fixed baseline.
+  **Validated on a synthetic test** (oracle <= fixed and <= random mean,
+  as it must be) -- see git history for the test snippet if it needs
+  re-checking.
+- `signals_predictor_free.py`: signals 7 (latent speed), 8 (direction
+  change), 10 (action delta) -- straightforward, not yet run at all.
+  Signal 6 (BOCPD): **had a real bug, now fixed and verified** -- a
+  constant-hazard BOCPD's `P(run_length=0)` is mathematically pinned to
+  exactly the hazard rate at every timestep regardless of data (verified
+  both by derivation and by a flat-0.1-everywhere empirical result before
+  the fix); switched the returned signal to `P(run_length <=
+  SHORT_RUN_THRESHOLD=3)`, which IS genuinely data-dependent -- **verified
+  on a synthetic two-regime sequence, shows a clear peak right at the true
+  changepoint** (baseline ~0.17, peaks at 0.50 two steps after the true
+  break). Fully documented in the function's docstring.
+- **`data_split.py` corrected**: PREREGISTRATION.md SS7 wrongly assumed
+  main and probe draw from the same 25-map pool. They don't -- main has
+  25 maps, probe has 20 COMPLETELY DIFFERENT maps (verified by comparing
+  actual layout strings, zero overlap). Corrected design (simpler and
+  arguably more faithful to the original intent): **main = selection set,
+  probe = report set**, no further per-half split needed since they're
+  already disjoint. Already re-run successfully, `split.json` written and
+  committed.
+- **Not yet written:** the actual driver script that samples ~300 episodes
+  from main (stratified across 25 maps, ~12/map), fits a 10-component PCA
+  for signal 6 on a subsample, computes all 4 signals + fixed/random(20
+  seeds)/oracle boundaries per episode, scores each via Metric B, and
+  reports mean/improvement-over-fixed/oracle-reachability per signal. This
+  is the main remaining work for Stage 2.
+
+**Next action when resuming:** check on / let finish the background
+investigation job, write up its results, then write and run the Stage 2
+driver script described above. Report both together per the user's
+request ("Stage 2의 predictor-free 신호 결과와 원인 규명 결과가 모두
+나오면 멈추고 보고해줘").
+
 
 ## Execution-outage report (resolved)
 
