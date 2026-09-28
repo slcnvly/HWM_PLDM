@@ -92,8 +92,14 @@ for whoever next touches core grid-conversion code, but out of scope here).
 For a 60-step window (raw error series indices 0..59, corresponding to
 frames 1..60 of the 61-frame window):
 
-1. **Raw one-step error**: `||ẑ_{t+1} - z_{t+1}||_2` -- current pipeline's
-   existing signal (`compute_error_series`).
+1. **Raw one-step error** (a.k.a. window-start-anchored open-loop error --
+   see Amendment 1 below): `||ẑ_{t+1} - z_{t+1}||_2`, where `ẑ_{t+1}` comes
+   from a single continuous autoregressive rollout started at the window's
+   real frame 0 (`compute_error_series`, unchanged). **This is the exact
+   signal every prior stage of this project (§5-§8) has called "one-step
+   prediction error" and used for adaptive waypoint placement -- kept here,
+   unchanged, specifically as that historical comparison point**, not
+   because it's still believed to be a freshly-anchored one-step quantity.
 2. **Surprise** (§8 method): `err_t^2 / σ²(z_t)`, using a beta-NLL variance
    head retrained locally from scratch following §8.2's exact recipe (v2
    fix: log-variance output, standardized inputs/normalized target, beta=0.5,
@@ -225,3 +231,75 @@ No `pldm.train` calls, no fine-tuning, no `pldm.planning`/MPC rollouts, no
 GPU. The only "training" anywhere in this study is signal 2's small
 post-hoc variance-head MLP (CPU, seconds, mirrors §8.2 exactly) -- not the
 frozen level1/level2 world model itself.
+
+## Amendment 1 (2026-09-28, before any signal scoring -- Stage 1 still in progress)
+
+**Finding.** While verifying the rollout API needed for signals 4/5
+(`verify_rollout_api.py`, see PROGRESS.md), discovered that
+`model.level1.predictor.prior_model` and `.posterior_model` are **both
+`None`** for this checkpoint. Consequence (traced through
+`sequence_predictor.py`'s `forward_multiple`, lines ~231-305): every step of
+a `forward_posterior`/`compute_error_series` call falls through to the
+`else` branch (`predictor_input.append(actions[i])`) regardless of the
+`compute_posterior` flag, and `current_state` is always the PREVIOUS step's
+own prediction after the first step (`current_state = pred_output.prediction`,
+line 321) -- **never** re-anchored on the real intermediate frame. So
+`err[i]` (signal 1, `||ẑ_{t+1}-z_{t+1}||`) is not "the error of a prediction
+made fresh from the real state at t" -- it's the error, at step t, of a
+*single continuous open-loop rollout that has been running since the
+window's frame 0*, using real actions throughout but never real
+intermediate states beyond frame 0.
+
+**Why this matters, and why it's being amended now rather than left as a
+footnote.** Every one of §5/§6b's `adaptive_minseg8` waypoint placements and
+§8's "surprise" signal (`err^2/σ²`) were built on this exact quantity. If
+`err[i]` is dominated by *how far the rollout has drifted since frame 0*
+(structurally growing with `i`) rather than by *local, state-specific
+dynamics* (walls, turns) at step `i`, then what §5-§8 called "changepoint
+detection" may substantially reduce to "detecting how much time/distance has
+elapsed in the window" -- a much weaker, less interesting claim than
+"detects structurally meaningful moments." This is exactly testable (see
+PROGRESS.md diagnostics (a)-(c), run before Stage 2), and the outcome could
+change how Stage 2-4 should be designed -- e.g., if signal 1 turns out to be
+near-equivalent to elapsed-window-distance, comparing it against a
+freshly-re-anchored variant is more informative than comparing 10 signals
+that might all share the same confound.
+
+**Amendment, made before any signal-scoring code has run (Stage 0's own
+signals/metrics/splits/stop-condition are untouched -- this only adds
+signals, it doesn't change what "winning" means):**
+
+- **Signal 1 is kept exactly as originally defined**, explicitly re-labeled
+  above as "the exact signal §5-§8 actually used" -- it remains in the
+  comparison specifically *as* that historical baseline, not removed or
+  redefined out from under prior results.
+- **1b. Re-anchored one-step error**: `||f(z_t, a_t) - z_{t+1}||_2` for
+  every `t`, where `z_t` is the REAL encoded observation at `t` (from
+  `backbone_output.encodings`, not a rollout state) and `f` is one level1
+  predictor step (`predictor.forward_multiple(state_encs=z_t[None],
+  actions=a_t[None], T=1, compute_posterior=False)` -- confirmed correct
+  and non-degenerate in `verify_rollout_api.py`). **Computed batched across
+  all t in one call per episode**: `state_encs` shaped `(1, 60, D)` (time=1,
+  batch=60 -- one independent starting point per t) and `actions` shaped
+  `(1, 60, A)`, not a 60-iteration loop, since `T=1` means the predictor's
+  internal loop only runs once regardless and each of the 60 "batch" slots
+  is processed independently.
+- **2b, 3b, 9b**: identical definitions to signals 2, 3, 9 respectively, but
+  substituting 1b's `err_1b_t` everywhere the original definition used
+  `err_t`. (Signal 2b needs its own freshly-retrained variance head, trained
+  on 1b's errors -- see PROGRESS.md item 3; this is a distinct model
+  checkpoint from signal 2's, not a reuse.)
+- Signals 4-8, 10 are unaffected by this amendment -- 4 (cumulative
+  rollout) and 5 (action sensitivity) were already designed around
+  fresh re-anchoring at `t` (confirmed in the same rollout-API check that
+  surfaced this finding), and 6-8, 10 don't depend on the one-step-error
+  quantity at all.
+- Metrics (§6), bootstrap protocol, selection/report split (§7), and the
+  stop condition (§8) are all unchanged -- 1b/2b/3b/9b are scored exactly
+  like every other signal, on the same split, same metrics, same stop rule.
+
+This amendment is made before any Stage 2 signal has been scored on real
+data (Stage 1 -- event labeling -- was still in progress), so it does not
+constitute post-hoc reframing around a result; it's disclosed here, with
+the reasoning, per the same transparency standard as the original
+preregistration.
