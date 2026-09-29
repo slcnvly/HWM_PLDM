@@ -620,6 +620,64 @@ code.**
 Full numbers: `results_gate_check_1b.json`. Script: `gate_check_1b.py`
 (now memory-safe/resumable, see infra note above).
 
+## Part A: action-connectivity check (paradox: ratio=1.0000 but planner gets 80% on hard) -- RESOLVED
+
+User's framing: obs prediction's real/shuffled-action ratio was 1.0000, but
+the planner (which only costs obs_component) gets 80% success on hard
+difficulty -- both can't be true if action is genuinely disconnected.
+Checked exactly the 4 things asked, no more:
+
+**1. Huge-constant perturbation test:** `pred(z_t, a)` vs `pred(z_t, a+1000)`
+-- `torch.equal` = **False**, max abs diff = 10.54. Action input is NOT
+disconnected from the network.
+
+**2. Zero-action test:** `pred(z_t, a_real)` vs `pred(z_t, zeros)` -- max
+abs diff = 0.053, mean abs diff = 0.0087. Small but real and nonzero.
+
+**3. Planner's actual rollout call path:** `pldm/planning/planners/
+mppi_planner.py:41-131` (`LearnedDynamics.__call__`) -- traced its exact
+call: `state.unsqueeze(0)` (time dim), squeeze ensemble dim, then
+`self.model.predictor.forward_multiple(state, action.float(), T,
+proprio=proprio, locations=location, raw_locations=raw_location,
+ensemble_input=ensemble_input)` -- **no `compute_posterior` argument
+passed at all**, so it uses `forward_multiple`'s own default
+(`compute_posterior=False`), identical to every call this study has made.
+Argument shapes match too (`state`: `(1, BS, ...)`, `action`: `(T, BS, A)`
+after the same unsqueeze pattern). **No calling-convention mismatch --
+the planner and this study's code call the exact same function the same
+way.** So (3)'s contingency ("fix shape/dtype/order to match the planner")
+doesn't apply; nothing needed re-fixing here.
+
+**4. Shuffle implementation validity:** checked directly -- the seeded
+permutation used is NOT the identity (`np.array_equal(perm, arange(60)) =
+False`), and only 3/60 positions coincidentally landed on their original
+action after shuffling (expected by chance for a random permutation of 60
+items, not a bug).
+
+**What actually resolves the paradox** (measured directly, not in the
+user's numbered list but the natural next question once 1-4 came back
+clean): fed the SAME `z_t` two **genuinely different real actions** (from
+t=10 and t=30 of the same episode, magnitudes `[0.12, 0.03]` vs
+`[0.66, -0.75]`) and compared predictions directly (not their error against
+a target): obs-only prediction difference **L2 = 6.53**. That's real and
+non-trivial on its own scale, but tiny next to the ~256 L2 magnitude of
+`pred_err` (prediction vs. true target) that the original ratio metric
+was built from (256 vs 256, both swamped by the same ~245 bias term) --
+**~2.5% of the total error scale, invisible to a ratio-of-errors metric,
+but a real, consistent, per-candidate signal.** MPPI never needs the
+absolute magnitude to be large -- it ranks many candidate rollouts against
+the *same* target from the *same* start state, so the common bias term
+cancels in the *relative* comparison across candidates, leaving exactly
+this small-but-real action-dependent difference as the part MPPI actually
+optimizes over. **Not a contradiction: the network encodes real, if small,
+action-dependent information; the original ratio metric (error-vs-error)
+just wasn't the right lens to see it, because it's dominated by a large
+common-mode bias that cancels for the planner's relative-ranking use case
+but doesn't cancel in an absolute-error ratio.**
+
+Script: ad-hoc checks, not yet saved as a standalone file (small, run
+inline) -- can be recreated from this writeup if needed again.
+
 ## Stage 2: predictor-free signals (6/7/8/10) + Metric B baselines -- DONE
 
 Per the user's option-3 decision after Amendment 2 (predictor-based
