@@ -711,6 +711,100 @@ the original signal 16 in the final table. Old 1-step results kept in
 `results_stage2_amendment3.json` for the record, but not reported in the
 final combined table.
 
+## min_seg sweep + bootstrap CIs -- DONE (user's corrected conclusion: bottleneck is min_seg, not signal quality)
+
+100 episodes (`sample_episodes(seed=3)`), min_seg in {8,6,5,4,3,2,1}.
+Scripts: `min_seg_sweep.py`, `bootstrap_ci.py`, `segment_length_vs_min_seg.py`,
+`compression_loss.py`. Results: `results_min_seg_sweep.json`,
+`results_bootstrap_ci.json`, `results_segment_length_vs_min_seg.json`,
+`results_compression_loss.json`.
+
+**1. Full sweep (% improvement over fixed):**
+
+| min_seg | oracle | bottom_up | top_down | random | signal_13 | signal_10 | signal_6 |
+|---|---|---|---|---|---|---|---|
+| 8 | 30.7% | -12.2% | -2.6% | -0.8% | -13.7% | -9.4% | -17.3% |
+| 6 | 38.6% | -12.3% | 2.2% | -12.0% | -10.6% | -22.1% | -17.4% |
+| 5 | 40.2% | -10.5% | 3.6% | -20.6% | -26.1% | -24.2% | -10.9% |
+| 4 | 41.4% | -8.5% | 6.0% | -29.6% | -33.8% | -30.6% | -18.9% |
+| 3 | 42.4% | -5.1% | 6.8% | -36.7% | -48.7% | -41.1% | -41.3% |
+| 2 | 42.7% | -2.1% | 7.7% | -45.7% | -77.1% | -53.1% | -51.0% |
+| 1 | 43.9% | **+24.7%** | 8.8% | -61.0% | -119.1% | -73.8% | -202.6% |
+
+**top-down crosses fixed between min_seg=8 and min_seg=6** (monotonic
+increase thereafter, -2.6% -> +8.8%). **bottom-up does NOT cross until
+min_seg=1** -- it stays worse than fixed all the way down to min_seg=2
+(-2.1%), then jumps sharply to +24.7% only when the constraint is nearly
+fully removed. **Scalar signals (13/10/6) get MONOTONICALLY WORSE as
+min_seg relaxes** -- the opposite direction from oracle/bottom-up/top-down
+-- naive peak-picking has no mechanism to avoid pathologically clustered
+boundaries once the spacing constraint is loosened; only algorithms that
+directly optimize Metric B benefit from relaxation.
+
+**2. Bootstrap 95% CI (n=10000, paired, same 100 episodes) on
+bottom_up-fixed:**
+
+| min_seg | diff (bottom_up - fixed) | 95% CI | significant? |
+|---|---|---|---|
+| 8 | +0.00967 (worse) | [0.00484, 0.01503] | yes -- bottom_up significantly WORSE |
+| 6 | +0.00976 (worse) | [0.00487, 0.01528] | yes -- worse |
+| 5 | +0.00834 (worse) | [0.00337, 0.01390] | yes -- worse |
+| 4 | +0.00674 (worse) | [0.00153, 0.01245] | yes -- worse |
+| 3 | +0.00403 (worse) | [-0.00081, 0.00949] | no -- CI includes 0 |
+| 2 | +0.00168 (worse) | [-0.00362, 0.00752] | no -- CI includes 0 |
+| 1 | -0.01955 (**better**) | [-0.02416, -0.01532] | **yes -- bottom_up significantly BETTER** |
+
+**Precise, statistically-backed answer to "where does bottom-up start
+beating fixed":** not gradually -- it's significantly WORSE at min_seg in
+{4,5,6,8}, statistically indistinguishable at {2,3}, and only
+significantly BETTER once min_seg=1 (essentially unconstrained). Report
+this transition precisely rather than a single crossing point.
+
+**3. Segment-length distribution (bottom-up's own chosen boundaries) and
+expected encoding loss per min_seg**, using `compression_loss.py`'s
+length->round-trip-MSE lookup (see below):
+
+| min_seg | length: min/p10/median/p90/max | mean expected encoding loss |
+|---|---|---|
+| 8 | 6/8/9/13/17 | 0.00290 |
+| 6 | 6/7/9/13/21 | 0.00295 |
+| 5 | 5/7/10/14/21 | 0.00299 |
+| 4 | 4/6/10/14/21 | 0.00303 |
+| 3 | 3/6/10/15/27 | 0.00306 |
+| 2 | 2/5/10/15/27 | 0.00310 |
+| 1 | 1/2/10/17/27 | 0.00338 |
+
+**Surprising finding: the encoding-loss cost of relaxing min_seg is much
+smaller than the Metric B swing.** Mean expected encoding loss barely
+moves (0.00290 -> 0.00338, +17% relative) across the ENTIRE sweep from
+min_seg=8 to min_seg=1, while bottom-up's Metric B improvement swings from
+-12.2% to +24.7% over the same range. The median segment length bottom-up
+actually chooses barely changes (9 -> 10) even when permitted to go much
+shorter -- relaxation mostly extends the upper tail (p90: 13->17, max:
+17->27) and only occasionally uses very short segments, so the average
+compression cost stays nearly flat. **Net-benefit conclusion (item 3):
+there is no meaningful tradeoff to balance here -- the Metric B gain from
+relaxing min_seg overwhelmingly dominates the encoding-loss cost at every
+point in this sweep**, so a single "optimal min_seg" isn't really the
+right frame; the data says "as unconstrained as the actual use case
+allows" is best by both measures simultaneously, at least down to
+min_seg=1 (this study didn't test truly unconstrained/min_seg=0, i.e.
+adjacent-frame boundaries, since segmentation.py's own contract requires
+min_seg>=1).
+
+**Compression-loss-vs-length curve** (`compression_loss.py`, 100 episodes,
+independent of min_seg -- a general property of the 10-step linear-
+interpolation compression scheme itself): round-trip MSE grows
+smoothly and consistently faster than linearly with segment length, from
+~0.00009 at length 2 (near-zero -- resampling a short segment to 10 points
+is upsampling, not lossy compression) to ~0.039 at length 58 (a ~440x
+increase for a 29x length increase). Confirms the compression scheme is
+cheap for short segments and expensive for long ones -- exactly the
+opposite of what would justify a LARGER min_seg on compression-loss
+grounds; if anything this argues that guarding against long segments
+(unbounded by min_seg, which only sets a minimum) matters more than
+guarding against short ones.
+
 ## Part B: fairness checks -- DONE
 
 Script: `check_b_fairness.py`, 50 episodes. Results: `results_b_fairness.json`.

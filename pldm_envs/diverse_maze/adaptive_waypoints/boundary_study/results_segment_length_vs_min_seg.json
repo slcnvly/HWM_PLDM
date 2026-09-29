@@ -1,0 +1,65 @@
+{
+  "8": {
+    "min_length": 6,
+    "max_length": 17,
+    "p10": 8.0,
+    "median": 9.0,
+    "p90": 13.0,
+    "mean_expected_encoding_loss": 0.0029041441302987275,
+    "n_segments": 600
+  },
+  "6": {
+    "min_length": 6,
+    "max_length": 21,
+    "p10": 7.0,
+    "median": 9.0,
+    "p90": 13.0,
+    "mean_expected_encoding_loss": 0.002945408556146345,
+    "n_segments": 600
+  },
+  "5": {
+    "min_length": 5,
+    "max_length": 21,
+    "p10": 7.0,
+    "median": 10.0,
+    "p90": 14.0,
+    "mean_expected_encoding_loss": 0.0029863146027694814,
+    "n_segments": 600
+  },
+  "4": {
+    "min_length": 4,
+    "max_length": 21,
+    "p10": 6.0,
+    "median": 10.0,
+    "p90": 14.0,
+    "mean_expected_encoding_loss": 0.0030266623540228304,
+    "n_segments": 600
+  },
+  "3": {
+    "min_length": 3,
+    "max_length": 27,
+    "p10": 6.0,
+    "median": 10.0,
+    "p90": 15.0,
+    "mean_expected_encoding_loss": 0.0030628031450606196,
+    "n_segments": 600
+  },
+  "2": {
+    "min_length": 2,
+    "max_length": 27,
+    "p10": 5.0,
+    "median": 10.0,
+    "p90": 15.0,
+    "mean_expected_encoding_loss": 0.0031015079045405318,
+    "n_segments": 600
+  },
+  "1": {
+    "min_length": 1,
+    "max_length": 27,
+    "p10": 2.0,
+    "median": 10.0,
+    "p90": 17.0,
+    "mean_expected_encoding_loss": 0.0033768519293612058,
+    "n_segments": 600
+  }
+}
