@@ -1,0 +1,16 @@
+{
+  "signal_16_v2_obs": {
+    "mean_metric_b": 0.08680265711758867,
+    "improvement_over_fixed": -0.13203352443950198,
+    "n_episodes": 50
+  },
+  "signal_16_v2_proprio": {
+    "mean_metric_b": 0.08265350921414137,
+    "improvement_over_fixed": -0.07792257115154702,
+    "n_episodes": 50
+  },
+  "fixed": {
+    "mean_metric_b": 0.07667852165470702,
+    "n_episodes": 50
+  }
+}

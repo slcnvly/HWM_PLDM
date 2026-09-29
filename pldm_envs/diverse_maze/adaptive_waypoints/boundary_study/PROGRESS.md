@@ -846,11 +846,12 @@ signal_16 (v1, 1-step) is superseded by v2 (rollout-length-matched, 14
 steps) per the "Major correction" section above -- v1's numbers kept here
 for the record but not used in the final combined table.
 
-## Signal 16 v2 (rollout-matched, 14 steps) -- pending (running)
+## Signal 16 v2 (rollout-matched, 14 steps) -- DONE
 
 Redefined per the "Major correction" finding (training rollout = 15
-frames, not 1 step). Script: `signal_16_v2_rollout_matched.py`, 60
-episodes (tighter cap -- a 14-step rollout is ~14x a 1-step call), 16
+frames, not 1 step). Script: `signal_16_v2_rollout_matched.py`, 50
+episodes (`sample_episodes(n_target=60)` -> 2/map x 25 maps = 50; tighter
+cap than the usual 300, since a 14-step rollout is ~14x a 1-step call), 16
 strided starting points per episode (stride 3, all satisfying
 `start+14<=60`) -- **note this is genuinely coarser than the other
 signals** (only 16 of 60 positions ever nonzero per episode, vs a dense
@@ -861,6 +862,25 @@ starting points, stride 10) where `min_seg=8` masks index 0 and
 regardless of ranking -- obs and proprio came back byte-identical because
 ranking never mattered with that few candidates. Fixed by densifying to
 16 candidates (stride 3) -- confirmed obs vs proprio now differ.
+
+**Result:**
+
+| | mean Metric B | vs. fixed |
+|---|---|---|
+| signal_16_v2_proprio | 0.08265 | -7.8% |
+| signal_16_v2_obs | 0.08680 | -13.2% |
+| (for reference) signal_16 v1, 1-step, obs | 0.10142 | -19.9% |
+| (for reference) signal_16 v1, 1-step, proprio | 0.09814 | -16.0% |
+
+**Matching the model's actual trained rollout length made signal 16
+noticeably less bad (obs: -19.9% -> -13.2%, proprio: -16.0% -> -7.8%) --
+consistent with the "Major correction" finding that 1-step re-anchoring
+under-uses the model's real capability -- but still doesn't flip the sign;
+both remain worse than fixed-interval placement on Metric B.** Of every
+predictor-based signal tried in this study (1b/2b/3b/9b were never scored,
+put on hold; only 16 and 16-v2 were actually computed), this is the best
+result any predictor-based signal has produced against Metric B, and it's
+still a loss.
 
 ## Stage 3: Scoring -- NOT STARTED
 
