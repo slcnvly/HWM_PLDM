@@ -1,0 +1,30 @@
+{
+  "b6_recovery": {
+    "n_episodes": 50,
+    "exact_recovery_rate": 1.0,
+    "within_2steps_recovery_rate": 1.0
+  },
+  "b7_min_seg_sensitivity": {
+    "8": {
+      "fixed_mean": 0.08492681502519986,
+      "oracle_mean": 0.058283397560871676,
+      "oracle_improvement_over_fixed": 0.3137220847905627
+    },
+    "5": {
+      "fixed_mean": 0.08492681502519986,
+      "oracle_mean": 0.04864794904484037,
+      "oracle_improvement_over_fixed": 0.42717798812536023
+    },
+    "3": {
+      "fixed_mean": 0.08492681502519986,
+      "oracle_mean": 0.047040800364876116,
+      "oracle_improvement_over_fixed": 0.44610191314818576
+    },
+    "1": {
+      "fixed_mean": 0.08492681502519986,
+      "oracle_mean": 0.046118108289090756,
+      "oracle_improvement_over_fixed": 0.4569664684186451
+    }
+  },
+  "n_episodes": 50
+}

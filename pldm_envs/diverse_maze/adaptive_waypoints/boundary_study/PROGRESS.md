@@ -711,6 +711,42 @@ the original signal 16 in the final table. Old 1-step results kept in
 `results_stage2_amendment3.json` for the record, but not reported in the
 final combined table.
 
+## Part B: fairness checks -- DONE
+
+Script: `check_b_fairness.py`, 50 episodes. Results: `results_b_fairness.json`.
+
+**B5 (oracle respects min_seg=8):** confirmed earlier via ad-hoc check
+(min gap == 8 exactly across 20 episodes, no violations) -- nothing to
+recompute, `oracle_boundaries` was already correctly constrained.
+
+**B6 (procedural diagnostic -- is peak-picking itself the bottleneck?):**
+built a synthetic signal that's 1 exactly at each episode's own oracle
+boundary positions and 0 elsewhere, fed it through `pick_changepoints`
+(min_seg=8, 5 boundaries). **Exact recovery: 50/50 (100.0%).** The
+extraction procedure is NOT the bottleneck at all -- given a signal that's
+actually informative, peak-picking finds the right answer perfectly,
+every time. **The entire problem is signal quality: none of the 14
+candidate signals/algorithms tried in this study approximates the oracle
+positions well enough**, not that a good signal is being thrown away by a
+bad extraction step.
+
+**B7 (min_seg sensitivity):** oracle's improvement over fixed, as
+`min_seg` relaxes:
+
+| min_seg | oracle mean Metric B | improvement over fixed |
+|---|---|---|
+| 8 | 0.05828 | 31.4% |
+| 5 | 0.04865 | 42.7% |
+| 3 | 0.04704 | 44.6% |
+| 1 | 0.04612 | 45.7% |
+
+**`min_seg=8` genuinely costs real headroom** -- relaxing it from 8 to 1
+nearly doubles oracle's achievable improvement over fixed (31.4% ->
+45.7%). Directly consistent with Amendment 3's finding that the
+unconstrained top-down/bottom-up algorithms beat fixed while their
+`min_seg=8`-constrained versions don't -- this isn't a coincidence, it's
+the same effect quantified two ways.
+
 ## Part A: action-connectivity check (paradox: ratio=1.0000 but planner gets 80% on hard) -- RESOLVED
 
 User's framing: obs prediction's real/shuffled-action ratio was 1.0000, but
