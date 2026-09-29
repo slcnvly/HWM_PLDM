@@ -812,6 +812,56 @@ reconstruction).
 
 Raw numbers: `results_stage2_predictor_free.json`.
 
+## Amendment 3 results: curvature signals + algorithms -- DONE (full 300 episodes)
+
+Same 300-episode sample as above. Script: `run_stage2_amendment3.py`.
+
+| | mean Metric B | vs. fixed |
+|---|---|---|
+| bottom_up (unconstrained) | 0.06182 | **+26.9%** |
+| top_down (unconstrained) | 0.07865 | **+7.1%** |
+| fixed (10,20,30,40,50) | 0.08462 | 0% (reference) |
+| signal_13 (chord deviation) | 0.08966 | -6.0% |
+| top_down (min_seg=8) | 0.08804 | -4.0% |
+| bottom_up (min_seg=8) | 0.09703 | -14.7% |
+| signal_16_proprio (v1, 1-step -- superseded, see below) | 0.09814 | -16.0% |
+| signal_16_obs (v1, 1-step -- superseded, see below) | 0.10142 | -19.9% |
+| signal_12 (normalized curvature) | 0.11176 | -32.1% |
+| signal_11 (2nd-diff curvature) | 0.11739 | -38.7% |
+
+**None of the three curvature signals (11/12/13) beat fixed either** --
+contrary to the motivating hypothesis (Metric B rewards bends, curvature
+signals should find them). Chord deviation (13) came closest (-6.0%,
+still a loss) but 2nd-difference curvature (11) was the WORST of any
+signal tried in this entire study so far (-38.7%). **The only things that
+beat fixed at all are the two direct-Metric-B-optimizing algorithms
+(top-down, bottom-up), and only in their UNCONSTRAINED form** -- once
+`min_seg=8` is enforced, both drop below fixed too (top-down -4.0%,
+bottom-up -14.7%). This is a striking result on its own: **the `min_seg=8`
+constraint itself appears to cost more than any of these signals/
+algorithms can make back on this data.** Directly relevant to B7 (min_seg
+sensitivity, running) -- see below once it lands.
+
+signal_16 (v1, 1-step) is superseded by v2 (rollout-length-matched, 14
+steps) per the "Major correction" section above -- v1's numbers kept here
+for the record but not used in the final combined table.
+
+## Signal 16 v2 (rollout-matched, 14 steps) -- pending (running)
+
+Redefined per the "Major correction" finding (training rollout = 15
+frames, not 1 step). Script: `signal_16_v2_rollout_matched.py`, 60
+episodes (tighter cap -- a 14-step rollout is ~14x a 1-step call), 16
+strided starting points per episode (stride 3, all satisfying
+`start+14<=60`) -- **note this is genuinely coarser than the other
+signals** (only 16 of 60 positions ever nonzero per episode, vs a dense
+60-length signal for everything else), flagged as a real limitation, not
+hidden. Caught and fixed a real bug in an earlier draft (5 sparse
+starting points, stride 10) where `min_seg=8` masks index 0 and
+`pick_changepoints` trivially selects all ~4 remaining nonzero candidates
+regardless of ranking -- obs and proprio came back byte-identical because
+ranking never mattered with that few candidates. Fixed by densifying to
+16 candidates (stride 3) -- confirmed obs vs proprio now differ.
+
 ## Stage 3: Scoring -- NOT STARTED
 
 Metric A (event alignment: step AUROC/AP, boundary P/R/F1 overall + per
