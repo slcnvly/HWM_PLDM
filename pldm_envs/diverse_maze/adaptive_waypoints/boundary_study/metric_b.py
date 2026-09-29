@@ -114,3 +114,125 @@ def random_boundaries(T, n_boundaries, min_seg, rng):
 
 def fixed_boundaries():
     return [10, 20, 30, 40, 50]
+
+
+def _point_to_chord_dist(z, a, b, k):
+    """Perpendicular distance from z[k] to the line through z[a], z[b]."""
+    va, vb, vk = z[a], z[b], z[k]
+    ab = vb - va
+    ab_norm = np.linalg.norm(ab)
+    if ab_norm < 1e-8:
+        return np.linalg.norm(vk - va)
+    t = np.dot(vk - va, ab) / (ab_norm**2)
+    proj = va + t * ab
+    return np.linalg.norm(vk - proj)
+
+
+def top_down_split(z, n_boundaries=5, min_seg=None):
+    """Algorithm 14 (Douglas-Peucker style): repeatedly split the segment
+    containing the point of maximum perpendicular deviation from its own
+    chord, until n_boundaries splits are made. min_seg=None -> unconstrained
+    (candidate points can be anywhere in a segment); min_seg=int ->
+    candidates within min_seg of either segment endpoint are excluded."""
+    T = z.shape[0] - 1
+    segments = [(0, T)]
+    boundaries = []
+    while len(boundaries) < n_boundaries:
+        best_seg, best_point, best_dist = None, None, -1.0
+        for (a, b) in segments:
+            if b - a <= 1:
+                continue
+            lo = a + (min_seg if min_seg else 1)
+            hi = b - (min_seg if min_seg else 1) + 1
+            for k in range(max(a + 1, lo), min(b, hi)):
+                d = _point_to_chord_dist(z, a, b, k)
+                if d > best_dist:
+                    best_dist, best_seg, best_point = d, (a, b), k
+        if best_point is None:
+            break  # no feasible split left (min_seg exhausted the room)
+        boundaries.append(best_point)
+        segments.remove(best_seg)
+        segments.append((best_seg[0], best_point))
+        segments.append((best_point, best_seg[1]))
+
+    # min_seg can starve greedy top-down of feasible splits before reaching
+    # n_boundaries (no lookahead) -- fall back to uniform spacing for any
+    # still-missing slots, same convention as segmentation.py's
+    # pick_changepoints, so every algorithm returns exactly n_boundaries
+    # and Metric B comparisons stay apples-to-apples. Reported alongside
+    # results whenever this fallback actually triggers.
+    if len(boundaries) < n_boundaries:
+        uniform = [round(T * (i + 1) / (n_boundaries + 1)) for i in range(n_boundaries)]
+        for u in uniform:
+            if len(boundaries) >= n_boundaries:
+                break
+            if all(abs(u - c) >= (min_seg or 1) for c in boundaries) and 0 < u < T:
+                boundaries.append(u)
+        while len(boundaries) < n_boundaries:
+            boundaries.append(min(T - 1, (max(boundaries) if boundaries else 0) + 1))
+    return sorted(boundaries[:n_boundaries])
+
+
+def bottom_up_merge(z, n_boundaries=5, min_seg=None):
+    """Algorithm 15: start with every interior point as a boundary, repeatedly
+    remove the boundary whose removal costs least (in total squared
+    reconstruction error of the newly-merged segment), until n_boundaries
+    remain. min_seg=None -> pure cost-based merging throughout. min_seg=int
+    -> if any segment is shorter than min_seg once we reach n_boundaries,
+    keep force-merging the boundary adjacent to the shortest such segment
+    (cheaper of its two neighbor-merges) until all segments satisfy
+    min_seg -- a documented simplification, not a globally optimal
+    constrained solution (that's what oracle_boundaries is for)."""
+    T = z.shape[0] - 1
+    boundaries = list(range(1, T))
+
+    def total_cost(anchors):
+        return sum(segment_cost(z, a, b)[0] for a, b in zip(anchors[:-1], anchors[1:]))
+
+    while len(boundaries) > n_boundaries:
+        anchors = [0] + boundaries + [T]
+        best_idx, best_cost = None, float("inf")
+        for i in range(1, len(anchors) - 1):
+            a, b = anchors[i - 1], anchors[i + 1]
+            cost, _ = segment_cost(z, a, b)
+            if cost < best_cost:
+                best_cost, best_idx = cost, i
+        del boundaries[best_idx - 1]
+
+    if min_seg:
+        for _ in range(200):  # safety cap on iterations
+            anchors = [0] + boundaries + [T]
+            gaps = [anchors[i + 1] - anchors[i] for i in range(len(anchors) - 1)]
+            if min(gaps) >= min_seg or len(boundaries) == 0:
+                break
+            short_i = int(np.argmin(gaps))  # segment index with the violation
+            # remove whichever of that segment's two bounding INTERIOR
+            # boundaries is cheaper to merge away (can't remove 0 or T)
+            candidates = []
+            if short_i > 0:
+                candidates.append(short_i - 1)  # boundaries index for anchors[short_i]
+            if short_i < len(gaps) - 1:
+                candidates.append(short_i)  # boundaries index for anchors[short_i+1]
+            if not candidates:
+                break
+            costs = []
+            for bi in candidates:
+                trial = boundaries[:bi] + boundaries[bi + 1 :]
+                costs.append(total_cost([0] + trial + [T]))
+            remove_bi = candidates[int(np.argmin(costs))]
+            del boundaries[remove_bi]
+            # re-fill back up to n_boundaries greedily via top_down on the
+            # resulting largest segment, if we dropped below n_boundaries
+            while len(boundaries) < n_boundaries:
+                anchors2 = [0] + boundaries + [T]
+                seg_lens = [(anchors2[i + 1] - anchors2[i], i) for i in range(len(anchors2) - 1)]
+                seg_lens.sort(reverse=True)
+                _, i = seg_lens[0]
+                a, b = anchors2[i], anchors2[i + 1]
+                mid = (a + b) // 2
+                if a < mid < b and mid not in boundaries:
+                    boundaries.append(mid)
+                    boundaries.sort()
+                else:
+                    break
+    return sorted(boundaries)

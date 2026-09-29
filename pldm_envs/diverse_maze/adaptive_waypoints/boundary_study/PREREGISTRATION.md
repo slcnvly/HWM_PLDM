@@ -423,3 +423,107 @@ before trusting its output, or (c) deprioritize predictor-based signals in
 favor of 6/7/8/10 (which don't call the predictor at all) pending further
 investigation. This is a design decision for the user, not made
 unilaterally here -- flagged and stopped per their explicit request.
+
+**Resolution (2026-09-29, follow-up investigation, recorded as a
+PROGRESS.md diagnostic, not a further amendment since it doesn't change
+the signal list):** the "off-training-distribution" mechanism above was
+checked directly and refuted -- `d4rl.py:236-237` confirms training
+windows start at arbitrary in-episode positions, so a real state at any
+`t` is exactly what some training window's own first frame looks like.
+What actually characterizes the failure instead: the obs-channel
+prediction is **action-invariant** under re-anchoring (real vs.
+randomly-shuffled actions give statistically indistinguishable prediction
+error, ratio 1.0000 at both 1-step and 5-step), not just biased. A
+follow-up check (same-day) further clarified this isn't a true
+disconnection -- feeding two genuinely different real actions to the same
+`z_t` DOES change the obs prediction by a real amount (L2=6.53) -- it's
+just ~2.5% of the ~256 L2 scale the bias dominates, invisible to an
+error-ratio metric but real enough for MPPI's *relative* candidate-ranking
+(which cancels the common bias term across candidates sharing a start
+state) to exploit. See PROGRESS.md "Part A" and "Root-cause investigation"
+sections for the full detail.
+
+## Amendment 3 (2026-09-29, before any predictor-based signal is scored -- adds curvature/relative-comparison signals and two direct algorithms)
+
+**Why.** Amendment 2's gate check found predictor-based one-step
+re-anchoring is ~95% dominated by a bias term that's common across nearby
+candidates. Separately, Stage 2's first predictor-free results (signals
+6/7/8/10, all scored on real data) showed **all four losing to the fixed-
+interval baseline on Metric B**, latent speed (7) losing worst of all
+(-26.8%). The diagnosis: **Metric B rewards finding where the latent
+trajectory BENDS (poor piecewise-linear fit), not where it moves FAST**
+-- a straight, fast-moving segment reconstructs perfectly with a 2-point
+linear interpolation regardless of speed; a slow segment that curves
+reconstructs badly. None of the original 10 signals directly measures
+curvature/deviation-from-straight-line, which is exactly what Metric B
+scores. This amendment adds three curvature signals aimed directly at
+that mismatch, one predictor-based signal specifically constructed to
+cancel Amendment 2's bias term (comparing predictions to each other, never
+to the true target), and two algorithms that optimize Metric B's own
+objective directly instead of going through scalar-signal + peak-picking.
+
+**Added, all scored on the identical 300-episode sample already used for
+signals 6/7/8/10 (same stratified draw, same 25 maps) so results land in
+one directly-comparable table:**
+
+- **11. Second-difference curvature**: `||z_{t+1} - 2*z_t + z_{t-1}||_2`.
+  Undefined at the series' first index (needs `z_{t-1}`) -- set to 0
+  there, excluded from peak-picking candidacy by `min_seg` regardless.
+- **12. Normalized curvature**: signal 11 divided by local displacement
+  `||z_{t+1}-z_t|| + ||z_t-z_{t-1}||` -- curvature *relative to* how far
+  the trajectory is moving, so a sharp turn during a slow segment and a
+  gentle bend during a fast segment can be compared on the same scale.
+- **13. Local chord deviation** (`w=5`): perpendicular distance from `z_t`
+  to the line connecting `z_{t-w}` and `z_{t+w}` -- directly measures the
+  same quantity Metric B itself scores (deviation from a local linear
+  fit), just at a fixed local window instead of the actual chosen
+  segment. Undefined near the window edges (`t-w<0` or `t+w>60`).
+- **16. Action-sensitivity divergence** (relative comparison -- the one
+  predictor-based signal added here, specifically because it cancels
+  Amendment 2's bias by construction): at each `t`, `K=16` candidate
+  actions sampled from the dataset's action distribution (parametric
+  Gaussian, fit on the empirical per-dimension mean/std of all real
+  actions in the selection set -- not a bootstrap resample of literal
+  action vectors, since either reading is defensible from the original
+  phrasing and this is simpler; documented in `signals_curvature.py`),
+  all applied to the SAME real `z_t`; signal = sum of per-dimension
+  variance ACROSS the resulting `K` predictions (compared to their own
+  mean, never to the true target `z_{t+1}`). Because the bias term is
+  identical for every candidate (same `z_t`), it cancels when computing
+  variance around the candidates' own mean -- this is the only
+  predictor-based signal in the comparison set not contaminated by
+  Amendment 2's finding, by construction rather than by accident.
+  Computed separately for the obs-only space (16 channels, matches what
+  the planner actually costs) and proprio-only space. Capped at the same
+  300-episode sample (expensive-signal precedent, SS7) -- 60 batched
+  predictor calls per episode (one per `t`, each internally batched
+  across the 16 candidates).
+- **14. Top-down recursive splitting** (Douglas-Peucker style): repeatedly
+  split the segment containing the point of maximum perpendicular
+  deviation from its own chord, until 5 splits are made. Computed both
+  unconstrained and with `min_seg=8` (candidates within `min_seg` of a
+  segment's own endpoints excluded) -- **documented limitation**: greedy
+  top-down has no lookahead, so `min_seg=8` can starve it of feasible
+  splits before reaching 5; when that happens, remaining boundaries are
+  filled via the same uniform-spacing fallback `pick_changepoints` already
+  uses, so every algorithm returns exactly 5 boundaries for a fair
+  Metric-B comparison (whether the fallback triggered is checked per
+  episode in the results).
+- **15. Bottom-up merging**: start with every interior point as a
+  boundary, repeatedly remove whichever boundary costs least to merge
+  away (smallest resulting increase in reconstruction error), until 5
+  remain. Also computed unconstrained and `min_seg=8`-respecting.
+  **Documented limitation**: the `min_seg`-respecting variant uses a
+  best-effort post-hoc repair (force-merge the boundary adjacent to the
+  shortest segment, then re-split the largest remaining segment to get
+  back to 5) rather than a globally optimal constrained solution --
+  `oracle_boundaries` already provides that exact optimum for comparison,
+  so this is deliberately a "cheap, realistic heuristic" data point, not
+  a second oracle.
+
+Both algorithms and all four new signals are scored with the *same*
+`score_boundaries` (Metric B) used throughout, on the *same* sample, so
+they land in the same table as signals 6/7/8/10 and the fixed/random/
+oracle baselines. **Metric A is explicitly NOT computed this round** (per
+the user's instruction) -- the question being asked first is narrower:
+can anything beat fixed-interval placement on Metric B at all.
