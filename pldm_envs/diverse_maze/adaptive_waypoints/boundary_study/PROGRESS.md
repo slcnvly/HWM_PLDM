@@ -620,6 +620,97 @@ code.**
 Full numbers: `results_gate_check_1b.json`. Script: `gate_check_1b.py`
 (now memory-safe/resumable, see infra note above).
 
+## Major correction: the "off-distribution t>0" hypothesis was right after all (2026-09-29)
+
+User pushed back a second time with a concrete lead: the HWM paper's
+appendix describes training loss `L = gamma_tf*L_tf + gamma_roll*L_roll`,
+with the maze sub-model using `gamma_tf=0, gamma_roll=1` -- i.e. NO
+teacher forcing, pure rollout loss. If true, the model never learned to
+treat a ground-truth latent as input for a single-step prediction at all,
+which would explain both 1b's degeneracy and the k=0 11x overshoot.
+Checked directly, code-first:
+
+**1. No teacher-forcing mechanism exists in this architecture, confirmed
+structurally (not just for our checkpoint's runtime state -- for the
+training CONFIG itself):**
+- `pldm/configs/diverse_maze/icml/large_diverse_25maps.yaml:64`: `z_dim: 0`
+  for level1 (this is the actual L1 PRETRAINING config -- confirmed by
+  `train_l1: true` at line 41 and `load_l1_only: false` at line 71, unlike
+  the `_l2.yaml` variant this whole study loads checkpoints via, which has
+  `train_l1: false` and is for L2-stage work with L1 frozen).
+- `pldm/models/predictors/sequence_predictor.py:44-45`: `if config.z_dim
+  is not None and config.z_dim > 0: self.prior_model = PriorContinuous(...)`
+  -- with `z_dim=0`, this is False, so `self.prior_model = None` (line 78)
+  **by explicit training-time design, not incidentally**. This is exactly
+  the flag (confirmed independently in Amendment 1 for our loaded
+  checkpoint's runtime object) that gates the ONLY teacher-forcing-capable
+  branch in `forward_multiple` (the `term_states` "posterior" path using a
+  real future frame, ~line 260-268) -- with `prior_model=None`, that branch
+  can never execute, for any input, ever. Teacher forcing isn't just
+  unused here; it's architecturally unreachable by construction.
+- `PredictorConfig.use_teacher_forcing` / `transformer_teacher_forcing_ratio`
+  (`pldm/models/predictors/enums.py:37,39`) exist as config fields but are
+  **consumed nowhere else in the codebase** (grepped for both names --
+  zero hits outside their own definitions) -- dead config for this
+  architecture regardless of value, presumably wired up only for a
+  different predictor variant (Transformer) never used in this project.
+- `PredictionObs`/`PredictionProprio` (`pldm/objectives/__init__.py:99-114`):
+  both are plain `PredictionObjective` instances -- **there is no separate
+  teacher-forcing-loss code path anywhere in this codebase to weight
+  against**. This matches `gamma_tf=0, gamma_roll=1` exactly, and more
+  strongly: for this architecture there was never an option to do
+  otherwise.
+
+**2. Distance function: squared error, not L1.**
+`pldm/objectives/prediction.py:83`: `pred_loss = (encodings -
+predictions).pow(2).mean()` -- MSE, not `.abs()`. If the paper's appendix
+literally states L1 for this sub-model, that's a paper-vs-code discrepancy
+in this fork -- noted factually, not resolved further here.
+
+**3. Training rollout length: 15 frames, NOT 60.** `pldm/configs/
+diverse_maze/icml/large_diverse_25maps.yaml:1` (`n_steps: &n_steps 15`)
+and `:40` (`l1_n_steps: *n_steps`) -- **the frozen L1 model was only ever
+trained to roll out 14 prediction steps from a 15-frame window.** This
+entire study (signal 1's window-position correlation, every Metric-B
+score, every gate check) has been evaluating it over a 60-step window --
+**4x longer than its trained rollout horizon.** This is a separate,
+additional finding from the teacher-forcing question, and by itself
+plausibly explains a good chunk of Amendment 1's "error grows with window
+position" result independent of the re-anchoring question.
+
+**Correction to the retraction in Amendment 2:** the original hypothesis
+("the model never sees a real state as `current_state` at t>0, only
+ever-compounding self-generated states") is **retracted-of-the-retraction
+-- the user's original instinct was closer to correct, just imprecisely
+worded.** The refutation ("training windows start at arbitrary in-episode
+positions," `d4rl.py:236-237`) is still TRUE as a fact, but it answers the
+wrong question: window position within an episode was never the relevant
+variable. The precise, now-verified mechanism is: **with `z_dim=0`, this
+model has no mechanism to ever be told "here is the ground-truth latent
+mid-sequence, use it and continue" -- every window, regardless of which
+absolute episode-position it starts at, is scored via `pred_loss.mean()`
+averaged unweighted across all 14 rollout steps, diluting any pressure to
+get a single fresh-anchor one-step prediction specifically right relative
+to a model that's merely "decent in the aggregate" over a whole rollout
+shape.** This is consistent with, not contradicted by, arbitrary window
+starts -- the issue was never about *where* real anchors appear, but that
+*no gradient signal ever specifically isolates and corrects a single
+fresh one-step prediction* the way 1b's re-anchoring tests for. The
+diluted-first-step-gradient framing is offered as a plausible mechanism,
+not itself independently proven beyond what's cited above.
+
+**Signal 16 redefinition (this finding directly requested it):** the
+version already computed in `results_stage2_amendment3.json` (1-step,
+K=16 candidate actions) is now understood to test a shorter horizon than
+what the model was ever trained on, though not necessarily wrong for
+*that* reason alone (1-step training coverage should exist within the
+15-step budget) -- redefining anyway per the user's explicit request, to
+match the model's own trained rollout length exactly: see
+`signal_16_v2_rollout_matched.py` below, this replaces (not supplements)
+the original signal 16 in the final table. Old 1-step results kept in
+`results_stage2_amendment3.json` for the record, but not reported in the
+final combined table.
+
 ## Part A: action-connectivity check (paradox: ratio=1.0000 but planner gets 80% on hard) -- RESOLVED
 
 User's framing: obs prediction's real/shuffled-action ratio was 1.0000, but
