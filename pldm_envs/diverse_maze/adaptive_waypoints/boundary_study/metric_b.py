@@ -174,20 +174,45 @@ def top_down_split(z, n_boundaries=5, min_seg=None):
 
 
 def bottom_up_merge(z, n_boundaries=5, min_seg=None):
-    """Algorithm 15: start with every interior point as a boundary, repeatedly
-    remove the boundary whose removal costs least (in total squared
-    reconstruction error of the newly-merged segment), until n_boundaries
-    remain. min_seg=None -> pure cost-based merging throughout. min_seg=int
-    -> if any segment is shorter than min_seg once we reach n_boundaries,
-    keep force-merging the boundary adjacent to the shortest such segment
-    (cheaper of its two neighbor-merges) until all segments satisfy
-    min_seg -- a documented simplification, not a globally optimal
-    constrained solution (that's what oracle_boundaries is for)."""
-    T = z.shape[0] - 1
-    boundaries = list(range(1, T))
+    """Algorithm 15: repeatedly remove the boundary whose removal costs
+    least (smallest resulting increase in squared reconstruction error),
+    until n_boundaries remain.
 
-    def total_cost(anchors):
-        return sum(segment_cost(z, a, b)[0] for a, b in zip(anchors[:-1], anchors[1:]))
+    BUG FOUND AND FIXED (2026-09-30, see PROGRESS.md "bottom-up cliff"
+    investigation): the original version always started from EVERY
+    interior point as a boundary (ignoring min_seg entirely), merged down
+    to exactly n_boundaries via pure unconstrained cost-minimization, and
+    only THEN tried to patch min_seg violations post-hoc (force-merge the
+    shortest-segment's cheaper neighbor, re-split the largest remaining
+    segment at its midpoint). Since merging only ever GROWS segments, that
+    first phase produced the IDENTICAL unconstrained-optimal 5 boundaries
+    regardless of min_seg's value -- the only thing min_seg changed was how
+    much ad-hoc, low-quality post-hoc repair got layered on top, which is
+    exactly why min_seg=1 (trivially no violations, no repair) gave the
+    true result while min_seg=2..8 were each degraded by a differing
+    amount of patching -- a discontinuous artifact of the implementation,
+    not a real property of the algorithm or the data.
+
+    Fixed by building min_seg into the merge from the start: initialize
+    with min_seg-SIZED atomic segments (boundaries at every min_seg-th
+    point), not every single point. Since merging only grows segments,
+    every segment stays >= min_seg throughout the entire process -- no
+    post-hoc repair needed, and the result varies smoothly with min_seg
+    (more, finer atomic chunks to start from as min_seg shrinks), matching
+    top_down_split's already-smooth behavior. min_seg=None keeps the
+    original every-point start (true unconstrained baseline, unaffected by
+    this bug since it never entered the buggy branch)."""
+    T = z.shape[0] - 1
+    if min_seg:
+        # stop early enough that the FINAL segment (last boundary -> T)
+        # also satisfies min_seg -- T isn't generally a multiple of
+        # min_seg, so a naive range(min_seg, T, min_seg) can leave a
+        # too-short leftover last segment (caught by an assertion while
+        # testing this fix: min_seg=8 on T=60 gives boundaries ending at
+        # 56, leaving a length-4 final segment).
+        boundaries = list(range(min_seg, T - min_seg + 1, min_seg))
+    else:
+        boundaries = list(range(1, T))
 
     while len(boundaries) > n_boundaries:
         anchors = [0] + boundaries + [T]
@@ -199,40 +224,22 @@ def bottom_up_merge(z, n_boundaries=5, min_seg=None):
                 best_cost, best_idx = cost, i
         del boundaries[best_idx - 1]
 
-    if min_seg:
-        for _ in range(200):  # safety cap on iterations
-            anchors = [0] + boundaries + [T]
-            gaps = [anchors[i + 1] - anchors[i] for i in range(len(anchors) - 1)]
-            if min(gaps) >= min_seg or len(boundaries) == 0:
-                break
-            short_i = int(np.argmin(gaps))  # segment index with the violation
-            # remove whichever of that segment's two bounding INTERIOR
-            # boundaries is cheaper to merge away (can't remove 0 or T)
-            candidates = []
-            if short_i > 0:
-                candidates.append(short_i - 1)  # boundaries index for anchors[short_i]
-            if short_i < len(gaps) - 1:
-                candidates.append(short_i)  # boundaries index for anchors[short_i+1]
-            if not candidates:
-                break
-            costs = []
-            for bi in candidates:
-                trial = boundaries[:bi] + boundaries[bi + 1 :]
-                costs.append(total_cost([0] + trial + [T]))
-            remove_bi = candidates[int(np.argmin(costs))]
-            del boundaries[remove_bi]
-            # re-fill back up to n_boundaries greedily via top_down on the
-            # resulting largest segment, if we dropped below n_boundaries
-            while len(boundaries) < n_boundaries:
-                anchors2 = [0] + boundaries + [T]
-                seg_lens = [(anchors2[i + 1] - anchors2[i], i) for i in range(len(anchors2) - 1)]
-                seg_lens.sort(reverse=True)
-                _, i = seg_lens[0]
-                a, b = anchors2[i], anchors2[i + 1]
-                mid = (a + b) // 2
-                if a < mid < b and mid not in boundaries:
-                    boundaries.append(mid)
-                    boundaries.sort()
-                else:
-                    break
+    # only reachable if min_seg was large enough that fewer than
+    # n_boundaries atomic chunks existed to begin with -- pad via
+    # top_down-style splitting of the largest remaining segment, same
+    # min_seg-respecting feasibility check as top_down_split.
+    while len(boundaries) < n_boundaries:
+        anchors = [0] + boundaries + [T]
+        seg_lens = [(anchors[i + 1] - anchors[i], i) for i in range(len(anchors) - 1)]
+        seg_lens.sort(reverse=True)
+        _, i = seg_lens[0]
+        a, b = anchors[i], anchors[i + 1]
+        if min_seg and b - a < 2 * min_seg:
+            break  # can't split further without violating min_seg
+        mid = (a + b) // 2
+        if a < mid < b and mid not in boundaries:
+            boundaries.append(mid)
+            boundaries.sort()
+        else:
+            break
     return sorted(boundaries)
