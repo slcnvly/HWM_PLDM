@@ -387,13 +387,24 @@ probe: 1000 episodes) using exact DP optimization of Metric B (the
 `dp_segmentation` method -- identical format to `compute_changepoints.py`'s
 own output, directly loadable by `AdaptiveD4RLDataset` unchanged).
 
-[PENDING -- `generate_dp_segmentation_cache.py` still running at time of
-writing, ETA ~5 hours from launch (oracle DP's per-episode cost, ~8.4s/ep x
-2250 episodes, is the dominant cost -- a known, pure-CPU, no-GPU-needed
-batch job). Will fill in final wall-clock time and confirm both output
-file paths once complete:
-`pldm_envs/diverse_maze/datasets/r50_local/r50_dataset/main/
-changepoints_minseg8.pt` and the `probe/` equivalent.]
+**Done.** Total wall-clock time: 15,527s (258.8 min, ~4h19m) on local CPU,
+no GPU needed -- oracle DP's per-episode cost (~8-9s/episode, pure Python
+O(T^2) segment-cost evaluation) is the dominant cost across all 2250
+episodes. Both splits fully covered, verified by loading back and
+checking episode counts:
+
+| split | episodes covered | file path |
+|---|---|---|
+| main | 1250/1250 | `pldm_envs/diverse_maze/datasets/r50_local/r50_dataset/main/changepoints_minseg8.pt` |
+| probe | 1000/1000 | `pldm_envs/diverse_maze/datasets/r50_local/r50_dataset/probe/changepoints_minseg8.pt` |
+
+Format confirmed identical to `compute_changepoints.py`'s own output and
+directly compatible with `AdaptiveD4RLDataset.__init__` (`d4rl_adaptive.py:
+24-28`) with zero code changes: `{episode_idx: [b1,b2,b3,b4,b5]}`, e.g.
+`main[0] = [8, 16, 25, 36, 48]`. To use for a Kaggle fine-tuning run: copy
+the file matching your actual training `data.p`'s directory next to it,
+named `changepoints_minseg8.pt`, and point `AdaptiveD4RLDataset(config,
+min_seg=8, ...)` at that `config.path` as usual -- no other wiring needed.
 
 ## 10. Per the stop condition (PREREGISTRATION.md §8)
 

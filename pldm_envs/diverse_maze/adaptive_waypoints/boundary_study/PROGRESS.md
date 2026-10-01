@@ -3,7 +3,16 @@
 Read this file first if resuming after a session break. Update it at the end
 of every stage (or sub-step within a long stage) -- commit + push each time.
 
-## Status: Stage 1 COMPLETE. Root-cause investigation DONE (see diagnostic below). Stage 2 (predictor-free signals) code written; driver script + run still pending.
+## Status: Study complete through Metric A + dp_segmentation cache. See `RESULTS.md` for the condensed final writeup. GPU fine-tuning/eval (does the Metric B gain translate to planning success) explicitly NOT done here, per instruction -- the dp_segmentation cache is prepared for that as a follow-up on Kaggle.
+
+**dp_segmentation cache: DONE** (2026-10-01). Full r50, min_seg=8, both
+splits, 15,527s (~4h19m) local CPU. Cache files are in the (gitignored)
+local dataset directory, NOT in git:
+- `pldm_envs/diverse_maze/datasets/r50_local/r50_dataset/main/changepoints_minseg8.pt` (1250/1250 episodes)
+- `pldm_envs/diverse_maze/datasets/r50_local/r50_dataset/probe/changepoints_minseg8.pt` (1000/1000 episodes)
+Verified format matches `compute_changepoints.py`'s own output exactly,
+loadable by `AdaptiveD4RLDataset` unmodified. See RESULTS.md §9 for the
+one-line usage note.
 
 ## Root-cause investigation (user's 3 follow-up checks, post-Amendment-2) -- DONE, diagnostic only (not Amendment 3)
 
