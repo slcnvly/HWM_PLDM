@@ -287,16 +287,96 @@ improvement moves from +9.6% to +27.9% (peak at min_seg=3) over the same
 range -- the Metric B upside dominates the encoding-loss cost at every
 point tested.
 
-## 8. Metric A vs Metric B
+## 8. Metric A vs Metric B: they substantially DISAGREE
 
-[PENDING -- run_metric_a.py rerun with the fixed bottom_up_merge still
-running; this section will report: step-level AUROC/AP for the 9 scalar
-signals (+16v2 obs/proprio), boundary-level precision/recall/F1 overall
-and per event type for all 13 candidates (renaming "oracle" to
-"dp_segmentation" throughout per the user's framing -- it is not cheating,
-it uses the same real latent trajectory every other method sees, just
-finds the Metric-B-exact optimum via DP instead of a heuristic), bootstrap
-95% CIs, and the Metric A-vs-B rank comparison with Spearman correlation.]
+300-episode sample (main), min_seg=8. "oracle" below = `dp_segmentation`
+(renamed per the user's framing -- it uses the exact same real latent
+trajectory every other candidate sees; it just finds the Metric-B-exact
+optimum via DP instead of a heuristic. Not cheating, just a different,
+better signal for the same job).
+
+**Overall boundary-level F1 (+/-2 step tolerance), with 95% bootstrap CI
+(n=10000), ranked by Metric A F1, alongside each candidate's Metric B
+rank:**
+
+| name | Metric A F1 (95% CI) | A rank | Metric B % improve | B rank | \|rank diff\| |
+|---|---|---|---|---|---|
+| signal_11 | 0.598 [0.583, 0.613] | 1 | -38.7% | 12 | **11** |
+| signal_7 | 0.594 [0.579, 0.609] | 2 | -26.8% | 10 | 8 |
+| signal_6 | 0.579 [0.564, 0.593] | 3 | -16.1% | 8 | 5 |
+| signal_12 | 0.557 [0.541, 0.573] | 4 | -32.1% | 11 | 7 |
+| bottom_up | 0.527 [0.513, 0.541] | 5 | +9.6% | 2 | 3 |
+| signal_8 | 0.523 [0.506, 0.538] | 6 | -23.3% | 9 | 3 |
+| signal_10 | 0.514 [0.499, 0.530] | 7 | -14.2% | 7 | 0 |
+| top_down | 0.514 [0.498, 0.530] | 8 | -2.6% | 5 | 3 |
+| random | 0.511 [0.498, 0.524] | 9 | -0.7% | 4 | 5 |
+| fixed | 0.509 [0.495, 0.524] | 10 | 0.0% | 3 | 7 |
+| signal_13 | 0.493 [0.477, 0.509] | 11 | -6.0% | 6 | 5 |
+| **dp_segmentation (oracle)** | **0.452 [0.436, 0.467]** | **12 (worst)** | **+31.3% (best)** | **1** | **11** |
+
+**Spearman rho (Metric A F1 vs Metric B % improvement) = -0.769 (p=0.0034)
+-- strong, statistically significant NEGATIVE correlation.** This is not
+noise: `dp_segmentation`'s F1 CI [0.436, 0.467] and signal_11's CI [0.583,
+0.613] don't overlap at all. **The signal that's exactly optimal for
+Metric B is the single WORST at finding physically meaningful events, and
+vice versa.**
+
+**Step-level AUROC (95% CI), 7 signals + signal_16v2 (separate, 50-episode
+sample, see PROGRESS.md for why its sample wasn't scaled up):**
+
+| | AUROC | 95% CI |
+|---|---|---|
+| signal_12 | 0.561 | [0.552, 0.571] |
+| signal_11 | 0.561 | [0.549, 0.572] |
+| signal_6 | 0.538 | [0.522, 0.554] |
+| signal_13 | 0.535 | [0.519, 0.551] |
+| signal_8 | 0.524 | [0.514, 0.534] |
+| signal_10 | 0.516 | [0.505, 0.527] |
+| signal_7 | 0.512 | [0.502, 0.522] |
+| signal_16v2_proprio | 0.481 | (n=50, noisier) |
+| signal_16v2_obs | 0.480 | (n=50, noisier) |
+
+None of the 9 continuous signals clear AUROC~0.6 -- the BEST (signal_11/
+12, curvature-based) are only modestly above chance (0.5), and this is
+exactly the inverse of their Metric B rank (11/12 are the two WORST
+Metric B signals). signal_16v2 (predictor-based, action-sensitivity) sits
+at or slightly below chance for event-finding too.
+
+**Per-event-type F1 (overall table above is pooled across all 4 types) --
+a consistent pattern across every candidate, not specific to any one
+method:**
+
+| | wall_contact | direction_turn | corridor_change | junction_arrival |
+|---|---|---|---|---|
+| best performer | signal_11 (0.473) | signal_7 (0.534) | top_down/signal_13 (0.208) | fixed (0.168) |
+| dp_segmentation (oracle) | 0.349 (worst) | 0.299 (worst) | 0.208 | 0.152 |
+
+**wall_contact and direction_turn (the two higher-base-rate events, 16.7%
+and 18.7% of steps) are where every method does best, and where
+dp_segmentation specifically does WORST** -- consistent with the
+headline finding: a sharp turn or a near-wall moment is exactly the kind
+of point where the latent trajectory is hard to LINEARLY RECONSTRUCT
+*through* (locally erratic), so Metric-B-optimal DP segmentation actively
+avoids anchoring boundaries there, while a human/physical-event detector
+is drawn to exactly those points. corridor_change and junction_arrival
+(rarer, 3.3%/2.4%) are hard for everyone (F1 0.12-0.21 across the board) --
+not a method-specific weakness.
+
+**Bottom line for this section: Metric A and Metric B are not proxies for
+each other on this data -- they are, if anything, in tension.** A
+boundary-placement method tuned for one will tend to do worse on the
+other. This is itself one of this study's clearest findings, independent
+of which metric anyone considers "more important" for a given downstream
+use.
+
+Scripts: `run_metric_a.py`, `run_metric_a_signal16v2.py`,
+`bootstrap_ci_metric_a.py`, `compare_metric_a_b.py`. Raw results:
+`results_metric_a.json`, `results_metric_a_signal16v2.json`,
+`results_bootstrap_ci_metric_a.json`, `results_metric_a_vs_b.json`.
+**Not yet done**: Metric A on the held-out report set (probe) -- this
+section used main (the selection set) throughout, per the original
+preregistered split; a report-set confirmation is natural future work,
+not completed here.
 
 ## 9. dp_segmentation cache for the full r50 dataset
 

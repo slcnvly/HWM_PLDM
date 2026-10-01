@@ -18,6 +18,8 @@ def main():
         metric_b_stage2 = json.load(f)["summary"]
     with open(os.path.join(HERE, "results_stage2_amendment3.json")) as f:
         metric_b_amend3 = json.load(f)
+    with open(os.path.join(HERE, "results_min_seg_sweep.json")) as f:
+        metric_b_sweep = json.load(f)["summary"]["8"]  # post-bugfix, min_seg=8
 
     # Metric B (% improvement over fixed) for the 12 main-sample candidates,
     # min_seg=8 versions specifically for top_down/bottom_up.
@@ -29,8 +31,12 @@ def main():
         "signal_11": metric_b_amend3["signal_11_curvature"]["improvement_over_fixed"],
         "signal_12": metric_b_amend3["signal_12_norm_curvature"]["improvement_over_fixed"],
         "signal_13": metric_b_amend3["signal_13_chord_dev"]["improvement_over_fixed"],
-        "top_down": metric_b_amend3["top_down_minseg8"]["improvement_over_fixed"],
-        "bottom_up": metric_b_amend3["bottom_up_minseg8"]["improvement_over_fixed"],
+        # bottom_up/top_down pulled from the POST-BUGFIX min_seg=8 sweep
+        # (results_stage2_amendment3.json's bottom_up_minseg8 is stale --
+        # computed before the bottom_up_merge min_seg bug was fixed, see
+        # PROGRESS.md "bottom_up_merge bug: found, fixed, full sweep rerun").
+        "top_down": metric_b_sweep["top_down"]["improvement_over_fixed"],
+        "bottom_up": metric_b_sweep["bottom_up"]["improvement_over_fixed"],
         "fixed": 0.0,
         "random": metric_b_stage2["random"]["improvement_over_fixed"],
         "oracle": metric_b_stage2["oracle"]["improvement_over_fixed"],

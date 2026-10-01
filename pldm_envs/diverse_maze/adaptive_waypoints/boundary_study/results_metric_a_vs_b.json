@@ -1,0 +1,102 @@
+{
+  "spearman_rho": -0.7692307692307694,
+  "spearman_p": 0.0034464502618274493,
+  "table": [
+    {
+      "name": "signal_11",
+      "metric_a_f1": 0.5977456500675402,
+      "a_rank": 1,
+      "metric_b_pct_improve": -38.723261714337085,
+      "b_rank": 12,
+      "rank_diff": 11
+    },
+    {
+      "name": "signal_7",
+      "metric_a_f1": 0.5941388006291498,
+      "a_rank": 2,
+      "metric_b_pct_improve": -26.758302928741568,
+      "b_rank": 10,
+      "rank_diff": 8
+    },
+    {
+      "name": "signal_6",
+      "metric_a_f1": 0.5788609679217186,
+      "a_rank": 3,
+      "metric_b_pct_improve": -16.137709822269226,
+      "b_rank": 8,
+      "rank_diff": 5
+    },
+    {
+      "name": "signal_12",
+      "metric_a_f1": 0.557302570098715,
+      "a_rank": 4,
+      "metric_b_pct_improve": -32.068940135378696,
+      "b_rank": 11,
+      "rank_diff": 7
+    },
+    {
+      "name": "bottom_up",
+      "metric_a_f1": 0.526954207247298,
+      "a_rank": 5,
+      "metric_b_pct_improve": 9.641458152014433,
+      "b_rank": 2,
+      "rank_diff": 3
+    },
+    {
+      "name": "signal_8",
+      "metric_a_f1": 0.5224976004881444,
+      "a_rank": 6,
+      "metric_b_pct_improve": -23.33107576917996,
+      "b_rank": 9,
+      "rank_diff": 3
+    },
+    {
+      "name": "signal_10",
+      "metric_a_f1": 0.5142884889934775,
+      "a_rank": 7,
+      "metric_b_pct_improve": -14.168709972624669,
+      "b_rank": 7,
+      "rank_diff": 0
+    },
+    {
+      "name": "top_down",
+      "metric_a_f1": 0.5136163842657563,
+      "a_rank": 8,
+      "metric_b_pct_improve": -2.594298221585996,
+      "b_rank": 5,
+      "rank_diff": 3
+    },
+    {
+      "name": "random",
+      "metric_a_f1": 0.511219819711797,
+      "a_rank": 9,
+      "metric_b_pct_improve": -0.7354480936233753,
+      "b_rank": 4,
+      "rank_diff": 5
+    },
+    {
+      "name": "fixed",
+      "metric_a_f1": 0.5091370240065827,
+      "a_rank": 10,
+      "metric_b_pct_improve": 0.0,
+      "b_rank": 3,
+      "rank_diff": 7
+    },
+    {
+      "name": "signal_13",
+      "metric_a_f1": 0.4930126532392906,
+      "a_rank": 11,
+      "metric_b_pct_improve": -5.950337513995634,
+      "b_rank": 6,
+      "rank_diff": 5
+    },
+    {
+      "name": "oracle",
+      "metric_a_f1": 0.45159337695537716,
+      "a_rank": 12,
+      "metric_b_pct_improve": 31.299006481673892,
+      "b_rank": 1,
+      "rank_diff": 11
+    }
+  ]
+}
