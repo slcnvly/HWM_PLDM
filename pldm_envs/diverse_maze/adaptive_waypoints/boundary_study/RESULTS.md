@@ -29,10 +29,11 @@ Amendments 1-3.
    compress/decompress through the fixed-10-step scheme with near-zero
    loss; long segments are where the real cost is, and min_seg only
    bounds the minimum, never the maximum.
-5. **Metric A and Metric B substantially disagree** (Spearman rho -- see
-   below) -- "physically/humanly meaningful moment" and "good anchor for
-   piecewise-linear latent reconstruction" are measuring different
-   things, not proxies for each other.
+5. ~~Metric A and Metric B substantially disagree~~ **(superseded by §11)**:
+   the -0.769 Spearman was driven by jitter-dominated event labels. Under
+   de-jittered labels it shrinks to -0.28 (n.s.), and no candidate
+   (dp_segmentation included) aligns with physical events better than
+   random. Metric A as defined cannot rank boundary methods.
 6. **Open question, explicitly not answered here**: does the Metric B
    gain from DP/bottom-up segmentation translate into better *planning
    success*? That requires fine-tuning + eval rollouts, out of scope for
@@ -429,3 +430,101 @@ piecewise-linear fit reconstruct the latent trajectory) -- a real test
 needs the GPU fine-tuning + MPC eval pipeline this study was explicitly
 scoped to avoid. The `dp_segmentation` cache (§9) is prepared specifically
 to make that follow-up possible without re-deriving anything.
+
+## 11. Metric A label-noise check (2026-10-01): the original event labels were jitter-dominated
+
+**Question.** §8's Spearman(Metric A F1, Metric B) = -0.769 could mean the two
+metrics really measure opposite things, or that Metric A's labels mostly
+tag frame-level jitter. The original wall_contact (near wall + speed lower
+than the previous frame) and direction_turn (45 deg vs the 3-frame mean)
+fire on 16.7% / 18.5% of steps, i.e. ~10-11 "events" each per 60-step
+episode, which is more than a 6-segment trajectory can physically contain.
+
+**Coarse labels** (`event_labels_coarse.py`): turn = angle between v[f-10]
+and v[f] >= 90 deg (placed at the window centre); wall contact = near wall AND
+>= 3 consecutive decelerating steps. Corridor/junction unchanged. Each run
+of consecutive flags is collapsed to one event at its midpoint
+(**primary**). The non-collapsed per-frame variant is also reported. Same 300
+episodes, same PCA, same random-boundary RNG stream as §8. The original-label
+column reproduces `results_metric_a.json` exactly. Script
+`run_metric_a_coarse.py`. Results are in `results_metric_a_coarse.json`,
+`results_metric_a_coarse_vs_b.json` and `results_metric_a_coarse_bootstrap_vs_random.json`.
+
+**Event rates (fraction of steps / events per episode)**
+
+| type | original | coarse, collapsed (primary) | coarse, per-frame |
+|---|---|---|---|
+| wall_contact | 16.7% / 10.0 | 2.3% / 1.4 | 3.9% / 2.3 |
+| direction_turn | 18.5% / 11.1 | 7.5% / 4.5 | 28.6% / 17.2 |
+| corridor_change | 3.4% / 2.0 | same | same |
+| junction_arrival | 2.4% / 1.4 | same | same |
+| pooled | 31.9% / 19.1 | 13.5% / 8.1 | 34.3% / 20.6 |
+
+(A 90-degree net heading change over 10 steps is *common* frame by frame
+(28.6%) because one physical turn makes ~5-10 consecutive windows qualify.
+The collapsed variant counts it once.)
+
+**Metric A overall F1 minus random F1 (paired bootstrap 95% CI, n=300)**
+
+| candidate | original labels | coarse collapsed (primary) | coarse per-frame |
+|---|---|---|---|
+| signal_11 | **+0.087 [+0.070,+0.103]** | +0.020 [-0.003,+0.044] | -0.009 [-0.024,+0.006] |
+| signal_7 | **+0.083 [+0.066,+0.100]** | +0.013 [-0.009,+0.036] | -0.017 [-0.032,-0.002] |
+| signal_6 | **+0.068 [+0.052,+0.083]** | -0.008 [-0.031,+0.016] | -0.008 [-0.023,+0.008] |
+| signal_12 | **+0.046 [+0.029,+0.064]** | -0.014 [-0.037,+0.009] | -0.023 [-0.038,-0.008] |
+| bottom_up | +0.016 [-0.000,+0.032] | -0.004 [-0.026,+0.019] | **+0.018 [+0.002,+0.033]** |
+| signal_8 | +0.011 [-0.007,+0.029] | -0.025 [-0.047,-0.003] | -0.027 [-0.042,-0.011] |
+| signal_10 | +0.003 [-0.013,+0.020] | -0.025 [-0.050,-0.001] | -0.021 [-0.036,-0.005] |
+| top_down | +0.002 [-0.014,+0.019] | -0.017 [-0.039,+0.006] | -0.030 [-0.045,-0.015] |
+| fixed | -0.002 [-0.005,+0.001] | +0.001 [-0.003,+0.005] | -0.000 [-0.003,+0.002] |
+| signal_13 | -0.018 [-0.036,-0.001] | -0.024 [-0.047,-0.000] | -0.033 [-0.049,-0.018] |
+| oracle (dp_segmentation) | -0.060 [-0.075,-0.045] | -0.035 [-0.057,-0.013] | -0.007 [-0.023,+0.008] |
+| random F1 (absolute) | 0.511 | 0.517 | 0.571 |
+
+Step-level AUROC stays at 0.50-0.59 under every label set (best: signal_13
+0.593 collapsed / 0.629 per-frame, signal_11 0.555 / 0.554).
+
+**Spearman(Metric A F1, Metric B % improvement), 12 candidates**
+
+| label set | rho | p |
+|---|---|---|
+| original | -0.769 | 0.003 |
+| coarse collapsed (primary) | -0.280 | 0.379 |
+| coarse per-frame | +0.490 | 0.106 |
+
+**dp_segmentation noise sensitivity** (±2-step centred moving average of the
+latent trajectory, exact DP re-run, min_seg=8, 300 episodes): **89.1%** of
+original boundaries have a smoothed boundary within ±2 steps. 43.9% match
+exactly, the mean shift is 1.04 steps, and in 65.7% of episodes all 5
+boundaries stay within ±2. The recomputed unsmoothed boundaries matched the
+full-r50 cache in 300/300 episodes.
+
+**Interpretation.**
+- **The original Metric A advantage of signals 6/7/11/12 was a product of
+  the jittery labels.** All four beat random significantly under the
+  original labels, and none does under the primary coarse labels. Under the
+  per-frame coarse labels, signals 7 and 12 fall significantly *below*
+  random. The latent-speed and curvature signals line up with frame-level
+  deceleration and heading wobbles, which is exactly what the original
+  wall/turn definitions mostly tagged.
+- **The strong negative Spearman (-0.769) does not survive relabeling. It
+  shrinks to -0.28 (n.s.) and does not robustly flip positive.** The
+  per-frame variant gives +0.49, but that is not significant and depends
+  on the labeling choice. So the original "A and B substantially disagree"
+  (§8) is withdrawn as a finding: it was driven by label noise. The
+  corrected statement is that **no candidate, dp_segmentation included,
+  shows a reliable alignment with physical events beyond random under
+  de-jittered labels**. Metric A as defined cannot rank boundary methods,
+  and nothing here supports a claim in either direction about whether
+  Metric-B-good boundaries are physically meaningful.
+- dp_segmentation is *below* random on Metric A under the original and
+  collapsed labels (-0.060, -0.035). It places boundaries where the latent
+  path bends, and those points are not systematically ±2 steps from
+  labeled events. It is ~tied with random under per-frame labels.
+- **dp_segmentation boundaries are moderately stable to latent noise**
+  (89% within ±2 under ±2 smoothing). They are not jitter-driven in the way
+  the original labels were. But ~1/3 of episodes move at least one of
+  their 5 boundaries by more than 2 steps, so per-boundary placement is
+  not tightly determined.
+
+§8's conclusion (5 in the tl;dr) is superseded by this section.

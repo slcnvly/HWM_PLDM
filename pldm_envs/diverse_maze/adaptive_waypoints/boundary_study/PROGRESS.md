@@ -51,6 +51,16 @@ of every stage (or sub-step within a long stage) -- commit + push each time.
   **Decision:** the existing exact `oracle_boundaries` is used for the
   smoothing test (no new fast DP implementation) -- slower (~1.5h) but no
   new code path to validate.
+- **B DONE** (~55 min; wandb run wd1cmt97). The original-label column reproduces
+  results_metric_a.json exactly, and the recomputed oracle matches the r50
+  cache 300/300. Signals 6/7/11/12 beat random under original labels but
+  NONE does under the collapsed coarse labels (paired bootstrap). Spearman
+  is -0.769 -> -0.280 (n.s.) collapsed / +0.490 (n.s.) per-frame. dp
+  smoothing: 89.1% of boundaries within ±2, 43.9% exact, 65.7% of episodes
+  have all 5 within ±2. Write-up: RESULTS.md §11 (tl;dr item 5 superseded).
+  **Decision:** an extra paired bootstrap vs random was added
+  (results_metric_a_coarse_bootstrap_vs_random.json), because the raw F1
+  differences are small and need CIs to read.
 
 **dp_segmentation cache: DONE** (2026-10-01). Full r50, min_seg=8, both
 splits, 15,527s (~4h19m) local CPU. Cache files are in the (gitignored)
