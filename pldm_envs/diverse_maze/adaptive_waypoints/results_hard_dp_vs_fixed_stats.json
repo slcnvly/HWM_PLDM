@@ -1,0 +1,83 @@
+{
+  "table": {
+    "baseline (SS6b)": {
+      "k": 96,
+      "n": 120,
+      "rate": 0.8,
+      "wilson95": [
+        0.7196332649371805,
+        0.8617552352115975
+      ],
+      "avg_steps_successes": 169.6
+    },
+    "fixed-interval control (SS6b, historic)": {
+      "k": 110,
+      "n": 120,
+      "rate": 0.9166666666666666,
+      "wilson95": [
+        0.8533776783593434,
+        0.9541063496250703
+      ],
+      "avg_steps_successes": 169.5
+    },
+    "adaptive signal-1 min_seg=8 (SS6b)": {
+      "k": 111,
+      "n": 120,
+      "rate": 0.925,
+      "wilson95": [
+        0.8635908239400624,
+        0.9600428846040397
+      ],
+      "avg_steps_successes": 155.1
+    },
+    "fixed-interval control (re-eval, same instances)": {
+      "k": 106,
+      "n": 120,
+      "rate": 0.8833333333333333,
+      "wilson95": [
+        0.8136664838239611,
+        0.9292188219216995
+      ],
+      "avg_steps_successes": 172.61320754716982
+    },
+    "adaptive dp_segmentation min_seg=8 (new)": {
+      "k": 107,
+      "n": 120,
+      "rate": 0.8916666666666667,
+      "wilson95": [
+        0.8234463978470834,
+        0.9355885884582658
+      ],
+      "avg_steps_successes": 156.0467289719626
+    }
+  },
+  "mcnemar_dp_vs_fixed_reeval": {
+    "dp_success_fixed_fail": 7,
+    "dp_fail_fixed_success": 6,
+    "both_success": 100,
+    "both_fail": 7,
+    "exact_p_two_sided": 1.0
+  },
+  "mann_whitney_steps_successes": {
+    "n_dp": 107,
+    "n_fixed": 106,
+    "median_dp": 142.0,
+    "median_fixed": 162.0,
+    "U": 4822.5,
+    "p_two_sided": 0.05934064975328552
+  },
+  "paired_steps_on_both_success": {
+    "n": 100,
+    "mean_diff_dp_minus_fixed": -17.33,
+    "median_diff": -15.5,
+    "n_dp_faster": 62,
+    "n_fixed_faster": 37,
+    "wilcoxon_p_two_sided": 0.014764569448202643
+  },
+  "sanity": {
+    "max_success_steps": 483.0,
+    "fail_steps_unique": [
+      485.0
+    ]
+  }
+}

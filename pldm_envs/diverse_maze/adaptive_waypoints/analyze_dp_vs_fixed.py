@@ -7,15 +7,17 @@ import os
 import sys
 
 import numpy as np
-from scipy.stats import binomtest, mannwhitneyu
-from statsmodels.stats.proportion import proportion_confint
+from scipy.stats import binomtest, mannwhitneyu, norm, wilcoxon
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def wilson(k, n):
-    lo, hi = proportion_confint(k, n, alpha=0.05, method="wilson")
-    return float(lo), float(hi)
+def wilson(k, n, alpha=0.05):
+    z = norm.ppf(1 - alpha / 2)
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return float(centre - half), float(centre + half)
 
 
 def load(path, key):
@@ -63,7 +65,10 @@ def main(dp_path, fixed_path):
         "paired_steps_on_both_success": {
             "n": int(both_mask.sum()), "mean_diff_dp_minus_fixed": float(paired_diff.mean()),
             "median_diff": float(np.median(paired_diff)),
+            "n_dp_faster": int((paired_diff < 0).sum()), "n_fixed_faster": int((paired_diff > 0).sum()),
+            "wilcoxon_p_two_sided": float(wilcoxon(paired_diff).pvalue),
         },
+        "sanity": {"max_success_steps": float(max(a.max(), b.max())), "fail_steps_unique": sorted(set(np.concatenate([dp_t[dp_s == 0], fx_t[fx_s == 0]]).tolist()))},
     }
     json.dump(out, open(os.path.join(HERE, "results_hard_dp_vs_fixed_stats.json"), "w"), indent=2)
     print(json.dumps(out, indent=2))

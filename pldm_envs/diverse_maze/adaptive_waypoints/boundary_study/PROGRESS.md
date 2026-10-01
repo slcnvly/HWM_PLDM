@@ -5,7 +5,7 @@ of every stage (or sub-step within a long stage) -- commit + push each time.
 
 ## Status: Study complete through Metric A + dp_segmentation cache. See `RESULTS.md` for the condensed final writeup. GPU fine-tuning/eval (does the Metric B gain translate to planning success) explicitly NOT done here, per instruction -- the dp_segmentation cache is prepared for that as a follow-up on Kaggle.
 
-## Follow-up 2026-10-01 (user away, full autonomy): GPU dp_segmentation run + Metric A label-noise check -- IN PROGRESS
+## Follow-up 2026-10-01 (user away, full autonomy): GPU dp_segmentation run + Metric A label-noise check -- DONE
 
 ### A. GPU: fine-tune on the dp_segmentation cache (Kaggle)
 - Dataset `seungwonryoo/hwm-dp-segmentation-cache` (dp_main/dp_probe_changepoints_minseg8.pt;
@@ -32,6 +32,13 @@ of every stage (or sub-step within a long stage) -- commit + push each time.
   MPCReport files.
 - Analysis: `adaptive_waypoints/analyze_dp_vs_fixed.py` (Wilson, exact McNemar
   with flip counts, Mann-Whitney U on steps among successes).
+- **A DONE.** dp 107/120 (89.2%, 156.0 steps) vs fixed re-eval 106/120
+  (88.3%, 172.6 steps; historic 110/120). McNemar 7 vs 6, p=1.0.
+  Mann-Whitney p=0.059. **Decision:** added a paired Wilcoxon signed-rank on
+  the 100 both-solved instances (p=0.015, dp faster on 62/99), because the
+  design is paired. It is labelled post hoc/supplementary in the write-up.
+  Write-up: `adaptive_waypoints/RESULTS.md` §9. analyze_dp_vs_fixed.py uses
+  its own Wilson formula (statsmodels is not in the local venv).
 
 ### B. CPU: Metric A label-noise check
 - `event_labels_coarse.py`: turn = angle(v[f-10], v[f]) >= 90 deg, placed at

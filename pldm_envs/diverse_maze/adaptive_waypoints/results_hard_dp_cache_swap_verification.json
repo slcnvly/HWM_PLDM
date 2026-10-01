@@ -1,0 +1,30 @@
+{
+  "loaded_path": "/kaggle/working/HWM_PLDM/pldm_envs/diverse_maze/datasets/main/changepoints_minseg8.pt",
+  "main_n": 1250,
+  "main0": [
+    8,
+    16,
+    25,
+    36,
+    48
+  ],
+  "probe_n": 1000,
+  "probe0": [
+    8,
+    16,
+    24,
+    33,
+    46
+  ],
+  "signal1_backup_main0": [
+    10,
+    18,
+    26,
+    37,
+    46
+  ],
+  "signal1_backup_n": 1250,
+  "main0_ok": true,
+  "probe0_ok": true,
+  "differs_from_signal1": true
+}

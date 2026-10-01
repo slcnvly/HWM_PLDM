@@ -814,3 +814,88 @@ Kaggle kernel: `hwm-surprise-finetune-eval`
 `stage_timing.json`, `changepoints_minseg8_surprise_main.pt`/`_probe.pt`.
 `confidence_intervals.py` extended with a `n120_surprise` scale for the
 Wilson/Newcombe/permutation numbers above.
+
+## 9. dp_segmentation boundary cache: fine-tune + hard eval (n=120, paired)
+
+**What changed vs SS5/SS6b's adaptive min_seg=8 run: the boundary cache only.**
+`changepoints_minseg8.pt` next to the training `data.p` was replaced by the
+**dp_segmentation** cache (`boundary_study/RESULTS.md` §9: the exact
+dynamic-programming split minimising Metric B, i.e. piecewise-linear latent
+reconstruction error, under min_seg=8, for all 1250 main + 1000 probe
+episodes). The previous signal-1 cache was moved to
+`changepoints_minseg8_signal1_backup.pt` first. Runtime verification
+(`results_hard_dp_cache_swap_verification.json`), loaded via the exact path
+`AdaptiveD4RLDataset` builds: main[0]=[8,16,25,36,48] (dp) vs backup
+main[0]=[10,18,26,37,46] (signal 1), 1250/1000 episodes. Training emitted no
+"no precomputed changepoints" fallback warning. Everything else was held
+identical: the same HF pretrained checkpoint, load_l1_only=false, r50,
+adaptive_min_seg=8, 2 epochs, base_lr=0.0017632900482959527 (0.1x), batch
+128, num_workers=0. Eval: hard (D13-16), the same 120 instances
+(`starts_targets_13_16.pt` seed=42 x40 + `extra80_full.pt` seed=20260910 x80),
+n_steps=500, level2.mppi.num_samples=200, fixed L1 allocation, 6 resumable
+chunks of 20.
+
+**Fixed-interval control re-evaluated.** The paired tests below need
+per-trial outcomes, and SS6b kept only aggregates. So the SS6b
+fixed-interval checkpoint (`fixed_stride_finetuned.ckpt`, unchanged) was
+re-evaluated with the identical eval config on the same 120 instances. No
+training was involved. It scored **106/120**, vs 110/120 historically.
+That 4-trial gap on the same checkpoint and instances is pure MPPI
+run-to-run noise (first 40: 36 vs 35; new 80: 70 vs 75), and it is the
+scale of noise every comparison here should be read against.
+
+| Condition | Success | Wilson 95% CI | Avg steps (successes) |
+|---|---|---|---|
+| Baseline (SS6b) | 80.0% (96/120) | [72.0, 86.2] | 169.6 |
+| Fixed-interval control (SS6b, historic run) | 91.7% (110/120) | [85.3, 95.4] | 169.5 |
+| Fixed-interval control (**re-eval**, same instances) | 88.3% (106/120) | [81.4, 92.9] | 172.6 |
+| Adaptive, signal-1 cache (SS6b) | 92.5% (111/120) | [86.4, 96.0] | 155.1 |
+| **Adaptive, dp_segmentation cache (new)** | **89.2% (107/120)** | [82.3, 93.6] | **156.0** |
+
+**Paired tests, dp_segmentation vs re-evaluated fixed control (same 120 instances):**
+- **McNemar (exact binomial on discordant pairs): 7 instances flip
+  fixed-fail -> dp-success, and 6 flip fixed-success -> dp-fail.** 100 are
+  solved by both and 7 by neither. p = 1.00. Success rates are
+  indistinguishable.
+- **Mann-Whitney U, steps-to-goal among successes** (unpaired, as
+  requested): median 142 (dp, n=107) vs 162 (fixed, n=106), U=4822.5,
+  **p=0.059**.
+- Supplementary (added because the instances are paired, so this is the
+  more powerful test): **Wilcoxon signed-rank on the 100 instances both
+  solved: dp is faster on 62 and slower on 37 (1 tie). The mean difference
+  is -17.3 steps and the median -15.5, p=0.015.**
+
+**Reading.**
+- **Success rate: no effect.** dp_segmentation (89.2%) sits within MPPI
+  noise of both fixed-interval runs (88.3% / 91.7%) and of the signal-1
+  adaptive run (92.5%). The McNemar flips are balanced 7 vs 6. This repeats
+  SS6b's conclusion: on success rate, fine-tuning itself is the effect, and
+  boundary placement is not.
+- **Efficiency: the same direction as SS6b, now with a paired test.** Avg
+  steps among successes is 156.0 (dp) vs 172.6 (fixed, same run batch),
+  essentially the same as signal-1 adaptive's 155.1 vs 169.5 in SS6b. The
+  paired Wilcoxon (p=0.015) supports dp-trained checkpoints reaching the
+  goal faster on instances both solve. The unpaired Mann-Whitney the
+  analysis plan named is borderline (p=0.059), so this is suggestive, not
+  conclusive. The Wilcoxon was added post hoc.
+- **A 31% Metric B gain over fixed placement (boundary_study) did not buy
+  anything over the signal-1 cache**, which is *worse* than fixed on
+  Metric B. Both adaptive caches give ~155-156 avg steps and ~89-93%
+  success. So either Metric B is not what drives the efficiency gain, or
+  the gain comes from *any* non-uniform, episode-specific placement rather
+  than from how well that placement reconstructs the latent trajectory.
+  This experiment cannot tell those apart. The informative follow-up would
+  be a random-boundary cache (same min_seg=8), which this run did not do.
+- Caveat: n=120 on a single training seed per condition. The re-eval shows
+  ±4/120 noise from MPPI alone, and training-seed variance is unmeasured.
+
+Kernels: `hwm-dp-segmentation-finetune` (`experiments/kaggle_dp_segmentation_finetune/`,
+55 min fine-tune + 6x~71 min eval, ~8h total) and `hwm-fixed-control-reeval`
+(`experiments/kaggle_fixed_control_reeval/`, 6x~68 min eval). Dataset
+`seungwonryoo/hwm-dp-segmentation-cache`. Artifacts in this directory:
+`results_hard_dp_final.json`, `results_hard_dp_progress.json` (per-trial),
+`results_hard_fixed_reeval_final.json`, `results_hard_fixed_reeval_progress.json`
+(per-trial), `results_hard_dp_vs_fixed_stats.json`, `analyze_dp_vs_fixed.py`.
+Raw MPCReport files and the fine-tuned checkpoint
+(`dp_segmentation_minseg8_finetuned.ckpt`) are in each kernel's local
+`output/` (gitignored, not pushed).

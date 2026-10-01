@@ -34,12 +34,15 @@ Amendments 1-3.
    de-jittered labels it shrinks to -0.28 (n.s.), and no candidate
    (dp_segmentation included) aligns with physical events better than
    random. Metric A as defined cannot rank boundary methods.
-6. **Open question, explicitly not answered here**: does the Metric B
-   gain from DP/bottom-up segmentation translate into better *planning
-   success*? That requires fine-tuning + eval rollouts, out of scope for
-   this CPU-only study (per the original instruction and the most recent
-   one) -- a `dp_segmentation` boundary cache for the full r50 dataset has
-   been generated for exactly this follow-up (see below).
+6. **Follow-up answered on GPU (2026-10-01, `../RESULTS.md` §9):** fine-tuning
+   on the dp_segmentation cache, with everything else identical to SS6b, gives
+   89.2% (107/120) hard success vs 88.3% (106/120) for the fixed-interval
+   control re-evaluated on the same instances. McNemar flips are 7 vs 6,
+   p=1.0. Steps among successes: 156.0 vs 172.6 (Mann-Whitney p=0.059;
+   paired Wilcoxon on 100 both-solved instances p=0.015). These are about
+   the same numbers as the signal-1 cache (92.5%, 155.1 steps), so the 31%
+   Metric B advantage did not translate into anything beyond what signal-1
+   adaptive already gave.
 
 ## 0. Scope and what this document does not cover
 
