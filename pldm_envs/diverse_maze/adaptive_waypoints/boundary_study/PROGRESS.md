@@ -5,6 +5,53 @@ of every stage (or sub-step within a long stage) -- commit + push each time.
 
 ## Status: Study complete through Metric A + dp_segmentation cache. See `RESULTS.md` for the condensed final writeup. GPU fine-tuning/eval (does the Metric B gain translate to planning success) explicitly NOT done here, per instruction -- the dp_segmentation cache is prepared for that as a follow-up on Kaggle.
 
+## Follow-up 2026-10-01 (user away, full autonomy): GPU dp_segmentation run + Metric A label-noise check -- IN PROGRESS
+
+### A. GPU: fine-tune on the dp_segmentation cache (Kaggle)
+- Dataset `seungwonryoo/hwm-dp-segmentation-cache` (dp_main/dp_probe_changepoints_minseg8.pt;
+  verified 1250/1000 eps, main[0]=[8,16,25,36,48], probe[0]=[8,16,24,33,46]).
+- Kernel `hwm-dp-segmentation-finetune` (`experiments/kaggle_dp_segmentation_finetune/run.py`):
+  existing `changepoints_minseg8.pt` next to `data.p` moved to
+  `changepoints_minseg8_signal1_backup.pt`, dp file copied in under the original
+  name, then verified in the pldm env through the exact path
+  `AdaptiveD4RLDataset` builds (`dirname(config.path)/changepoints_minseg8.pt`);
+  the kernel aborts if main[0]!=[8,16,25,36,48] or if training logs the
+  "no precomputed changepoints" fallback. Everything else identical to the
+  SS6b adaptive run: same HF pretrained ckpt, load_l1_only=false, r50,
+  adaptive_min_seg=8, epochs=2, base_lr=0.0017632900482959527, batch 128
+  (config default), num_workers=0; eval hard, same 120 instances
+  (starts_targets_13_16.pt + extra80_full.pt), n_steps=500,
+  mppi.num_samples=200, l2_latent_bounds_percentile=2.0, 6x20 chunks, resumable.
+- **Decision: also re-evaluate the SS6b fixed-interval control** (kernel
+  `hwm-fixed-control-reeval`, `fixed_stride_finetuned.ckpt`, no training, same
+  eval). Reason: McNemar and Mann-Whitney need per-trial outcomes, and the
+  historic SS6b run kept only aggregates (and the surprise run's per-trial
+  extraction silently failed under system Python). The paired tests use the
+  re-evaluated control; the historic 110/120 is shown alongside. Both kernels
+  now extract per-trial data under the conda env Python and also save the raw
+  MPCReport files.
+- Analysis: `adaptive_waypoints/analyze_dp_vs_fixed.py` (Wilson, exact McNemar
+  with flip counts, Mann-Whitney U on steps among successes).
+
+### B. CPU: Metric A label-noise check
+- `event_labels_coarse.py`: turn = angle(v[f-10], v[f]) >= 90 deg, placed at
+  the window centre; wall = near wall AND >=3 consecutive decelerating steps.
+  corridor/junction unchanged. **Decision:** each run of consecutive flags is
+  collapsed to one event at its midpoint (primary, "coarse_collapsed"),
+  because one physical turn makes ~5-10 consecutive windows qualify and
+  per-frame labels would penalise recall for that alone. The per-frame
+  variant is reported as well.
+- 50-episode pre-check of rates: wall 16.7% -> 4.0% per-frame / 2.6%
+  collapsed; turn 17.6% -> **28.4% per-frame** / 6.6% collapsed.
+- `run_metric_a_coarse.py`: same 300 eps / PCA / RNG stream as
+  run_metric_a.py, scores all 12 candidates on original + both coarse label
+  sets (original must reproduce results_metric_a.json), plus dp_segmentation
+  on a +/-2-step moving-average-smoothed trajectory (edges: mean over the
+  available frames). `compare_metric_a_b_coarse.py` recomputes Spearman.
+  **Decision:** the existing exact `oracle_boundaries` is used for the
+  smoothing test (no new fast DP implementation) -- slower (~1.5h) but no
+  new code path to validate.
+
 **dp_segmentation cache: DONE** (2026-10-01). Full r50, min_seg=8, both
 splits, 15,527s (~4h19m) local CPU. Cache files are in the (gitignored)
 local dataset directory, NOT in git:
