@@ -147,6 +147,26 @@ class MPPI:
 
         self.cost_entity = cost_entity
 
+        # Common-random-numbers support (INFERENCE_PREREG.md): when a generator
+        # is set, noise is drawn from it instead of the global RNG.
+        self.generator = None
+        self.noise_sigma_chol = torch.linalg.cholesky(self.noise_sigma)
+        self.track_clamp = False
+        self.last_clamp_frac = None
+
+    def _sample_noise(self, shape):
+        if self.generator is None:
+            return self.noise_dist.rsample(shape)
+        eps = torch.randn(
+            (*shape, self.nu), generator=self.generator, device=self.d, dtype=self.dtype
+        )
+        return self.noise_mu + eps @ self.noise_sigma_chol.T
+
+    def reset_with_generator(self, generator):
+        self.generator = generator
+        self.U = self._sample_noise((self.T,))
+        self.generator = None
+
     # @handle_batch_input(n=2)
     def _dynamics(self, state, proprio, location, raw_location, u):
         return self.F(state, proprio, location, raw_location, u)
@@ -373,13 +393,18 @@ class MPPI:
     def _compute_total_cost_batch(self):
         # parallelize sampling across trajectories
         # resample noise each time we take an action
-        noise = self.noise_dist.rsample((self.K, self.T))
+        noise = self._sample_noise((self.K, self.T))
         # broadcast own control to noise over samples; now it's K x T x nu
         perturbed_action = self.U + noise
         if self.sample_null_action:
             perturbed_action[self.K - 1] = 0
+        pre_bound = perturbed_action.clone() if self.track_clamp else None
         # naively bound control
         self.perturbed_action = self._bound_action(perturbed_action)
+        if pre_bound is not None:
+            self.last_clamp_frac = float(
+                ((pre_bound - self.perturbed_action).abs() > 1e-7).float().mean()
+            )
         # bounded noise after bounding (some got cut off, so we don't penalize that in action cost)
         self.noise = self.perturbed_action - self.U
         if self.noise_abs_cost:

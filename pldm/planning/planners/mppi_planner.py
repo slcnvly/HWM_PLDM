@@ -270,6 +270,23 @@ class RunningCost:
         return diff.mean(dim=-1)
 
 
+def crn_generator(device, seed, trial_id, stage, step, level):
+    """One torch.Generator per (seed, trial, stage, step, level): the same trial
+    at the same planning call draws the same noise regardless of chunking."""
+    import hashlib
+
+    key = f"{seed}|{trial_id}|{stage}|{step}|{level}".encode()
+    g = torch.Generator(device=device)
+    g.manual_seed(int.from_bytes(hashlib.sha256(key).digest()[:8], "little") % (2**63))
+    return g
+
+
+def _cat_or_none(parts, dim):
+    if parts[0] is None:
+        return None
+    return torch.cat(parts, dim=dim)
+
+
 class MPPIPlanner:
     def __init__(
         self,
@@ -380,6 +397,25 @@ class MPPIPlanner:
         self.last_plan_size = None
         self.num_refinement_steps = num_refinement_steps
         self.l2 = l2
+        self.device = device
+        # CRN (off unless set_crn is called): per-env generators and batch-size-
+        # invariant (per-env) encoding / nominal rollout.
+        self.crn = None
+        self.crn_context = None
+
+    def set_crn(self, seed, trial_ids, level):
+        self.crn = {"seed": seed, "trial_ids": list(trial_ids), "level": level}
+        for i, ctrl in enumerate(self.ctrls):
+            ctrl.reset_with_generator(
+                crn_generator(self.device, seed, self.crn["trial_ids"][i], "init", 0, level)
+            )
+
+    def set_crn_context(self, stage, step):
+        self.crn_context = (stage, step)
+
+    def set_track_clamp(self, on: bool):
+        for ctrl in self.ctrls:
+            ctrl.track_clamp = on
 
     @torch.no_grad()
     def plan(
@@ -423,11 +459,28 @@ class MPPIPlanner:
             else:
                 curr_proprio_states = None
 
-            backbone_output = self.model.backbone(
-                current_state.cuda(),
-                proprio=curr_proprio_states,
-                locations=curr_locations.cuda() if curr_locations is not None else None,
-            )
+            if self.crn is not None:
+                outs = [
+                    self.model.backbone(
+                        current_state[j : j + 1].cuda(),
+                        proprio=curr_proprio_states[j : j + 1] if curr_proprio_states is not None else None,
+                        locations=curr_locations[j : j + 1].cuda() if curr_locations is not None else None,
+                    )
+                    for j in range(current_state.shape[0])
+                ]
+                backbone_output = BackboneOutput(
+                    encodings=torch.cat([o.encodings for o in outs]),
+                    obs_component=_cat_or_none([o.obs_component for o in outs], 0),
+                    proprio_component=_cat_or_none([o.proprio_component for o in outs], 0),
+                    location_component=_cat_or_none([o.location_component for o in outs], 0),
+                    raw_locations=_cat_or_none([o.raw_locations for o in outs], 0),
+                )
+            else:
+                backbone_output = self.model.backbone(
+                    current_state.cuda(),
+                    proprio=curr_proprio_states,
+                    locations=curr_locations.cuda() if curr_locations is not None else None,
+                )
         else:
             backbone_output = current_state
 
@@ -446,6 +499,11 @@ class MPPIPlanner:
                     self.ctrls[i].shift_nominal_trajectory()
 
             self.ctrls[i].change_horizon(plan_size)
+            if self.crn is not None:
+                stage, step = self.crn_context
+                self.ctrls[i].generator = crn_generator(
+                    self.device, self.crn["seed"], self.crn["trial_ids"][i], stage, step, self.crn["level"]
+                )
 
             # add refinement steps?
             actions.append(
@@ -459,29 +517,31 @@ class MPPIPlanner:
             )
 
         actions = torch.stack(actions)
+        for ctrl in self.ctrls:
+            ctrl.generator = None
 
-        ensemble_state_input = self.dynamics.model.predictor._prepare_ensemble_input(
-            current_state
-        )
-        ensemble_proprio_input = self.dynamics.model.predictor._prepare_ensemble_input(
-            proprio
-        )
-        ensemble_location_input = self.dynamics.model.predictor._prepare_ensemble_input(
-            location
-        )
-        ensemble_raw_location = self.dynamics.model.predictor._prepare_ensemble_input(
-            raw_location
-        )
-
-        dynamics_output = self.dynamics(
-            state=ensemble_state_input,
-            proprio=ensemble_proprio_input,
-            location=ensemble_location_input,
-            raw_location=ensemble_raw_location,
-            action=actions.permute(1, 0, 2),
-            only_return_last=False,
-            flatten_output=False,
-        )
+        if self.crn is not None:
+            # per-env nominal rollout so results do not depend on chunk size
+            per_env = [
+                self._nominal_rollout(
+                    current_state[j : j + 1],
+                    proprio[j : j + 1] if proprio is not None else None,
+                    location[j : j + 1] if location is not None else None,
+                    raw_location[j : j + 1] if raw_location is not None else None,
+                    actions[j : j + 1],
+                )
+                for j in range(batch_size)
+            ]
+            dynamics_output = DynamicsResult(
+                *[
+                    _cat_or_none([getattr(o, f) for o in per_env], self._batch_dim(f))
+                    for f in DynamicsResult._fields
+                ]
+            )
+        else:
+            dynamics_output = self._nominal_rollout(
+                current_state, proprio, location, raw_location, actions
+            )
 
         pred_obs = dynamics_output.obs_component
         pred_proprio = dynamics_output.proprio_component
@@ -527,6 +587,24 @@ class MPPIPlanner:
             actions=actions,
             locations=unnormed_locations,
             losses=losses,
+        )
+
+    @staticmethod
+    def _batch_dim(field):
+        # non-ensemble outputs are (T+1, B, ...); ensemble outputs carry the
+        # ensemble axis before the batch axis: (T+1, E, B, ...)
+        return 2 if field.startswith("ensemble_") else 1
+
+    def _nominal_rollout(self, current_state, proprio, location, raw_location, actions):
+        prep = self.dynamics.model.predictor._prepare_ensemble_input
+        return self.dynamics(
+            state=prep(current_state),
+            proprio=prep(proprio),
+            location=prep(location),
+            raw_location=prep(raw_location),
+            action=actions.permute(1, 0, 2),
+            only_return_last=False,
+            flatten_output=False,
         )
 
     def reset_targets(self, targets: torch.Tensor, repr_input: bool = True):

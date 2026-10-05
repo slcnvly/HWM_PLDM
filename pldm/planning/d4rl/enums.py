@@ -31,6 +31,16 @@ class HierarchicalD4RLMPCConfig(D4RLMPCConfig):
     error_adaptive_l1_checkpoint_path: str = ""
     error_adaptive_l1_num_samples_multiplier: float = 2.0
     error_adaptive_l1_horizon_multiplier: float = 1.5
+    # Inference-design study (adaptive_waypoints/INFERENCE_PREREG.md); defaults
+    # reproduce the original behavior.
+    crn: bool = False
+    crn_seed: int = 0
+    crn_trial_id_offset: int = 0
+    deterministic_algorithms: bool = False
+    l1_waypoint_index: int = 1
+    l1_plan_size: int = 0
+    diag_path: str = ""
+    diag_prober_path: str = ""
 
 
 class MPCReport(NamedTuple):

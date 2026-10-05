@@ -14,10 +14,18 @@ class TwoLvlPlanner:
         l1_planner: Planner,
         l2_planner: Planner,
         l2_step_skip: int,
+        l1_waypoint_index: int = 1,
+        l1_plan_size: int = 0,
+        per_env_encode: bool = False,
     ):
         self.l1_planner = l1_planner
         self.l2_planner = l2_planner
         self.l2_step_skip = l2_step_skip
+        # which L2 waypoint L1 tracks (pred_obs[0] is the current state), and
+        # L1's planning horizon (0 -> l2_step_skip, the original behavior)
+        self.l1_waypoint_index = l1_waypoint_index
+        self.l1_plan_size = l1_plan_size if l1_plan_size > 0 else l2_step_skip
+        self.per_env_encode = per_env_encode
 
     def reset_targets(self, targets: torch.Tensor, repr_input: bool = True):
         self.l2_planner.reset_targets(targets, repr_input=repr_input)
@@ -45,9 +53,33 @@ class TwoLvlPlanner:
 
         locations_cuda = curr_locations.cuda() if curr_locations is not None else None
 
-        backbone_output = self.l1_planner.model.backbone(
-            current_state.cuda(), proprio=proprio_l1, locations=locations_cuda
-        )
+        if self.per_env_encode:
+            from pldm.models.encoders.enums import BackboneOutput
+
+            outs = [
+                self.l1_planner.model.backbone(
+                    current_state[j : j + 1].cuda(),
+                    proprio=proprio_l1[j : j + 1] if proprio_l1 is not None else None,
+                    locations=locations_cuda[j : j + 1] if locations_cuda is not None else None,
+                )
+                for j in range(batch_size)
+            ]
+
+            def cat(name):
+                parts = [getattr(o, name) for o in outs]
+                return None if parts[0] is None else torch.cat(parts)
+
+            backbone_output = BackboneOutput(
+                encodings=cat("encodings"),
+                obs_component=cat("obs_component"),
+                proprio_component=cat("proprio_component"),
+                location_component=cat("location_component"),
+                raw_locations=cat("raw_locations"),
+            )
+        else:
+            backbone_output = self.l1_planner.model.backbone(
+                current_state.cuda(), proprio=proprio_l1, locations=locations_cuda
+            )
         l2_result = self.l2_planner.plan(
             current_state=backbone_output,
             plan_size=plan_size,
@@ -70,13 +102,14 @@ class TwoLvlPlanner:
                 device=encs2.device,
             )
         else:
+            wp_idx = min(self.l1_waypoint_index, l2_result.pred_obs.shape[0] - 1)
             self.l1_planner.reset_targets(
-                l2_result.pred_obs[1].detach(), repr_input=True
+                l2_result.pred_obs[wp_idx].detach(), repr_input=True
             )
 
             l1_result = self.l1_planner.plan(
                 current_state=backbone_output,
-                plan_size=self.l2_step_skip,
+                plan_size=self.l1_plan_size,
                 repr_input=True,
                 curr_proprio_pos=curr_proprio_pos,
                 curr_proprio_vel=curr_proprio_vel,

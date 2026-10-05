@@ -47,6 +47,19 @@ class MPCEvaluator(ABC):
         # resource allocation to decide the next planning call's num_samples
         # / horizon; None (default) is a no-op, zero behavior change otherwise.
         self.post_l1_step_hook = None
+        # INFERENCE_PREREG.md flags (all default to the original behavior)
+        self.crn = bool(getattr(config, "crn", False))
+        self.crn_seed = int(getattr(config, "crn_seed", 0))
+        self.crn_trial_id_offset = int(getattr(config, "crn_trial_id_offset", 0))
+        if getattr(config, "deterministic_algorithms", False):
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        self.diag_hook = None
+        if getattr(config, "diag_path", ""):
+            from pldm_envs.diverse_maze.adaptive_waypoints.inference_study.diag_recorder import (
+                DiagRecorder,
+            )
+
+            self.diag_hook = DiagRecorder(config=config, model=model, normalizer=normalizer)
 
     def close(self):
         pass
@@ -80,6 +93,9 @@ class MPCEvaluator(ABC):
             l1_planner=l1_planner,
             l2_planner=l2_planner,
             l2_step_skip=self.model.config.step_skip,
+            l1_waypoint_index=int(getattr(self.config, "l1_waypoint_index", 1)),
+            l1_plan_size=int(getattr(self.config, "l1_plan_size", 0)),
+            per_env_encode=self.crn,
         )
 
         return h_planner
@@ -173,9 +189,20 @@ class MPCEvaluator(ABC):
         for chunk_size in chunk_sizes:
             envs = self.envs[chunk_offset : chunk_offset + chunk_size]
             planner = self._construct_planner(n_envs=chunk_size)
+            trial_ids = [
+                self.crn_trial_id_offset + chunk_offset + j for j in range(chunk_size)
+            ]
+            if self.crn:
+                planner.set_crn(self.crn_seed, trial_ids, "flat")
 
             if self.hierarchical:
                 h_planner = self._construct_h_planner(n_envs=chunk_size)
+                if self.crn:
+                    h_planner.l1_planner.set_crn(self.crn_seed, trial_ids, "l1")
+                    h_planner.l2_planner.set_crn(self.crn_seed, trial_ids, "l2")
+                if self.diag_hook is not None:
+                    h_planner.l2_planner.set_track_clamp(True)
+                    self.diag_hook.on_chunk_start(envs, trial_ids)
                 mpc_result = self._perform_h_mpc(
                     h_planner=h_planner,
                     planner=planner,
@@ -212,6 +239,9 @@ class MPCEvaluator(ABC):
             if self.hierarchical:
                 mpc_data.pred_locations_l2.append(mpc_result.pred_locations_l2)
                 mpc_data.loss_history_l2.append(mpc_result.loss_history_l2)
+
+            if self.diag_hook is not None and self.hierarchical:
+                self.diag_hook.on_chunk_end()
 
             chunk_offset += chunk_size
 
@@ -294,9 +324,33 @@ class MPCEvaluator(ABC):
         else:
             locations = None
 
-        l1_output = self.model.level1.backbone(
-            targets_obs, proprio=proprio_states, locations=locations
-        )
+        if self.crn:
+            from pldm.models.encoders.enums import BackboneOutput
+
+            outs = [
+                self.model.level1.backbone(
+                    targets_obs[j : j + 1],
+                    proprio=proprio_states[j : j + 1] if proprio_states is not None else None,
+                    locations=locations[j : j + 1] if locations is not None else None,
+                )
+                for j in range(targets_obs.shape[0])
+            ]
+
+            def _cat(name):
+                parts = [getattr(o, name) for o in outs]
+                return None if parts[0] is None else torch.cat(parts)
+
+            l1_output = BackboneOutput(
+                encodings=_cat("encodings"),
+                obs_component=_cat("obs_component"),
+                proprio_component=_cat("proprio_component"),
+                location_component=_cat("location_component"),
+                raw_locations=_cat("raw_locations"),
+            )
+        else:
+            l1_output = self.model.level1.backbone(
+                targets_obs, proprio=proprio_states, locations=locations
+            )
 
         target_obs = l1_output.obs_component.detach()
         target_proprio = l1_output.proprio_component
@@ -473,6 +527,14 @@ class MPCEvaluator(ABC):
                         self.config.n_steps - i, self.config.level1.max_plan_length
                     )
 
+                if self.crn:
+                    stage = "s1" if bilevel_planning else "s2"
+                    if bilevel_planning:
+                        planner.l1_planner.set_crn_context(stage, i)
+                        planner.l2_planner.set_crn_context(stage, i)
+                    else:
+                        planner.set_crn_context(stage, i)
+
                 planning_result = planner.plan(
                     obs_t,
                     curr_proprio_pos=curr_proprio_pos,
@@ -481,6 +543,15 @@ class MPCEvaluator(ABC):
                     plan_size=plan_size,
                     repr_input=False,
                 )
+
+                if self.diag_hook is not None:
+                    self.diag_hook.on_replan(
+                        stage="s1" if bilevel_planning else "s2",
+                        step=i,
+                        planner=planner,
+                        planning_result=planning_result,
+                        envs=envs,
+                    )
 
                 if bilevel_planning:
                     planning_result_l2 = planning_result.level2
@@ -553,6 +624,14 @@ class MPCEvaluator(ABC):
                     planning_result=planning_result,
                     current_obs=current_obs,
                     infos=infos,
+                )
+
+            if self.diag_hook is not None:
+                self.diag_hook.on_step(
+                    stage="s1" if bilevel_planning else "s2",
+                    step=i,
+                    infos=infos,
+                    rewards=rewards_t,
                 )
 
             action_history.append(planned_actions.detach().cpu())
