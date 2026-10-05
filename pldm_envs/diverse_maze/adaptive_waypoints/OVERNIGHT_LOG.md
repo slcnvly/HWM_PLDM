@@ -11,3 +11,6 @@ Decisions made without the user are listed in `PROGRESS.md` (this directory).
 | 2026-10-05 10:10 | 1 GPU validation | launched | kernel `hwm-inference-validate` (quota: 30h allowed, 0 used) |
 | 2026-10-05 10:12 | C1 | done | `inference_study/results_c1_latent_vs_maze_distance.json` |
 | 2026-10-05 10:20 | C2 | done | `inference_study/C2_unused_features.md` |
+| 2026-10-05 10:30 | 1 GPU validation v1 | failed (env) | Kaggle base image dropped `libgl1-mesa-glx`; apt aborted the whole install so `GL/osmesa.h` was missing and mujoco_py failed to compile. Fixed by installing packages one by one (+`libgl1`, `libglx-mesa0`). ~10 GPU-min used. |
+| 2026-10-05 13:09 | 1 GPU validation | **PASS** | instances 0-19, chunk 20 vs 10+10: success 20/20 identical, steps 20/20 identical, **all 20 agent trajectories bit-identical at every step**. 18/20 success. Chunk of 20 = 72.7 min, chunk of 10 = 36.1 min. Data: `inference_study/runs/validate/`. |
+| 2026-10-05 13:12 | 2 V0 + 3 V1 | launched (parallel) | quota before V0: 30 allowed, 2.72 used, 27.3 remaining ≥ 9.6; before V1: 19.7 remaining (after V0's 7.6h reservation) ≥ 9.6 |
