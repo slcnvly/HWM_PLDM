@@ -1,0 +1,50 @@
+{
+  "n_episodes": 297,
+  "episodes_skipped_bfs_unreachable": 0,
+  "lag_K": 5,
+  "spearman_per_episode_median": 0.4418048856620686,
+  "spearman_per_episode_iqr": [
+    0.3018159259013302,
+    0.5666169019626016
+  ],
+  "spearman_per_episode_frac_negative": 0.020202020202020204,
+  "spearman_pooled": 0.3253533446020349,
+  "frac_real_decrease_but_latent_increase": 0.3332079021636877,
+  "n_real_decrease_pairs": 5315,
+  "by_cell_type": {
+    "corner": {
+      "occupancy_share": 0.32435087719298245,
+      "share_of_violations": 0.20835686053077357,
+      "violation_rate_given_real_decrease": 0.30470685383980184,
+      "n_real_decrease": 1211
+    },
+    "dead_end": {
+      "occupancy_share": 0.1799298245614035,
+      "share_of_violations": 0.049689440993788817,
+      "violation_rate_given_real_decrease": 0.30985915492957744,
+      "n_real_decrease": 284
+    },
+    "junction": {
+      "occupancy_share": 0.30494736842105263,
+      "share_of_violations": 0.4743083003952569,
+      "violation_rate_given_real_decrease": 0.3309692671394799,
+      "n_real_decrease": 2538
+    },
+    "straight": {
+      "occupancy_share": 0.1907719298245614,
+      "share_of_violations": 0.2676453980801807,
+      "violation_rate_given_real_decrease": 0.36973478939157567,
+      "n_real_decrease": 1282
+    }
+  },
+  "latent_dist_by_bfs_cells": {
+    "0": 0.32589560747146606,
+    "1": 0.5899083018302917,
+    "2": 0.6302016377449036,
+    "3": 0.6834944486618042,
+    "4": 0.6916288733482361,
+    "5": 0.6412744522094727,
+    "6": 0.9089179039001465,
+    "7": 0.9153035879135132
+  }
+}

@@ -15,3 +15,24 @@ anything not covered gets the conservative choice, recorded here).
    undocumented.
 3. **Checkpoint.** `pretrained_baseline.ckpt` from dataset `seungwonryoo/hwm-finetune-checkpoints` (the file
    used for the SS6b baseline n=120), not a fresh HF download, so V0 is comparable with SS6b.
+4. **Deterministic algorithms are enabled with `warn_only=True`.** A strict `use_deterministic_algorithms(True)`
+   raises on any op without a deterministic kernel and would kill a 7h run. warn_only keeps the deterministic
+   kernels where they exist and logs the rest. The remaining nondeterminism is measured by the step-1 validation.
+5. **CRN seed = 0**, trial id = global index 0..119 in the SS6b order. Stage-1 replans, stage-2 replans and the
+   initial nominal sequence use distinct generator keys (`stage` in {init, s1, s2}, `level` in {l1, l2, flat}).
+6. **Per-env encoding and nominal rollout under CRN.** Batched conv results can depend on batch size. With CRN on,
+   the L1 encoder (current obs and goal) and the nominal-trajectory rollout run per environment, so a trial's
+   computation is identical whatever the chunk size. MPPI itself was already per environment.
+
+## FLAG for the user (found while preparing C1; not fixed tonight, by the conservative rule)
+
+**The boundary study and the changepoint-cache scripts feed raw, unnormalized inputs to the model.**
+Training normalizes images with `state_mean/std`, plus actions and proprio velocity (`pldm/data/utils.py:97,117` →
+`Normalizer.normalize_sample`, `pldm_envs/utils/normalizer.py:344-380`), and so does evaluation
+(`maze_draw.py:104-105`, `wrappers.py:297-302`). But `compute_changepoints.py:126-133` and the boundary-study
+helpers (`signal1_common.py:36-40`, `run_stage2_predictor_free.py:63-71`, and therefore
+`generate_dp_segmentation_cache.py`) pass raw 0–255 images, raw velocity and raw actions. Consequences to
+re-check: the signal-1 changepoint cache used for SS5/SS6b adaptive training, the surprise cache (SS8), every
+boundary-study encoding (Metric A/B, gate checks), and the dp_segmentation cache used in SS9. Whether this
+changed the conclusions is unknown until re-run with normalized inputs. All new inference-study CPU code (prober,
+C1) normalizes inputs as evaluation does.
