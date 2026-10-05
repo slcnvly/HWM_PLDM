@@ -19,3 +19,6 @@ Decisions made without the user are listed in `PROGRESS.md` (this directory).
 | 2026-10-05 16:20 | V1 relaunched | running | usage now increases ~2x wall-clock (both consuming). Monitor checks quota growth every 15 min to catch silent stalls. |
 | 2026-10-05 23:12 | 2 V0 | done | **94/120 (78.3%)**, mean steps (successes) 184.3, median 155. Chunk 0 is bit-identical to the validation run's cs20 chunk (different Kaggle session): CRN gives cross-session reproducibility. Failure types (n=26, overlapping): wrong path 24, stagnation 5, unreachable carrot 3, oscillation 0, slow progress 0, unclassified 1. |
 | 2026-10-05 23:15 | 3 V2 | launched | quota: used 16.36h, V1 remaining ~0.7h → 12.9h remaining ≥ 4.5+2 |
+| 2026-10-05 23:31 | 3 V1 | done | **101/120 (84.2%)**, mean steps 157.9. vs V0: flips 16 (V0 fail→V1 success) / 9 (reverse), McNemar p=0.23; steps on 85 both-solved: V1 faster 50 / slower 35, mean −30.0, Wilcoxon p=0.012 (Holm, m=4: 0.046 before V2). L2 clamp fraction rose 0.67→0.86. |
+| 2026-10-05 23:33 | 3 V3 | **SKIPPED (quota rule)** | used 16.98h + V2 remaining est 4.19h → 8.83h left < V3 est 14.7h + 2h. (V3 alone would also exceed Kaggle's 12h session limit.) |
+| 2026-10-05 23:33 | 3 V4 | **SKIPPED (quota rule)** | rule: a skipped GPU job skips all later GPU jobs. (Also, independently: V4 est ~10h + 2h > 8.83h − V2.) |
