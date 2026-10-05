@@ -17,3 +17,5 @@ Decisions made without the user are listed in `PROGRESS.md` (this directory).
 | 2026-10-05 16:11 | V0 + V1 (1st try) | **never ran** | Both pushed seconds apart at 13:12; both showed RUNNING/QUEUED for ~3h, then ERROR with empty logs, no output and **no GPU quota consumed** (used stayed 2.72h). No failure message from the API. |
 | 2026-10-05 16:15 | V0 relaunched alone | running | quota usage confirmed to increase (2:43→2:50 in 4 min) before launching the next |
 | 2026-10-05 16:20 | V1 relaunched | running | usage now increases ~2x wall-clock (both consuming). Monitor checks quota growth every 15 min to catch silent stalls. |
+| 2026-10-05 23:12 | 2 V0 | done | **94/120 (78.3%)**, mean steps (successes) 184.3, median 155. Chunk 0 is bit-identical to the validation run's cs20 chunk (different Kaggle session): CRN gives cross-session reproducibility. Failure types (n=26, overlapping): wrong path 24, stagnation 5, unreachable carrot 3, oscillation 0, slow progress 0, unclassified 1. |
+| 2026-10-05 23:15 | 3 V2 | launched | quota: used 16.36h, V1 remaining ~0.7h → 12.9h remaining ≥ 4.5+2 |

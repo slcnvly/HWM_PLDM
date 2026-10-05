@@ -241,6 +241,8 @@ def early_auroc(trials, t_max=100):
                 x.append(float(np.mean(v)))
                 yy.append(lab)
         out[s] = float(roc_auc_score(yy, x)) if len(set(yy)) == 2 else None
+    # reference predictor (not a planner signal): task difficulty = start BFS distance
+    out["reference_start_bfs_distance"] = float(roc_auc_score(y, [trials[i]["_ts"]["start_d"] for i in ids]))
     return out
 
 
