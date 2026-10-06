@@ -1,0 +1,77 @@
+{
+  "fused_state_original_1b": {
+    "n_samples": 135000,
+    "copy_baseline_l2": {
+      "mean": 108.81732177734375,
+      "median": 31.19550895690918
+    },
+    "pred_error_l2": {
+      "mean": 97.60657501220703,
+      "median": 49.992095947265625
+    },
+    "ratio_pred_over_copy": {
+      "ratio_of_means": 0.8969764709472656,
+      "mean_of_per_sample_ratios": 1.8357599973678589
+    },
+    "bias_decomposition": {
+      "global_bias_vector_norm": 6.9602227210998535,
+      "residual_after_bias_removal_pct_of_original": 100.07086181640625
+    },
+    "direction_cosine": {
+      "mean": 0.45382049679756165,
+      "median": 0.4113514721393585,
+      "std": 0.27828049659729004,
+      "frac_positive": 0.9716666666666667
+    }
+  },
+  "obs_only_matches_training_and_planner": {
+    "n_samples": 135000,
+    "copy_baseline_l2": {
+      "mean": 102.91082000732422,
+      "median": 24.105796813964844
+    },
+    "pred_error_l2": {
+      "mean": 96.6448745727539,
+      "median": 49.790245056152344
+    },
+    "ratio_pred_over_copy": {
+      "ratio_of_means": 0.9391128420829773,
+      "mean_of_per_sample_ratios": 151769.8125
+    },
+    "bias_decomposition": {
+      "global_bias_vector_norm": 6.936548709869385,
+      "residual_after_bias_removal_pct_of_original": 100.07260131835938
+    },
+    "direction_cosine": {
+      "mean": 0.34948837757110596,
+      "median": 0.2474214881658554,
+      "std": 0.33388277888298035,
+      "frac_positive": 0.9011037037037037
+    }
+  },
+  "proprio_only_matches_training": {
+    "n_samples": 135000,
+    "copy_baseline_l2": {
+      "mean": 17.300952911376953,
+      "median": 14.907377243041992
+    },
+    "pred_error_l2": {
+      "mean": 5.4256086349487305,
+      "median": 1.704542875289917
+    },
+    "ratio_pred_over_copy": {
+      "ratio_of_means": 0.3136017322540283,
+      "mean_of_per_sample_ratios": 0.473690390586853
+    },
+    "bias_decomposition": {
+      "global_bias_vector_norm": 0.5735722780227661,
+      "residual_after_bias_removal_pct_of_original": 100.07913970947266
+    },
+    "direction_cosine": {
+      "mean": 0.9095290899276733,
+      "median": 0.9924044013023376,
+      "std": 0.24431991577148438,
+      "frac_positive": 0.9798962962962963
+    }
+  }
+}

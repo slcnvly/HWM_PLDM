@@ -1,5 +1,11 @@
 # Boundary-signal study: results
 
+> **2026-10-06 정정 (먼저 읽을 것)**: 이 연구의 모든 인코딩은 정규화하지 않은 입력(raw 0–255 이미지, raw 속도·행동)으로 계산됐다.
+> 수정 후 재실행 결과, **tl;dr 1번(한 스텝 예측 오차는 편향이 대부분이라 쓸 수 없음)과 §3–§4의 기제 설명은 뒤집혔다.**
+> tl;dr 2번(스칼라 신호는 고정 간격에 진다)과 3번(DP는 고정 간격보다 낫다, +31.3% → +23.5%)은 유지되지만,
+> 신호 순위와 수치가 바뀌었다. 지표 A(§8, §11)는 재실행하지 않았다. 전후 비교표: `PROGRESS.md` 맨 위 섹션.
+
+
 Branch `adaptive-waypoints`. Full process/derivation trail in
 `PROGRESS.md`; this file is the condensed, decision-relevant summary,
 judged against `PREREGISTRATION.md`'s stop condition (§8) and its

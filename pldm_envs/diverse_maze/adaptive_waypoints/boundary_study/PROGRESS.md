@@ -5,6 +5,46 @@ of every stage (or sub-step within a long stage) -- commit + push each time.
 
 ## Status: Study complete through Metric A + dp_segmentation cache. See `RESULTS.md` for the condensed final writeup. GPU fine-tuning/eval (does the Metric B gain translate to planning success) explicitly NOT done here, per instruction -- the dp_segmentation cache is prepared for that as a follow-up on Kaggle.
 
+## 2026-10-06: raw-input bug fixed and re-verified (READ FIRST: overturns the central gate-check conclusion)
+
+**Bug.** Every boundary-study script and `compute_changepoints.py` fed the model raw inputs: 0-255 images, raw velocity,
+raw actions. The model was trained and is evaluated on inputs normalized with the hard-set STATS. **Fix.**
+`adaptive_waypoints/preprocess.py` builds the same `Normalizer` and calls the same methods. All input sites now
+use it, including the signal-16/16v2 perturbation actions. **Check** (`adaptive_waypoints/verify_preprocess.py`): on
+the same 61-frame batch, images, proprio and actions match the eval path exactly (`torch.equal`), and so do L1
+encodings and `forward_posterior` predictions. The output is made contiguous because a permuted batch takes a
+different conv kernel path (relative difference 1.6e-5). Raw-input encodings differ from the correct ones by
+**140% (relative norm)**. Old results are kept as `*_v1.json`. C1 (inference study) was already normalized: the
+rerun is identical.
+
+Numbers: `results_bugfix_comparison.json` (`compare_bugfix.py`). Gate check over the full corpus (135,000 one-step samples);
+Metric B on the same 300-episode sample. 16v2 moved from its own 50-episode sample to the shared 300-episode sample.
+
+| 결론 | 버그 있을 때 (v1, raw inputs) | 수정 후 | 유지되는가 |
+|---|---|---|---|
+| **Predictor 한 스텝 오차는 편향이 대부분이라 쓸 수 없다** (Amendment 2, gate check) | obs: 복사 기준선 비율 **20.4×**, 편향 노름/오차 **0.95**, 편향 제거 후 잔차 32%, 방향 cosine **0.0007** | obs: 복사 기준선 비율 **0.94×** (복사보다 나음), 편향 노름/오차 **0.07**, 편향 제거 후 잔차 100% (편향 없음), 방향 cosine **0.35** | **아니오. 뒤집힘.** 편향은 정규화하지 않은 입력이 만든 인공물이었다. 한 스텝 예측은 복사 기준선보다 낫고 실제 이동 방향과 양의 상관을 보인다. |
+| 같은 결론, fused (obs+proprio) | 비율 8.8×, 편향 0.94, cosine 0.020 | 비율 0.90×, 편향 0.07, cosine 0.45 | 아니오 |
+| proprio 예측은 복사 기준선 수준이다 | 비율 1.01×, cosine 0.44 | 비율 **0.31×**, cosine **0.91** | 아니오. proprio 예측은 강하게 맞는다. |
+| obs 예측은 행동에 거의 반응하지 않는다 (행동 뒤섞기 비율) | obs 1스텝 1.0000, 5스텝 1.0004 | obs 1스텝 **0.998**, 5스텝 **0.988** | **예 (대체로).** obs 예측은 여전히 행동에 거의 둔감하다. 행동 정보는 거의 proprio 쪽으로만 간다. |
+| proprio 예측의 행동 민감도 | 1스텝 0.85, 5스텝 0.998 | 1스텝 **0.24**, 5스텝 **0.77** | 아니오. proprio는 행동에 강하게 반응한다. |
+| 편향 보정 후 방향 cosine / R² | obs 0.015 / 0.87, proprio 0.42 / 0.86 | obs 0.35 / 0.56, proprio 0.91 / 0.94 | 아니오 (방향 정보가 있음) |
+| "teacher forcing이 없어서 한 스텝 예측이 편향된다"는 기제 설명 (RESULTS §4) | 위 편향을 설명하기 위해 도입 | 설명할 편향이 사라짐 | **불필요해짐.** 코드상 사실(z_dim=0, teacher forcing 경로 없음)은 그대로지만, 편향의 원인은 아니었다. |
+| 모든 스칼라 신호가 지표 B에서 고정 간격에 진다 | 6 −16.1, 7 −26.8, 8 −23.3, 10 −14.2, 11 −38.7, 13 −6.0, 16v2 obs −13.2 / proprio −7.8 (%) | 6 −6.0, 7 −36.7, 8 −93.6, **10 +0.007**, 11 −105.6, 13 −100.9, 16v2 obs −2.3 / proprio −2.5 (%) | **예.** 이기는 신호가 없다. 10은 동률이고, 16v2와 6은 근소하게 진다. |
+| 스칼라 신호 순위 (13이 가장 덜 나쁨) | 13 > 10 > 6 > … | 10 ≈ 고정 > 16v2 > 6 > 7 > 8 > 13 ≈ 11 | **아니오.** 순위가 크게 바뀌었다 (13이 최하위권). |
+| dp_segmentation(정확 DP)은 고정 간격보다 크게 낫다 | **+31.3%** | **+23.5%** | **예** (크기는 줄었음) |
+| bottom-up(min_seg=8)은 고정 간격보다 낫다 | v1 파일 −14.7% (병합 버그 수정 전 값). 수정 후 sweep은 +9.6% (100 ep, raw inputs) | **+4.3%** (300 ep) | 예 (방향 유지, 크기 작음) |
+| top-down(min_seg=8) | −4.0% | −60.1% | 결론에 쓰이지 않았음. 크게 악화 |
+| 무작위 경계 | −0.7% | +0.2% | 예 (고정과 동률) |
+| dp_segmentation 경계 자체 | (raw inputs로 만든 캐시, §9 GPU 실험에 사용) | 같은 300 ep에서 새 경계와 비교: ±2스텝 이내 **65.5%**, 정확 일치 25.5%, 5개 모두 ±2 이내인 에피소드 **19%** | **아니오.** §9에서 쓴 캐시는 올바른 입력의 DP 분할과 상당히 다르다. |
+| C1 (잠재 목표 거리 vs 미로 거리) | 처음부터 정규화된 경로 | 재실행 결과 동일 (Spearman 중앙값 0.442) | 예 (버그 영향 없음) |
+
+**재실행하지 않은 결과 (여전히 raw inputs 기반)**: 지표 A 전체(F1·AUROC, coarse 라벨 재검증 포함), min_seg sweep,
+bootstrap CI, compression loss, segment length, B6/B7 공정성, 신호 1/1b 원 계산(Amendment 1),
+`train_variance_head_1b.py`, full-r50 dp_segmentation 캐시. 범위 밖이라 고치지 않은 코드:
+`adaptive_waypoints/error_adaptive_l1.py`(§7 오차 적응 L1의 임계값 계산 경로)와 `variance_head.py`(§8)도 raw inputs 패턴을 쓴다.
+또 `compute_changepoints.py`로 Kaggle에서 만든 **signal-1 캐시(§5/§6b 적응 학습에 사용)와 surprise 캐시(§8)도 raw inputs로 계산됐다.**
+스크립트는 고쳤지만 캐시는 다시 만들지 않았다.
+
 ## Follow-up 2026-10-01 (user away, full autonomy): GPU dp_segmentation run + Metric A label-noise check -- DONE
 
 ### A. GPU: fine-tune on the dp_segmentation cache (Kaggle)

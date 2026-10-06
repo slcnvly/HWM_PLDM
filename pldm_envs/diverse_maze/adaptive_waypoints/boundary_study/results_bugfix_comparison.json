@@ -1,0 +1,125 @@
+{
+  "gate_obs": {
+    "v1_raw_inputs": {
+      "copy_baseline_ratio": 20.371368408203125,
+      "bias_norm_over_pred_error": 0.9469899519617647,
+      "residual_after_bias_pct": 32.320411682128906,
+      "direction_cosine_mean": 0.0007154305349104106,
+      "pred_error_l2_mean": 256.3278503417969,
+      "copy_l2_mean": 12.582751274108887
+    },
+    "fixed": {
+      "copy_baseline_ratio": 0.9391128420829773,
+      "bias_norm_over_pred_error": 0.07177358075670714,
+      "residual_after_bias_pct": 100.07260131835938,
+      "direction_cosine_mean": 0.34948837757110596,
+      "pred_error_l2_mean": 96.6448745727539,
+      "copy_l2_mean": 102.91082000732422
+    }
+  },
+  "gate_proprio": {
+    "v1_raw_inputs": {
+      "copy_baseline_ratio": 1.011110782623291,
+      "bias_norm_over_pred_error": 0.31693050377955356,
+      "residual_after_bias_pct": 97.31318664550781,
+      "direction_cosine_mean": 0.44367820024490356,
+      "pred_error_l2_mean": 24.653121948242188,
+      "copy_l2_mean": 24.38221549987793
+    },
+    "fixed": {
+      "copy_baseline_ratio": 0.3136017322540283,
+      "bias_norm_over_pred_error": 0.10571574852047656,
+      "residual_after_bias_pct": 100.07913970947266,
+      "direction_cosine_mean": 0.9095290899276733,
+      "pred_error_l2_mean": 5.4256086349487305,
+      "copy_l2_mean": 17.300952911376953
+    }
+  },
+  "gate_fused": {
+    "v1_raw_inputs": {
+      "copy_baseline_ratio": 8.827606201171875,
+      "bias_norm_over_pred_error": 0.9394674129626628,
+      "residual_after_bias_pct": 34.04848098754883,
+      "direction_cosine_mean": 0.01972566545009613,
+      "pred_error_l2_mean": 258.5141296386719,
+      "copy_l2_mean": 29.284738540649414
+    },
+    "fixed": {
+      "copy_baseline_ratio": 0.8969764709472656,
+      "bias_norm_over_pred_error": 0.07130895352315542,
+      "residual_after_bias_pct": 100.07086181640625,
+      "direction_cosine_mean": 0.45382049679756165,
+      "pred_error_l2_mean": 97.60657501220703,
+      "copy_l2_mean": 108.81732177734375
+    }
+  },
+  "investigate_obs": {
+    "v1_raw_inputs": {
+      "shuffle_ratio_1step": 0.9999592900276184,
+      "shuffle_ratio_5step": 1.0004005432128906,
+      "direction_cosine_bias_corrected": 0.0149316331371665,
+      "r_squared": 0.8733907354357003
+    },
+    "fixed": {
+      "shuffle_ratio_1step": 0.997608482837677,
+      "shuffle_ratio_5step": 0.9877092838287354,
+      "direction_cosine_bias_corrected": 0.35011589527130127,
+      "r_squared": 0.5587600122942062
+    }
+  },
+  "investigate_proprio": {
+    "v1_raw_inputs": {
+      "shuffle_ratio_1step": 0.8489710092544556,
+      "shuffle_ratio_5step": 0.997502326965332,
+      "direction_cosine_bias_corrected": 0.42404818534851074,
+      "r_squared": 0.8597063263715707
+    },
+    "fixed": {
+      "shuffle_ratio_1step": 0.24273252487182617,
+      "shuffle_ratio_5step": 0.7687416672706604,
+      "direction_cosine_bias_corrected": 0.9088237881660461,
+      "r_squared": 0.9367486512249572
+    }
+  },
+  "metric_b_improvement_over_fixed": {
+    "v1_raw_inputs": {
+      "signal_6": -0.16137709822269225,
+      "signal_7": -0.2675830292874157,
+      "signal_8": -0.2333107576917996,
+      "signal_10": -0.14168709972624668,
+      "fixed": 0.0,
+      "random": -0.007354480936233753,
+      "dp_segmentation": 0.3129900648167389,
+      "signal_11": -0.38723261714337087,
+      "signal_12": -0.320689401353787,
+      "signal_13": -0.059503375139956335,
+      "bottom_up_minseg8": -0.14661128250655456,
+      "top_down_minseg8": -0.040393313992811,
+      "signal_16_v2_obs": -0.13203352443950198,
+      "signal_16_v2_proprio": -0.07792257115154702
+    },
+    "fixed": {
+      "signal_6": -0.06005437217646295,
+      "signal_7": -0.3672348675431723,
+      "signal_8": -0.9355309693937791,
+      "signal_10": 6.609099901148528e-05,
+      "fixed": 0.0,
+      "random": 0.0022771561298356026,
+      "dp_segmentation": 0.23528619699062725,
+      "signal_11": -1.0564057340226376,
+      "signal_12": -0.8325168590230112,
+      "signal_13": -1.009347733803871,
+      "bottom_up_minseg8": 0.042935504558371335,
+      "top_down_minseg8": -0.6010414164622768,
+      "signal_16_v2_obs": -0.022971187314733334,
+      "signal_16_v2_proprio": -0.025474526227841434
+    },
+    "note": "v1 16v2 used its own 50-episode sample (seed 7); fixed run uses the shared 300-episode sample. v1 bottom_up_minseg8 predates the bottom_up_merge bug fix."
+  },
+  "dp_segmentation_boundary_agreement_old_cache_vs_fixed": {
+    "n_episodes": 300,
+    "frac_boundaries_within2": 0.6553333333333333,
+    "frac_boundaries_exact": 0.2553333333333333,
+    "frac_episodes_all5_within2": 0.19
+  }
+}
