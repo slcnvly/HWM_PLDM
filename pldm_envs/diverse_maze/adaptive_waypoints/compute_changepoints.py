@@ -106,6 +106,7 @@ def main():
     parser.add_argument("--min_segs", type=int, nargs="+", default=[3, 5, 8])
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--limit_episodes", type=int, default=None)
+    parser.add_argument("--out_dir", type=str, default=None, help="default: --data_path")
     args = parser.parse_args()
 
     model = load_level1(args.config_path, args.checkpoint_path, args.device)
@@ -152,7 +153,8 @@ def main():
             print(f"episode {ep_idx}/{n_episodes} done", flush=True)
 
     for ms, boundaries_by_ep in results.items():
-        out_path = os.path.join(args.data_path, f"changepoints_minseg{ms}.pt")
+        os.makedirs(args.out_dir or args.data_path, exist_ok=True)
+        out_path = os.path.join(args.out_dir or args.data_path, f"changepoints_minseg{ms}.pt")
         torch.save(boundaries_by_ep, out_path)
         print(f"saved {out_path}: {len(boundaries_by_ep)} episodes")
 

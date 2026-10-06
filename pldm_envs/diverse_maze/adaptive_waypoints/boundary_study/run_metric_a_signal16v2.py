@@ -32,7 +32,7 @@ N_BOUNDARIES = 5
 
 def main():
     model = get_model()
-    splits, chosen = sample_episodes(n_target=N_EPISODES, seed=7)  # SAME as signal_16_v2_rollout_matched.py
+    splits, chosen = sample_episodes()  # shared 300-episode sample (16v2 Metric B uses the same since 2026-10-06)
     images = np.load(os.path.join(DATA_ROOT, "main", "images.npy"), mmap_mode="r")
     maps = torch.load(os.path.join(DATA_ROOT, "main", "train_maps.pt"), weights_only=False)
     print(f"Metric A for signal_16_v2: {len(chosen)} episodes", flush=True)

@@ -89,7 +89,8 @@ def main():
     model = get_model()
     t_start = time.time()
     paths = {}
-    for split_name in ("main", "probe"):
+    splits = sys.argv[1:] or ["main", "probe"]  # optional: run one split per process
+    for split_name in splits:
         paths[split_name] = process_split(model, split_name)
     total_time = time.time() - t_start
     print(f"\nTotal wall-clock time: {total_time:.0f}s ({total_time/60:.1f} min)")

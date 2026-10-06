@@ -36,3 +36,15 @@ re-check: the signal-1 changepoint cache used for SS5/SS6b adaptive training, th
 boundary-study encoding (Metric A/B, gate checks), and the dp_segmentation cache used in SS9. Whether this
 changed the conclusions is unknown until re-run with normalized inputs. All new inference-study CPU code (prober,
 C1) normalizes inputs as evaluation does.
+
+## 2026-10-06 follow-up (IN PROGRESS when the session's usage limit was reached)
+
+- V5 launched on Kaggle (user waived the +2h buffer): kernel `hwm-inference-v5`, ~7.6h; resumable per 20-instance chunk.
+- Running locally (nohup, logs next to scripts): corrected dp cache for full r50 (`boundary_study/dp_cache_fixed_{main,probe}.log`;
+  old cache preserved as `changepoints_minseg8_dp_v1.pt`), corrected signal-1 cache (`signal1_cache_fixed_*.log` →
+  `datasets/r50_local/signal1_fixed/`), Metric A / coarse / 16v2 reruns (`boundary_study/run_metric_a*_fixed.log`; old results `*_v1.json`),
+  follow-up 1+2 (`followup/action_sensitivity_and_surprise.py`). Old signal-1 cache download → `experiments/old_signal1_cache/`.
+- Kaggle CPU kernel `hwm-render-v0-states` renders V0 replan states for follow-up 3 (V0 part).
+- Written, not yet run: `followup/decision_points.py` (task 3; r50 reduced to 100 episodes and V0 to backward replans + equal random
+  others, because of CPU cost ~2.2 s/state). Not yet written: task 4 (linear BFS-distance probe), error_adaptive_l1.py / variance_head.py
+  code fixes, Metric A comparison table, DECISION_POINTS.md, next-week GPU plan.
