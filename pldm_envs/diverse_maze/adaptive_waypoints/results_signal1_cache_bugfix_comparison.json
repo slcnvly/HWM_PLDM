@@ -1,0 +1,135 @@
+{
+  "main_minseg3": {
+    "n_episodes": 1250,
+    "frac_within2": 0.4763200000000001,
+    "frac_exact": 0.09424,
+    "frac_episodes_all_within2": 0.0224,
+    "example_ep0_old_new": [
+      [
+        14,
+        18,
+        23,
+        26,
+        46
+      ],
+      [
+        15,
+        24,
+        36,
+        47,
+        53
+      ]
+    ]
+  },
+  "main_minseg5": {
+    "n_episodes": 1250,
+    "frac_within2": 0.4952,
+    "frac_exact": 0.09392,
+    "frac_episodes_all_within2": 0.008,
+    "example_ep0_old_new": [
+      [
+        13,
+        18,
+        26,
+        41,
+        46
+      ],
+      [
+        15,
+        24,
+        36,
+        47,
+        53
+      ]
+    ]
+  },
+  "main_minseg8": {
+    "n_episodes": 1250,
+    "frac_within2": 0.5184,
+    "frac_exact": 0.1168,
+    "frac_episodes_all_within2": 0.0536,
+    "example_ep0_old_new": [
+      [
+        10,
+        18,
+        26,
+        37,
+        46
+      ],
+      [
+        7,
+        15,
+        24,
+        36,
+        47
+      ]
+    ]
+  },
+  "probe_minseg3": {
+    "n_episodes": 1000,
+    "frac_within2": 0.4602,
+    "frac_exact": 0.0888,
+    "frac_episodes_all_within2": 0.022,
+    "example_ep0_old_new": [
+      [
+        25,
+        44,
+        50,
+        53,
+        56
+      ],
+      [
+        7,
+        11,
+        20,
+        23,
+        38
+      ]
+    ]
+  },
+  "probe_minseg5": {
+    "n_episodes": 1000,
+    "frac_within2": 0.4888,
+    "frac_exact": 0.1006,
+    "frac_episodes_all_within2": 0.004,
+    "example_ep0_old_new": [
+      [
+        25,
+        39,
+        44,
+        50,
+        55
+      ],
+      [
+        7,
+        13,
+        23,
+        38,
+        49
+      ]
+    ]
+  },
+  "probe_minseg8": {
+    "n_episodes": 1000,
+    "frac_within2": 0.5166000000000001,
+    "frac_exact": 0.11259999999999999,
+    "frac_episodes_all_within2": 0.056,
+    "example_ep0_old_new": [
+      [
+        17,
+        25,
+        36,
+        44,
+        52
+      ],
+      [
+        7,
+        15,
+        23,
+        38,
+        49
+      ]
+    ]
+  },
+  "chance_within2_mismatched_episodes_main_minseg8": 0.51312
+}

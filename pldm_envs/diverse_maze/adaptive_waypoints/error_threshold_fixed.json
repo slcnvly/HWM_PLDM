@@ -1,0 +1,8 @@
+{
+  "mean": 0.7239671945571899,
+  "std": 0.9573044180870056,
+  "threshold": 2.638576030731201,
+  "n_steps": 75000,
+  "n_sigma": 2.0,
+  "inputs": "normalized (preprocess.py)"
+}

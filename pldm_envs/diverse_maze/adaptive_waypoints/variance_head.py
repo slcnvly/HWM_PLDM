@@ -33,6 +33,8 @@ import torch.nn.functional as F
 from pldm_envs.diverse_maze.adaptive_waypoints.compute_changepoints import load_level1
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def compute_error_and_encoding_series(model, states, actions, proprio_vel):
     """Same forward pass as compute_changepoints.compute_error_series, but
     also returns the PRE-transition latent state (the state the one-step
@@ -95,14 +97,14 @@ def build_dataset(
         start = 0 if ep_idx == 0 else cum_lengths[ep_idx - 1]
 
         obs = splits[ep_idx]["observations"][:window]
-        proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(device)
-        img_seq = torch.from_numpy(
+        proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1).to(device)
+        img_seq = normalize_images(torch.from_numpy(
             np.array(images[start : start + window])
-        ).float().permute(0, 3, 1, 2)
+        ).float().permute(0, 3, 1, 2))
         states = img_seq.unsqueeze(1).to(device)
-        actions = torch.from_numpy(
+        actions = normalize_actions(torch.from_numpy(
             splits[ep_idx]["actions"][: window - 1]
-        ).float().unsqueeze(1).to(device)
+        ).float()).unsqueeze(1).to(device)
 
         err, enc = compute_error_and_encoding_series(model, states, actions, proprio_vel)
         all_errs.append(err)

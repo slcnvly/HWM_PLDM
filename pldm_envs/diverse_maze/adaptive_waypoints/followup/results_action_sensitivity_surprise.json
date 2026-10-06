@@ -1,0 +1,115 @@
+{
+  "n_episodes": 300,
+  "action_sensitivity": {
+    "1": {
+      "obs": {
+        "err_real_mean": 96.62046813964844,
+        "err_shuffled_mean": 96.8985366821289,
+        "ratio_real_over_shuffled": 0.9971303343772888,
+        "copy_baseline_mean": 103.4364242553711,
+        "ratio_real_over_copy": 0.934104859828949,
+        "action_effect_mean": 8.201278686523438,
+        "action_effect_over_predicted_change": 0.10231509804725647,
+        "action_effect_over_err_real": 0.08488138020038605
+      },
+      "proprio": {
+        "err_real_mean": 5.616451263427734,
+        "err_shuffled_mean": 22.672962188720703,
+        "ratio_real_over_shuffled": 0.2477158159017563,
+        "copy_baseline_mean": 17.450870513916016,
+        "ratio_real_over_copy": 0.32184362411499023,
+        "action_effect_mean": 19.99100112915039,
+        "action_effect_over_predicted_change": 1.3452191352844238,
+        "action_effect_over_err_real": 3.5593652725219727
+      }
+    },
+    "5": {
+      "obs": {
+        "err_real_mean": 105.47783660888672,
+        "err_shuffled_mean": 111.20149993896484,
+        "ratio_real_over_shuffled": 0.9485288858413696,
+        "copy_baseline_mean": 147.80606079101562,
+        "ratio_real_over_copy": 0.7136232256889343,
+        "action_effect_mean": 29.384328842163086,
+        "action_effect_over_predicted_change": 0.2613213360309601,
+        "action_effect_over_err_real": 0.27858296036720276
+      },
+      "proprio": {
+        "err_real_mean": 7.21259069442749,
+        "err_shuffled_mean": 40.52310562133789,
+        "ratio_real_over_shuffled": 0.17798711359500885,
+        "copy_baseline_mean": 43.57412338256836,
+        "ratio_real_over_copy": 0.16552463173866272,
+        "action_effect_mean": 38.78285598754883,
+        "action_effect_over_predicted_change": 0.9046639204025269,
+        "action_effect_over_err_real": 5.377104759216309
+      }
+    },
+    "10": {
+      "obs": {
+        "err_real_mean": 109.5875473022461,
+        "err_shuffled_mean": 125.88892364501953,
+        "ratio_real_over_shuffled": 0.8705098628997803,
+        "copy_baseline_mean": 165.8000946044922,
+        "ratio_real_over_copy": 0.660961925983429,
+        "action_effect_mean": 53.414154052734375,
+        "action_effect_over_predicted_change": 0.40729451179504395,
+        "action_effect_over_err_real": 0.4874108135700226
+      },
+      "proprio": {
+        "err_real_mean": 9.392821311950684,
+        "err_shuffled_mean": 48.89691162109375,
+        "ratio_real_over_shuffled": 0.1920943707227707,
+        "copy_baseline_mean": 60.59526824951172,
+        "ratio_real_over_copy": 0.15500915050506592,
+        "action_effect_mean": 47.15056228637695,
+        "action_effect_over_predicted_change": 0.7845097780227661,
+        "action_effect_over_err_real": 5.019850730895996
+      }
+    }
+  },
+  "surprise": {
+    "obs": {
+      "auroc_junction_arrival_exact_pooled": 0.5547056293100026,
+      "auroc_junction_arrival_pm2_pooled": 0.5572067217095091,
+      "auroc_junction_arrival_exact_per_episode_mean": 0.548039597843547,
+      "n_episodes_with_arrival": 214,
+      "mean_by_cell_type": {
+        "straight": 93.24351501464844,
+        "corner": 98.90380096435547,
+        "dead_end": 99.87757873535156,
+        "junction": 94.01644134521484
+      },
+      "mean_at_arrival_vs_not": [
+        94.71333312988281,
+        96.44035339355469
+      ]
+    },
+    "proprio": {
+      "auroc_junction_arrival_exact_pooled": 0.509536074969226,
+      "auroc_junction_arrival_pm2_pooled": 0.5160523772709702,
+      "auroc_junction_arrival_exact_per_episode_mean": 0.4988719307230919,
+      "n_episodes_with_arrival": 214,
+      "mean_by_cell_type": {
+        "straight": 5.168862342834473,
+        "corner": 6.367725372314453,
+        "dead_end": 7.0582194328308105,
+        "junction": 4.021707534790039
+      },
+      "mean_at_arrival_vs_not": [
+        4.117225170135498,
+        5.537891864776611
+      ]
+    }
+  },
+  "label_rates": {
+    "junction_arrival_exact": 0.02388888888888889,
+    "junction_arrival_pm2": 0.11555555555555555,
+    "cell_type_share": {
+      "straight": 0.19777777777777777,
+      "corner": 0.31305555555555553,
+      "dead_end": 0.17155555555555554,
+      "junction": 0.3176111111111111
+    }
+  }
+}

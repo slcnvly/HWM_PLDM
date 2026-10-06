@@ -23,6 +23,11 @@ from pldm_envs.diverse_maze.adaptive_waypoints.compute_changepoints import (
     compute_error_series,
     load_level1,
 )
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import (
+    normalize_actions,
+    normalize_images,
+    normalize_proprio_vel,
+)
 
 
 def compute_r50_error_threshold(
@@ -59,14 +64,15 @@ def compute_r50_error_threshold(
         start = 0 if ep_idx == 0 else cum_lengths[ep_idx - 1]
 
         obs = splits[ep_idx]["observations"][:window]
-        proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(device)
-        img_seq = torch.from_numpy(
+        # inputs normalized exactly as in training/evaluation (preprocess.py, 2026-10-06 fix)
+        proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1).to(device)
+        img_seq = normalize_images(torch.from_numpy(
             np.array(images[start : start + window])
-        ).float().permute(0, 3, 1, 2)
+        ).float().permute(0, 3, 1, 2))
         states = img_seq.unsqueeze(1).to(device)
-        actions = torch.from_numpy(
+        actions = normalize_actions(torch.from_numpy(
             splits[ep_idx]["actions"][: window - 1]
-        ).float().unsqueeze(1).to(device)
+        ).float()).unsqueeze(1).to(device)
 
         err = compute_error_series(model, states, actions, proprio_vel)
         all_errs.append(err)
@@ -111,10 +117,11 @@ class L1ErrorMonitor:
         """
         Args:
             current_obs: (bs, 3, 98, 98) NORMALIZED obs, straight from the
-                MPC loop's env.step() this real step.
-            action: (bs, 2) raw (unnormalized) action just executed.
+                MPC loop's env.step() this real step (used as is).
+            action: (bs, 2) raw (unnormalized) action just executed (normalized here).
             current_proprio: (bs, 2) raw (unnormalized) proprio vel after the
-                step (from env info, get_info()'s "proprio", normalized=False).
+                step (from env info, get_info()'s "proprio", normalized=False;
+                normalized here).
 
         Returns:
             (bs,) per-env squared error, or None if there's no previous obs
@@ -122,8 +129,12 @@ class L1ErrorMonitor:
             "no boost" for the upcoming plan, which is correct: there's no
             prior real-step outcome to have detected a surprise from yet.
         """
-        obs_after = self.normalizer.unnormalize_state(current_obs).to(self.device)
-        proprio_after = current_proprio.to(self.device)
+        # The model was trained on normalized inputs: keep the env's (already
+        # normalized) obs as is, and normalize the raw proprio velocity and the
+        # raw executed action (until 2026-10-06 this path un-normalized the obs
+        # to match a raw-input threshold calibration; both are now normalized).
+        obs_after = current_obs.to(self.device)
+        proprio_after = normalize_proprio_vel(current_proprio.float()).to(self.device)
 
         if self._prev_obs is None:
             self._prev_obs = obs_after
@@ -132,7 +143,7 @@ class L1ErrorMonitor:
 
         states = torch.stack([self._prev_obs, obs_after], dim=0)  # (2, bs, 3, 98, 98)
         proprio_vel = torch.stack([self._prev_proprio, proprio_after], dim=0)  # (2, bs, 2)
-        actions = action.to(self.device).float().unsqueeze(0)  # (1, bs, 2)
+        actions = normalize_actions(action.float()).to(self.device).unsqueeze(0)  # (1, bs, 2)
 
         result = self.model.level1.forward_posterior(
             states, actions, proprio_vel=proprio_vel, encode_only=False
