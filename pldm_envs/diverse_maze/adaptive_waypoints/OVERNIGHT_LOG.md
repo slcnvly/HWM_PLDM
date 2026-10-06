@@ -22,3 +22,8 @@ Decisions made without the user are listed in `PROGRESS.md` (this directory).
 | 2026-10-05 23:31 | 3 V1 | done | **101/120 (84.2%)**, mean steps 157.9. vs V0: flips 16 (V0 fail→V1 success) / 9 (reverse), McNemar p=0.23; steps on 85 both-solved: V1 faster 50 / slower 35, mean −30.0, Wilcoxon p=0.012 (Holm, m=4: 0.046 before V2). L2 clamp fraction rose 0.67→0.86. |
 | 2026-10-05 23:33 | 3 V3 | **SKIPPED (quota rule)** | used 16.98h + V2 remaining est 4.19h → 8.83h left < V3 est 14.7h + 2h. (V3 alone would also exceed Kaggle's 12h session limit.) |
 | 2026-10-05 23:33 | 3 V4 | **SKIPPED (quota rule)** | rule: a skipped GPU job skips all later GPU jobs. (Also, independently: V4 est ~10h + 2h > 8.83h − V2.) |
+| 2026-10-06 02:00 | A raw-input bug fix | done | shared `preprocess.py` (eval-identical, verified torch.equal incl. encodings); old results → `*_v1.json`; CPU reruns of gate check, bias investigation, Metric B (300 ep), 16v2 (300 ep), C1. **Gate-check conclusion overturned** (table in `boundary_study/PROGRESS.md`). |
+| 2026-10-06 02:15 | C V5 | pre-registered + kernel ready | INFERENCE_PREREG.md §10; `experiments/kaggle_inference_v5/` |
+| 2026-10-06 03:31 | 3 V2 | done | **74/120 (61.7%)**, steps 223.1; vs V0 McNemar Holm p=0.012 (worse), Wilcoxon Holm p=6e-5 (slower) |
+| 2026-10-06 03:33 | C V5 | **SKIPPED this week (quota)** | used 20.8h → 9.2h left < 7.6+2. Run after 2026-10-10 00:00 UTC reset. |
+| 2026-10-06 | B diagnosis | done | `INFERENCE_DIAGNOSIS.md`; wandb trajectory figures run `obq6dutb` |

@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "boundary_study")))
 from grid_utils import GRID_SIZE, OBS_MIN_TOTAL, obs_to_ij, open_neighbor_count  # noqa: E402
 
 EXP = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", "..", "experiments"))
-VARIANTS = ["v0", "v1", "v2", "v3", "v4"]
+VARIANTS = ["v0", "v1", "v2", "v3", "v4"]  # Holm family (m=4: V1-V4 vs V0); V5 is a separate registration
 FAIL_TYPES = ["a_stagnation", "b_oscillation", "c_unreachable_carrot", "d_wrong_path", "e_slow_progress"]
 SIGNALS = ["l1_final_cost", "wp1_move_latent", "wp1_move_xy", "ess_l2", "ess_l1", "l2_clamp_frac"]
 
@@ -319,7 +319,7 @@ def main():
     ap.add_argument("--plots", action="store_true")
     args = ap.parse_args()
     res = {"validation": validation(), "variants": {}, "comparisons": {}, "not_run": []}
-    data = {v: load_variant(v) for v in VARIANTS}
+    data = {v: load_variant(v) for v in VARIANTS + ["v5"]}
     # p90 of L1 final cost over all stage-1 replans of V0 successes (prereg SS6c)
     l1_p90 = None
     if data["v0"]:
@@ -329,7 +329,7 @@ def main():
                 vals += [r["l1_final_cost"] for r in t["diag"]["replans"] if r["stage"] == "s1"]
         l1_p90 = float(np.percentile(vals, 90))
     res["l1_final_cost_p90_v0_success"] = l1_p90
-    for v in VARIANTS:
+    for v in VARIANTS + ["v5"]:
         if data[v] is None:
             res["not_run"].append(v)
             continue
@@ -355,13 +355,17 @@ def main():
                         **{k: paired({i: data["v0"][i] for i in ids}, {i: data["v4"][i] for i in ids})[k]
                            for k in ("steps_mean_diff_vx_minus_v0", "n_both_success", "wilcoxon_p", "v0_fail_vx_success", "v0_success_vx_fail")}}
         res["v4_split_by_junction_fraction"] = {"median_junction_fraction": med, **split}
+    # post-hoc (NOT pre-registered): share of stage-1 replans whose waypoint 1 lies
+    # farther from the goal in BFS maze distance than the agent ("backward carrot")
+    import carrot_direction
+    res["posthoc_carrot_direction"] = {v: carrot_direction.carrot_stats(data[v]) for v in VARIANTS + ["v5"] if data.get(v)}
     out_path = os.path.join(HERE, "results_inference.json")
     json.dump(res, open(out_path, "w"), indent=2, default=lambda o: None)
     print(json.dumps({k: res[k] for k in ("not_run", "comparisons")}, indent=1, default=str))
     if args.plots:
         import wandb
         run = wandb.init(project="hwm-boundary-study", name="inference_study_trajectories", job_type="analysis")
-        for v in VARIANTS:
+        for v in VARIANTS + ["v5"]:
             if data[v] is None:
                 continue
             for key, fig in plot_trials(v, data[v]):

@@ -31,6 +31,7 @@ def carrot_stats(trials):
             same += p == 0
         n = fw + bw + same + wall
         out["success" if t["success"] else "fail"].append({"forward": fw / n, "backward": bw / n, "same_cell_dist": same / n, "wall": wall / n})
+    out["all"] = out["success"] + out["fail"]
     summ = {}
     for g, rows in out.items():
         summ[g] = {k: float(np.mean([r[k] for r in rows])) for k in rows[0]} if rows else None
