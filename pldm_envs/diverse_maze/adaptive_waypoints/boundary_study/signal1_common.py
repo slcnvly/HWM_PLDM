@@ -18,6 +18,8 @@ CKPT_PATH = os.path.join(DATA_ROOT, "3-9-1-seed248_epoch=3_sample_step=15465472.
 WINDOW = 61  # 61 frames = 60-step window, matches compute_changepoints.py
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def get_model(device="cpu"):
     return load_level1(CONFIG_PATH, CKPT_PATH, device)
 
@@ -34,10 +36,10 @@ def compute_episode(model, ep, images, ep_start, device="cpu"):
         encodings: (61, D) flattened real per-frame encodings (D = C*H*W)
     """
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(device)
-    img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1).to(device)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1).to(device)
-    actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1).to(device)
+    actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1).to(device)
 
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)
@@ -79,10 +81,10 @@ def compute_episode_full(model, ep, images, ep_start, device="cpu"):
     (60,D) = f(z_t,a_t), and the raw ForwardResult (for a direct
     PredictionObjective consistency check)."""
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(device)
-    img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1).to(device)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1).to(device)
-    actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1).to(device)
+    actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1).to(device)
 
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)

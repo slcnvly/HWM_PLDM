@@ -1,0 +1,16 @@
+{
+  "states_equal": true,
+  "proprio_vel_equal": true,
+  "actions_equal": true,
+  "encodings_equal_eval_vs_new": true,
+  "forward_posterior_predictions_equal": true,
+  "old_vs_eval_encoding_rel_diff": 1.398436188697815,
+  "old_input_range": [
+    25.0,
+    227.0
+  ],
+  "eval_input_range": [
+    -4.558934211730957,
+    1.3213698863983154
+  ]
+}

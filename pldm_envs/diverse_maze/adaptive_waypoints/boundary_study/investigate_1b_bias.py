@@ -58,6 +58,8 @@ CKPT_PATH = os.path.join(HERE, "investigate_checkpoint.npz")
 N_5STEP_EPISODES = 300  # expensive-signal cap, matches PREREGISTRATION.md SS7
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def l2(vec_2d):
     return np.linalg.norm(vec_2d, axis=1)
 
@@ -80,10 +82,10 @@ def check_2_eval_vs_train(model):
 
     for ep_idx, ep, images, ep_start in iter_episodes("main", limit=1):
         obs = ep["observations"][:WINDOW]
-        proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-        img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+        proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+        img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
         states = img_seq.unsqueeze(1)
-        actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+        actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
 
         with torch.no_grad():
             result_eval = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)
@@ -125,10 +127,10 @@ def check_5step_shuffle(model):
     n_done = 0
     for ep_idx, ep, images, ep_start in iter_episodes("main", limit=N_5STEP_EPISODES):
         obs = ep["observations"][:WINDOW]
-        proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-        img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+        proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+        img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
         states = img_seq.unsqueeze(1)
-        actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+        actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
 
         with torch.no_grad():
             result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)
@@ -239,10 +241,10 @@ def main():
             continue
 
         obs = ep["observations"][:WINDOW]
-        proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-        img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+        proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+        img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
         states = img_seq.unsqueeze(1)
-        actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+        actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
 
         with torch.no_grad():
             result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)

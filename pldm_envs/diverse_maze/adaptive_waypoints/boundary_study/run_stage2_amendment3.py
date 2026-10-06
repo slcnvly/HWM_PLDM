@@ -28,6 +28,8 @@ N_BOUNDARIES = 5
 CKPT_PATH = os.path.join(HERE, "amendment3_checkpoint.npz")
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def get_episode_torch_encodings(model, splits, ep_idx, images):
     """Like get_episode_encodings_actions but also returns the raw torch
     tensors needed by signal_16 (real per-frame encodings + proprio,
@@ -35,10 +37,10 @@ def get_episode_torch_encodings(model, splits, ep_idx, images):
     ep = splits[ep_idx]
     cum = sum(len(splits[i]["observations"]) for i in range(ep_idx))
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-    img_seq = torch.from_numpy(np.array(images[cum : cum + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[cum : cum + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1)
-    actions_t = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+    actions_t = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions_t, proprio_vel=proprio_vel, encode_only=False)
     enc_torch = result.backbone_output.encodings  # (61,1,C,H,W)

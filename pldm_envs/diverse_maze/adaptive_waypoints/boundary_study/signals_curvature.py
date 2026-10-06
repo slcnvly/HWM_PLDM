@@ -32,6 +32,8 @@ ACTION_STD = np.array([0.3664, 0.4494])
 # direct convention to be scored consistently.
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def signal_11_curvature(z):
     """z: (61, D). out[i] = ||z[i+1] - 2*z[i] + z[i-1]||_2, for i=1..59
     (i=0 undefined, needs z[-1] -- set to 0)."""
@@ -89,7 +91,7 @@ def signal_16_action_sensitivity_divergence(model, encodings_torch, proprio_comp
     candidate_actions = rng.normal(
         loc=ACTION_MEAN, scale=ACTION_STD, size=(K, 2)
     ).astype(np.float32)  # fixed pool, reused across all t in this episode
-    actions_pool = torch.from_numpy(candidate_actions)  # (K, 2)
+    actions_pool = normalize_actions(torch.from_numpy(candidate_actions).float())  # (K, 2)
 
     obs_sig = np.zeros(60)
     proprio_sig = np.zeros(60)

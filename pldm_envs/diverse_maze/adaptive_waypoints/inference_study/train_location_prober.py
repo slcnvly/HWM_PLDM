@@ -18,6 +18,7 @@ from pldm.configs import DataclassArgParser  # noqa: E402
 from pldm.models.hjepa import HJEPA, HJEPAConfig  # noqa: E402
 from pldm.models.misc import Prober  # noqa: E402
 from pldm_envs.diverse_maze.adaptive_waypoints.compute_changepoints import _strip_enum_prefixes  # noqa: E402
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel  # noqa: E402
 
 DATA = os.path.join(ROOT, "pldm_envs/diverse_maze/datasets/r50_local/r50_dataset")
 CKPT = os.path.abspath(os.path.join(ROOT, "..", "experiments/hwm_finetune_checkpoints_dataset/pretrained_baseline.ckpt"))
@@ -53,9 +54,8 @@ def encode_split(model, split, ep_ids, every=2):
     for n, e in enumerate(ep_ids):
         ep = data[e]
         idx = np.arange(0, len(ep["observations"]), every)
-        img = torch.from_numpy(np.array(images[starts[e] + idx])).float().permute(0, 3, 1, 2)
-        img = (img - STATE_MEAN) / (STATE_STD + 1e-6)
-        pv = (torch.from_numpy(ep["observations"][idx, 2:4]).float() - PVEL_MEAN) / (PVEL_STD + 1e-6)
+        img = normalize_images(torch.from_numpy(np.array(images[starts[e] + idx])).float().permute(0, 3, 1, 2))
+        pv = normalize_proprio_vel(torch.from_numpy(ep["observations"][idx, 2:4]).float())
         with torch.no_grad():
             o = model.level1.backbone(img, proprio=pv)
         X.append(o.obs_component.half())

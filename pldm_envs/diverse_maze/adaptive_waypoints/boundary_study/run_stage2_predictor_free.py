@@ -34,6 +34,8 @@ MIN_SEG = 8
 N_BOUNDARIES = 5
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def sample_episodes(n_target=N_EPISODES_TARGET, seed=0):
     """Stratified sample from main (selection set), ~n_target/25 per map."""
     splits = torch.load(os.path.join(DATA_ROOT, "main", "data.p"), weights_only=False)
@@ -61,10 +63,10 @@ def get_episode_encodings_actions(model, splits, ep_idx, images):
     ep_start = cum
 
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-    img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1)
-    actions_t = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+    actions_t = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
 
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions_t, proprio_vel=proprio_vel, encode_only=True)
@@ -100,6 +102,7 @@ def main():
     metric_b_results = {name: [] for name in signal_names + baseline_names}
 
     rand_rng = np.random.default_rng(42)
+    oracle_bounds = {}
     n_done = 0
     for ep_idx in chosen:
         ep_idx = int(ep_idx)
@@ -127,8 +130,9 @@ def main():
         ]
         metric_b_results["random"].append(float(np.mean(rand_scores)))
 
-        _, oracle_score = oracle_boundaries(enc, N_BOUNDARIES, MIN_SEG)
+        oracle_b, oracle_score = oracle_boundaries(enc, N_BOUNDARIES, MIN_SEG)
         metric_b_results["oracle"].append(oracle_score)
+        oracle_bounds[ep_idx] = [int(b) for b in oracle_b]
 
         n_done += 1
         if n_done % 25 == 0:
@@ -159,7 +163,8 @@ def main():
 
     out_path = os.path.join(HERE, "results_stage2_predictor_free.json")
     with open(out_path, "w") as f:
-        json.dump({"summary": summary, "n_episodes_sampled": len(chosen)}, f, indent=2)
+        json.dump({"summary": summary, "n_episodes_sampled": len(chosen),
+                   "oracle_boundaries_by_episode": {str(k): v for k, v in oracle_bounds.items()}}, f, indent=2)
     print(f"wrote {out_path}")
 
 

@@ -18,6 +18,8 @@ N_EPISODES = 50
 K_MAX = 20  # k = 0..20 -> 21 step-deltas each (k -> k+1)
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def main():
     model = get_model()
 
@@ -28,10 +30,10 @@ def main():
     for split in ("main",):  # 50 episodes from main is enough per the request
         for ep_idx, ep, images, ep_start in iter_episodes(split, limit=N_EPISODES):
             obs = ep["observations"][:WINDOW]
-            proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-            img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+            proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+            img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
             states = img_seq.unsqueeze(1)
-            actions = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+            actions = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
 
             with torch.no_grad():
                 result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)

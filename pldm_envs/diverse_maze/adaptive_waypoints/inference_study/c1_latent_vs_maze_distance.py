@@ -16,7 +16,8 @@ from scipy.stats import spearmanr
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "boundary_study")))
-from train_location_prober import load_model, STATE_MEAN, STATE_STD, PVEL_MEAN, PVEL_STD, DATA  # noqa: E402
+from train_location_prober import load_model, DATA  # noqa: E402
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel  # noqa: E402
 from run_stage2_predictor_free import sample_episodes  # noqa: E402
 from grid_utils import obs_to_ij, open_neighbor_count  # noqa: E402
 
@@ -64,9 +65,8 @@ def main():
     for n, e in enumerate(chosen):
         ep = splits[e]
         T = len(ep["observations"])
-        img = torch.from_numpy(np.array(images[starts[e]:starts[e] + T])).float().permute(0, 3, 1, 2)
-        img = (img - STATE_MEAN) / (STATE_STD + 1e-6)
-        pv = (torch.from_numpy(ep["observations"][:, 2:4]).float() - PVEL_MEAN) / (PVEL_STD + 1e-6)
+        img = normalize_images(torch.from_numpy(np.array(images[starts[e]:starts[e] + T])).float().permute(0, 3, 1, 2))
+        pv = normalize_proprio_vel(torch.from_numpy(ep["observations"][:, 2:4]).float())
         with torch.no_grad():
             obs = model.level1.backbone(img, proprio=pv).obs_component.flatten(1)
         lat = (obs - obs[-1]).pow(2).mean(dim=1).numpy()  # (T,)
@@ -112,7 +112,7 @@ def main():
         },
         "latent_dist_by_bfs_cells": {int(b): float(np.median(pl[pb == b])) for b in np.unique(pb) if (pb == b).sum() >= 50},
     }
-    json.dump(res, open(os.path.join(HERE, "results_c1_latent_vs_maze_distance.json"), "w"), indent=2)
+    json.dump(res, open(os.path.join(HERE, "results_c1_latent_vs_maze_distance.json"), "w"), indent=2)  # previous run kept as *_prev.json
     print(json.dumps(res, indent=2))
 
 

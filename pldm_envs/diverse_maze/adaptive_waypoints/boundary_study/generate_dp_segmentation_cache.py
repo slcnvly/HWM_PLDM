@@ -31,12 +31,14 @@ N_BOUNDARIES = 5
 CKPT_DIR = HERE
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def compute_encodings(model, ep, images, ep_start):
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-    img_seq = torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[ep_start : ep_start + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1)
-    actions_t = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+    actions_t = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions_t, proprio_vel=proprio_vel, encode_only=True)
     return result.backbone_output.encodings.squeeze(1).flatten(1).cpu().numpy()

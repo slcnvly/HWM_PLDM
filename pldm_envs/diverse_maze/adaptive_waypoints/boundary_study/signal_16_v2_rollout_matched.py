@@ -41,14 +41,16 @@ K = 16
 STARTS = list(range(0, 46, 3))  # all satisfy start+14<=60
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def compute_episode(model, splits, ep_idx, images, seed):
     ep = splits[ep_idx]
     cum = sum(len(splits[i]["observations"]) for i in range(ep_idx))
     obs = ep["observations"][:WINDOW]
-    proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-    img_seq = torch.from_numpy(np.array(images[cum : cum + WINDOW])).float().permute(0, 3, 1, 2)
+    proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+    img_seq = normalize_images(torch.from_numpy(np.array(images[cum : cum + WINDOW])).float().permute(0, 3, 1, 2))
     states = img_seq.unsqueeze(1)
-    actions_t = torch.from_numpy(ep["actions"][: WINDOW - 1]).float().unsqueeze(1)
+    actions_t = normalize_actions(torch.from_numpy(ep["actions"][: WINDOW - 1]).float()).unsqueeze(1)
     with torch.no_grad():
         result = model.level1.forward_posterior(states, actions_t, proprio_vel=proprio_vel, encode_only=False)
     enc_torch = result.backbone_output.encodings
@@ -61,7 +63,7 @@ def compute_episode(model, splits, ep_idx, images, seed):
 
     for t in STARTS:
         candidate_seqs = rng.normal(loc=ACTION_MEAN, scale=ACTION_STD, size=(ROLLOUT_LEN, K, 2)).astype(np.float32)
-        actions_b = torch.from_numpy(candidate_seqs)  # (14, K, 2)
+        actions_b = normalize_actions(torch.from_numpy(candidate_seqs).float())  # (14, K, 2)
         state_encs_b = enc_torch[t : t + 1].squeeze(1).unsqueeze(0).expand(1, K, -1, -1, -1).contiguous()
         proprio_b = None
         if proprio_torch is not None:
@@ -80,7 +82,7 @@ def compute_episode(model, splits, ep_idx, images, seed):
 
 def main():
     model = get_model()
-    splits, chosen = sample_episodes(n_target=N_EPISODES, seed=7)
+    splits, chosen = sample_episodes()  # 300-episode main sample, same as every other Metric B run
     images = np.load(os.path.join(DATA_ROOT, "main", "images.npy"), mmap_mode="r")
     print(f"signal 16 v2: {len(chosen)} episodes, rollout_len={ROLLOUT_LEN}, starts={STARTS}", flush=True)
 

@@ -6,6 +6,7 @@ import torch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 from pldm_envs.diverse_maze.adaptive_waypoints.compute_changepoints import load_level1
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
 
 HERE = os.path.dirname(__file__)
 DATA_ROOT = os.path.join(HERE, "..", "..", "datasets", "r50_local", "r50_dataset")
@@ -22,10 +23,10 @@ images = np.load(os.path.join(DATA_ROOT, "main", "images.npy"), mmap_mode="r")
 window = 61
 ep = splits[0]
 obs = ep["observations"][:window]
-proprio_vel = torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1)
-img_seq = torch.from_numpy(np.array(images[0:window])).float().permute(0, 3, 1, 2)
+proprio_vel = normalize_proprio_vel(torch.from_numpy(obs[:, 2:4]).float()).unsqueeze(1)
+img_seq = normalize_images(torch.from_numpy(np.array(images[0:window])).float().permute(0, 3, 1, 2))
 states = img_seq.unsqueeze(1)
-actions = torch.from_numpy(ep["actions"][: window - 1]).float().unsqueeze(1)
+actions = normalize_actions(torch.from_numpy(ep["actions"][: window - 1]).float()).unsqueeze(1)
 
 with torch.no_grad():
     result = model.level1.forward_posterior(states, actions, proprio_vel=proprio_vel, encode_only=False)

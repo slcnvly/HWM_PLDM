@@ -29,6 +29,8 @@ from pldm_envs.diverse_maze.adaptive_waypoints.segmentation import (  # noqa: E4
 _ENUM_STR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*$")
 
 
+from pldm_envs.diverse_maze.adaptive_waypoints.preprocess import normalize_images, normalize_proprio_vel, normalize_actions  # noqa: E402
+
 def _strip_enum_prefixes(obj):
     """Same trick as experiments/verify_optimizer_equivalence.py: the real
     pipeline resolves "ClassName.member" yaml strings via OmegaConf.
@@ -126,17 +128,18 @@ def main():
         start = 0 if ep_idx == 0 else cum_lengths[ep_idx - 1]
 
         obs = splits[ep_idx]["observations"][:window]
-        proprio_vel = (
-            torch.from_numpy(obs[:, 2:4]).float().unsqueeze(1).to(args.device)
-        )  # (window, 1, 2) -- non-ant envs: obs[:, 2:] is qvel (d4rl.py _load_qvel)
-        img_seq = torch.from_numpy(
+        # inputs normalized exactly as in training/evaluation (preprocess.py)
+        proprio_vel = normalize_proprio_vel(
+            torch.from_numpy(obs[:, 2:4]).float()
+        ).unsqueeze(1).to(args.device)  # (window, 1, 2) -- non-ant envs: obs[:, 2:] is qvel (d4rl.py _load_qvel)
+        img_seq = normalize_images(torch.from_numpy(
             np.array(images[start : start + window])
-        ).float().permute(0, 3, 1, 2)  # (window, 3, 98, 98)
+        ).float().permute(0, 3, 1, 2))  # (window, 3, 98, 98)
 
         states = img_seq.unsqueeze(1).to(args.device)  # (window, 1, 3, 98, 98)
-        actions = torch.from_numpy(
+        actions = normalize_actions(torch.from_numpy(
             splits[ep_idx]["actions"][: window - 1]
-        ).float().unsqueeze(1).to(args.device)  # (window-1, 1, 2)
+        ).float()).unsqueeze(1).to(args.device)  # (window-1, 1, 2)
 
         err = compute_error_series(model, states, actions, proprio_vel)  # (window-1,) == 60
         assert err.shape[0] == args.l2_n_steps * args.l2_step_skip
