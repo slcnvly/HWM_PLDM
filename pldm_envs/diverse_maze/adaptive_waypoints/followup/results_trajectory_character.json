@@ -1,0 +1,219 @@
+{
+  "definitions": {
+    "chunk": 10,
+    "revisit_window": 20,
+    "min_disp_cells_for_reversal": 0.01,
+    "wall_thresholds_cells_drop": {
+      "strict": [
+        0.07,
+        0.8
+      ],
+      "medium": [
+        0.12,
+        0.5
+      ],
+      "loose": [
+        0.2,
+        0.25
+      ]
+    },
+    "grid_size": 0.9871249999999999
+  },
+  "sources": {
+    "r50_main": {
+      "n_trajectories": 1250,
+      "n_steps": 123750,
+      "n_chunks": 12500,
+      "straightness": {
+        "mean": 0.8446056958973656,
+        "q10": 0.5563536465130269,
+        "q25": 0.7861644182511982,
+        "median": 0.9260907870798045,
+        "q75": 0.9775365367812856,
+        "q90": 0.9921185158549747,
+        "hist_bins_0_to_1_step_0.1": [
+          36,
+          113,
+          176,
+          273,
+          388,
+          517,
+          690,
+          1133,
+          2095,
+          7079
+        ]
+      },
+      "revisit_within_20_share_of_steps": 0.0033292929292929293,
+      "revisit_within_20_share_of_cell_entries": 0.06532424290470905,
+      "cell_entries_per_step": 0.05096565656565657,
+      "reversal_share_of_moving_steps": 0.017294395460645907,
+      "wall_contact_share_of_steps": {
+        "strict": 0.021268686868686867,
+        "medium": 0.06203636363636364,
+        "loose": 0.1042989898989899
+      },
+      "mean_step_cells": 0.06907044916172357
+    },
+    "random_sim_data_init_vel": {
+      "n_trajectories": 1250,
+      "n_steps": 123750,
+      "n_chunks": 12500,
+      "straightness": {
+        "mean": 0.8495895959057985,
+        "q10": 0.5736101559870402,
+        "q25": 0.7915997234705416,
+        "median": 0.9267977319518649,
+        "q75": 0.9777023402738634,
+        "q90": 0.991701462701871,
+        "hist_bins_0_to_1_step_0.1": [
+          31,
+          102,
+          149,
+          241,
+          352,
+          501,
+          739,
+          1132,
+          2083,
+          7170
+        ]
+      },
+      "revisit_within_20_share_of_steps": 0.0035393939393939394,
+      "revisit_within_20_share_of_cell_entries": 0.06785437645236252,
+      "cell_entries_per_step": 0.05216161616161616,
+      "reversal_share_of_moving_steps": 0.016946427967105486,
+      "wall_contact_share_of_steps": {
+        "strict": 0.02105858585858586,
+        "medium": 0.06146262626262626,
+        "loose": 0.10294949494949494
+      },
+      "mean_step_cells": 0.06958491170381824
+    },
+    "random_sim_zero_init_vel": {
+      "n_trajectories": 1250,
+      "n_steps": 123750,
+      "n_chunks": 12500,
+      "straightness": {
+        "mean": 0.8393824979253681,
+        "q10": 0.5536493616814876,
+        "q25": 0.7798522119297646,
+        "median": 0.9193018695227267,
+        "q75": 0.9741074776123019,
+        "q90": 0.9904603157933546,
+        "hist_bins_0_to_1_step_0.1": [
+          42,
+          121,
+          200,
+          286,
+          360,
+          507,
+          738,
+          1157,
+          2190,
+          6899
+        ]
+      },
+      "revisit_within_20_share_of_steps": 0.0030626262626262625,
+      "revisit_within_20_share_of_cell_entries": 0.06888404216648492,
+      "cell_entries_per_step": 0.04446060606060606,
+      "reversal_share_of_moving_steps": 0.01576340276225039,
+      "wall_contact_share_of_steps": {
+        "strict": 0.01937777777777778,
+        "medium": 0.05566060606060606,
+        "loose": 0.09582222222222223
+      },
+      "mean_step_cells": 0.061142808972319475
+    },
+    "eval_v0_success_until_goal": {
+      "n_trajectories": 94,
+      "n_steps": 17322,
+      "n_chunks": 1698,
+      "straightness": {
+        "mean": 0.9012973803498878,
+        "q10": 0.6761506783257779,
+        "q25": 0.8906418768794544,
+        "median": 0.9752317803220846,
+        "q75": 0.9942597076582103,
+        "q90": 0.9981503574635949,
+        "hist_bins_0_to_1_step_0.1": [
+          3,
+          9,
+          11,
+          24,
+          34,
+          52,
+          54,
+          84,
+          179,
+          1248
+        ]
+      },
+      "revisit_within_20_share_of_steps": 0.004041103798637571,
+      "revisit_within_20_share_of_cell_entries": 0.040439052570768345,
+      "cell_entries_per_step": 0.0999307239348805,
+      "reversal_share_of_moving_steps": 0.01184443134944019,
+      "wall_contact_share_of_steps": {
+        "strict": 0.011372820690451448,
+        "medium": 0.05028287726590463,
+        "loose": 0.0912134857406766
+      },
+      "mean_step_cells": 0.11137425569774859
+    },
+    "eval_v0_failure_full": {
+      "n_trajectories": 26,
+      "n_steps": 12584,
+      "n_chunks": 1248,
+      "straightness": {
+        "mean": 0.8649952427136688,
+        "q10": 0.5605313303802327,
+        "q25": 0.8228914615434479,
+        "median": 0.9592531506474671,
+        "q75": 0.9914988337796464,
+        "q90": 0.9977993549635236,
+        "hist_bins_0_to_1_step_0.1": [
+          4,
+          11,
+          23,
+          27,
+          33,
+          49,
+          55,
+          88,
+          145,
+          813
+        ]
+      },
+      "revisit_within_20_share_of_steps": 0.00810553083280356,
+      "revisit_within_20_share_of_cell_entries": 0.10504634397528322,
+      "cell_entries_per_step": 0.07716147488874761,
+      "reversal_share_of_moving_steps": 0.015947232195040493,
+      "wall_contact_share_of_steps": {
+        "strict": 0.011999364272091546,
+        "medium": 0.055467260012714556,
+        "loose": 0.10870947234583599
+      },
+      "mean_step_cells": 0.09191906454643015
+    }
+  },
+  "extra_straightness_50step_chunks": {
+    "r50_main": {
+      "mean": 0.505,
+      "q25": 0.329,
+      "median": 0.519,
+      "q75": 0.687
+    },
+    "random_sim_zero_init_vel": {
+      "mean": 0.505,
+      "q25": 0.322,
+      "median": 0.516,
+      "q75": 0.681
+    },
+    "eval_v0_success_until_goal": {
+      "mean": 0.56,
+      "q25": 0.392,
+      "median": 0.595,
+      "q75": 0.752
+    }
+  }
+}
