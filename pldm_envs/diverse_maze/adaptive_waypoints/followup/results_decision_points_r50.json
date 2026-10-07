@@ -1,0 +1,235 @@
+{
+  "n_episodes": 100,
+  "n_points": 3000,
+  "frames": "1..59 step 2",
+  "label_rates": {
+    "jexact": 0.018666666666666668,
+    "jpm2": 0.10233333333333333,
+    "at_junction": 0.277
+  },
+  "signals": {
+    "signal_7": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.5279442449534162,
+      "auroc_junction_arrival_pm2": 0.5781777100965104,
+      "auroc_at_junction_cell": 0.48822207020598196,
+      "mean_by_cell_type": {
+        "straight": 105.5039056691374,
+        "corner": 110.0962151489338,
+        "dead_end": 92.23620564156136,
+        "junction": 100.84652551904625
+      }
+    },
+    "surprise_obs": {
+      "n_points": 870,
+      "auroc_junction_arrival_exact": 0.5076943140323422,
+      "auroc_junction_arrival_pm2": 0.5917330473856209,
+      "auroc_at_junction_cell": 0.5361105667956694,
+      "mean_by_cell_type": {
+        "straight": 85.019357105684,
+        "corner": 99.22812192237983,
+        "dead_end": 96.70137704502453,
+        "junction": 97.89199836062689
+      }
+    },
+    "surprise_proprio": {
+      "n_points": 870,
+      "auroc_junction_arrival_exact": 0.4325769431403234,
+      "auroc_junction_arrival_pm2": 0.5118974673202614,
+      "auroc_at_junction_cell": 0.4274604418752756,
+      "mean_by_cell_type": {
+        "straight": 5.171265767170833,
+        "corner": 7.4252643540754155,
+        "dead_end": 5.974448224811843,
+        "junction": 3.188492405371074
+      }
+    },
+    "spread_latent_planner_H1": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.5640164013975156,
+      "auroc_junction_arrival_pm2": 0.55440513528257,
+      "auroc_at_junction_cell": 0.6273233102479474,
+      "mean_by_cell_type": {
+        "straight": 960.4023074845311,
+        "corner": 906.0552090075837,
+        "dead_end": 806.2820538100718,
+        "junction": 1033.689143248557
+      }
+    },
+    "spread_xy_planner_H1": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.6066940023291926,
+      "auroc_junction_arrival_pm2": 0.6165254109157412,
+      "auroc_at_junction_cell": 0.6688548128397133,
+      "mean_by_cell_type": {
+        "straight": 0.0561863059128463,
+        "corner": 0.05029353952258356,
+        "dead_end": 0.040641646474961476,
+        "junction": 0.06416240958418477
+      }
+    },
+    "spread_latent_planner_H2": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.49580866653726713,
+      "auroc_junction_arrival_pm2": 0.4568981470841886,
+      "auroc_at_junction_cell": 0.5772023352801399,
+      "mean_by_cell_type": {
+        "straight": 2373.800614519817,
+        "corner": 2295.7584818992295,
+        "dead_end": 1910.8569153723986,
+        "junction": 2430.968519006539
+      }
+    },
+    "spread_xy_planner_H2": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.6374041634316769,
+      "auroc_junction_arrival_pm2": 0.6127661170049991,
+      "auroc_at_junction_cell": 0.6814000362841683,
+      "mean_by_cell_type": {
+        "straight": 0.28501337765637774,
+        "corner": 0.2645824562343417,
+        "dead_end": 0.192379155065981,
+        "junction": 0.3347314065367109
+      }
+    },
+    "spread_latent_planner_H3": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.4499102290372671,
+      "auroc_junction_arrival_pm2": 0.41238051118172225,
+      "auroc_at_junction_cell": 0.5405425648246627,
+      "mean_by_cell_type": {
+        "straight": 2959.6047715598006,
+        "corner": 2999.535093163242,
+        "dead_end": 2496.356910402939,
+        "junction": 2960.490108191608
+      }
+    },
+    "spread_xy_planner_H3": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.651870632763975,
+      "auroc_junction_arrival_pm2": 0.623266255498935,
+      "auroc_at_junction_cell": 0.6664735949455155,
+      "mean_by_cell_type": {
+        "straight": 0.7062532087045956,
+        "corner": 0.6353808011656173,
+        "dead_end": 0.43902871200896504,
+        "junction": 0.8067292517183347
+      }
+    },
+    "spread_latent_data_H1": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.577536636257764,
+      "auroc_junction_arrival_pm2": 0.5465781111846251,
+      "auroc_at_junction_cell": 0.6137267336092926,
+      "mean_by_cell_type": {
+        "straight": 385.7432798163355,
+        "corner": 362.949628477337,
+        "dead_end": 327.5484060713543,
+        "junction": 412.2045130356698
+      }
+    },
+    "spread_xy_data_H1": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.6052928474378882,
+      "auroc_junction_arrival_pm2": 0.5999508921065714,
+      "auroc_at_junction_cell": 0.6438015378051629,
+      "mean_by_cell_type": {
+        "straight": 0.02029456764004991,
+        "corner": 0.018136610212063753,
+        "dead_end": 0.014974759314048817,
+        "junction": 0.022628212317086928
+      }
+    },
+    "spread_latent_data_H2": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.5214965062111802,
+      "auroc_junction_arrival_pm2": 0.45370734356535397,
+      "auroc_at_junction_cell": 0.5691537966055994,
+      "mean_by_cell_type": {
+        "straight": 1279.407687055386,
+        "corner": 1207.9162867570124,
+        "dead_end": 1000.1184076934369,
+        "junction": 1305.7666856419164
+      }
+    },
+    "spread_xy_data_H2": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.6195894798136645,
+      "auroc_junction_arrival_pm2": 0.5684758772592957,
+      "auroc_at_junction_cell": 0.6320069638972525,
+      "mean_by_cell_type": {
+        "straight": 0.11392032341125514,
+        "corner": 0.106620968530295,
+        "dead_end": 0.08257185981369777,
+        "junction": 0.1294410435320915
+      }
+    },
+    "spread_latent_data_H3": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.46077979425465837,
+      "auroc_junction_arrival_pm2": 0.40607389649362385,
+      "auroc_at_junction_cell": 0.5310548651022309,
+      "mean_by_cell_type": {
+        "straight": 1982.0431469759644,
+        "corner": 1958.9616155864812,
+        "dead_end": 1584.1545914747521,
+        "junction": 1961.9063773218331
+      }
+    },
+    "spread_xy_data_H3": {
+      "n_points": 3000,
+      "auroc_junction_arrival_exact": 0.6312839673913043,
+      "auroc_junction_arrival_pm2": 0.5754670995257339,
+      "auroc_at_junction_cell": 0.626161551098262,
+      "mean_by_cell_type": {
+        "straight": 0.29875822537414587,
+        "corner": 0.28356648214990976,
+        "dead_end": 0.2061071285904076,
+        "junction": 0.33764547088758395
+      }
+    }
+  },
+  "l2_latent_stats": {
+    "mean": [
+      -0.012265308760106564,
+      -0.05445085093379021,
+      -0.0013152057072147727,
+      0.16214115917682648,
+      -0.09613701701164246,
+      0.18454857170581818,
+      -0.03412245213985443,
+      -0.14839987456798553
+    ],
+    "std": [
+      1.049015998840332,
+      1.030062198638916,
+      1.5520501136779785,
+      0.41829055547714233,
+      0.5072447061538696,
+      0.43271520733833313,
+      1.568196415901184,
+      0.5049442052841187
+    ],
+    "lo": [
+      -1.968953013420105,
+      -2.049583673477173,
+      -2.380451202392578,
+      -0.5493804812431335,
+      -0.9520125389099121,
+      -0.5527085661888123,
+      -2.394272565841675,
+      -1.0708491802215576
+    ],
+    "hi": [
+      1.9648994207382202,
+      1.8720487356185913,
+      2.395101547241211,
+      0.8829666972160339,
+      0.8485110998153687,
+      0.9463299512863159,
+      2.3946774005889893,
+      0.8021016120910645
+    ],
+    "n_chunks": 30000
+  }
+}

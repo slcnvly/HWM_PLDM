@@ -1,0 +1,100 @@
+{
+  "n_replans_total": 14160,
+  "backward_rate_all_replans": 0.11016949152542373,
+  "n_analysed": 3120,
+  "n_backward": 1560,
+  "velocity_scale": 25.647163992657823,
+  "by_signal": {
+    "spread_latent_planner_H1": {
+      "mean_backward": 880.686424930279,
+      "mean_other": 882.3706527709961,
+      "auroc_backward": 0.49662886259040107,
+      "mannwhitney_p": 0.744367145625888,
+      "auroc_backward_failed_trials": 0.4987909499978973,
+      "auroc_backward_successful_trials": 0.5101416353975514
+    },
+    "spread_xy_planner_H1": {
+      "mean_backward": 0.054675958313806075,
+      "mean_other": 0.04910195286285717,
+      "auroc_backward": 0.5604129684418147,
+      "mannwhitney_p": 5.1016307087671646e-09,
+      "auroc_backward_failed_trials": 0.5520312040035326,
+      "auroc_backward_successful_trials": 0.5665030744159294
+    },
+    "spread_latent_planner_H2": {
+      "mean_backward": 1936.1015770936624,
+      "mean_other": 2130.5362023182406,
+      "auroc_backward": 0.42470907297830374,
+      "mannwhitney_p": 3.2649808047539915e-13,
+      "auroc_backward_failed_trials": 0.42832436183186845,
+      "auroc_backward_successful_trials": 0.43475596395606797
+    },
+    "spread_xy_planner_H2": {
+      "mean_backward": 0.26539273711028866,
+      "mean_other": 0.24958929801717974,
+      "auroc_backward": 0.5272986522024983,
+      "mannwhitney_p": 0.008275393750053,
+      "auroc_backward_failed_trials": 0.5052882795744145,
+      "auroc_backward_successful_trials": 0.5263944427706719
+    },
+    "spread_latent_planner_H3": {
+      "mean_backward": 2419.1767715845353,
+      "mean_other": 2726.45176962828,
+      "auroc_backward": 0.39296700361604203,
+      "mannwhitney_p": 4.036620986360427e-25,
+      "auroc_backward_failed_trials": 0.3911013919845242,
+      "auroc_backward_successful_trials": 0.4072107549779519
+    },
+    "spread_xy_planner_H3": {
+      "mean_backward": 0.6124674102291465,
+      "mean_other": 0.5859664316647328,
+      "auroc_backward": 0.5131065088757397,
+      "mannwhitney_p": 0.20487166841430848,
+      "auroc_backward_failed_trials": 0.452137390134152,
+      "auroc_backward_successful_trials": 0.5252577990194736
+    }
+  },
+  "l2_latent_stats": {
+    "mean": [
+      -0.012265308760106564,
+      -0.05445085093379021,
+      -0.0013152057072147727,
+      0.16214115917682648,
+      -0.09613701701164246,
+      0.18454857170581818,
+      -0.03412245213985443,
+      -0.14839987456798553
+    ],
+    "std": [
+      1.049015998840332,
+      1.030062198638916,
+      1.5520501136779785,
+      0.41829055547714233,
+      0.5072447061538696,
+      0.43271520733833313,
+      1.568196415901184,
+      0.5049442052841187
+    ],
+    "lo": [
+      -1.968953013420105,
+      -2.049583673477173,
+      -2.380451202392578,
+      -0.5493804812431335,
+      -0.9520125389099121,
+      -0.5527085661888123,
+      -2.394272565841675,
+      -1.0708491802215576
+    ],
+    "hi": [
+      1.9648994207382202,
+      1.8720487356185913,
+      2.395101547241211,
+      0.8829666972160339,
+      0.8485110998153687,
+      0.9463299512863159,
+      2.3946774005889893,
+      0.8021016120910645
+    ],
+    "n_chunks": 30000
+  }
+}
