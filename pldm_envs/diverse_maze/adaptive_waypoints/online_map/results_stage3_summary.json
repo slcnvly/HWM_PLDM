@@ -1,0 +1,250 @@
+{
+  "taus": {
+    "conservative": 0.5257093247771263,
+    "medium": 0.5391122078895569,
+    "aggressive": 0.5516314896941185
+  },
+  "n_maps": 25,
+  "variants": {
+    "conservative": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.6915962495228866,
+        "spearman_map_path_fake_edges_removed": 0.9268373092635676,
+        "spearman_latent_straight": 0.028528782566821582,
+        "share_pairs_disconnected_after_removal": 0.22763238527663698
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.686405877813664,
+          "spearman_map_path_fake_edges_removed": 0.6514251608444853,
+          "spearman_latent_straight": 0.09844224506978642
+        },
+        "1000": {
+          "spearman_map_path": 0.7679575939208446,
+          "spearman_map_path_fake_edges_removed": 0.796867981794032,
+          "spearman_latent_straight": 0.04397344627944664
+        },
+        "2500": {
+          "spearman_map_path": 0.7354090528971474,
+          "spearman_map_path_fake_edges_removed": 0.8940886447249735,
+          "spearman_latent_straight": 0.03648745448118775
+        },
+        "5050": {
+          "spearman_map_path": 0.6915962495228866,
+          "spearman_map_path_fake_edges_removed": 0.9268373092635676,
+          "spearman_latent_straight": 0.028528782566821582
+        }
+      },
+      "nodes_mean": 261.32,
+      "nodes_max": 297,
+      "edges_mean": 580.52,
+      "frames_used_mean": 5050.0,
+      "fake_merge_share_mean": 0.04688019427880692,
+      "fake_merges_mean": 224.4,
+      "fake_edges_mean": 81.44,
+      "fake_edge_share_mean": 0.13935425853401212,
+      "all_pairs_shortest_path_seconds_max": 0.010351419448852539,
+      "grow_seconds_mean_per_5050_frames": 6.457957420349121
+    },
+    "conservative_spike_filter": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.6514437750433385,
+        "spearman_map_path_fake_edges_removed": 0.8794673201326223,
+        "spearman_latent_straight": 0.019714848669838483,
+        "share_pairs_disconnected_after_removal": 0.6950133481574611
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.6829198929186234,
+          "spearman_map_path_fake_edges_removed": 0.5595237728339514,
+          "spearman_latent_straight": 0.03888991662975886
+        },
+        "1000": {
+          "spearman_map_path": 0.7819338250226507,
+          "spearman_map_path_fake_edges_removed": 0.6375799168414257,
+          "spearman_latent_straight": 0.05287046005091779
+        },
+        "2500": {
+          "spearman_map_path": 0.6847314473282728,
+          "spearman_map_path_fake_edges_removed": 0.774982299642545,
+          "spearman_latent_straight": -0.014490633151763273
+        },
+        "5050": {
+          "spearman_map_path": 0.6825712014772733,
+          "spearman_map_path_fake_edges_removed": 0.8944003612590463,
+          "spearman_latent_straight": 0.039483045923937664
+        }
+      },
+      "nodes_mean": 122.4,
+      "nodes_max": 148,
+      "edges_mean": 208.52,
+      "frames_used_mean": 3790.56,
+      "fake_merge_share_mean": 0.05257820729154364,
+      "fake_merges_mean": 192.64,
+      "fake_edges_mean": 50.0,
+      "fake_edge_share_mean": 0.23928329564569129,
+      "all_pairs_shortest_path_seconds_max": 0.002623319625854492,
+      "grow_seconds_mean_per_5050_frames": 2.689346055984497
+    },
+    "medium": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.6303258975731655,
+        "spearman_map_path_fake_edges_removed": 0.9077174363792027,
+        "spearman_latent_straight": 0.04315452700159679,
+        "share_pairs_disconnected_after_removal": 0.2765408125589235
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.6879181686439272,
+          "spearman_map_path_fake_edges_removed": 0.6792891030327323,
+          "spearman_latent_straight": 0.05382087077162422
+        },
+        "1000": {
+          "spearman_map_path": 0.6765722428870145,
+          "spearman_map_path_fake_edges_removed": 0.7555920133873741,
+          "spearman_latent_straight": 0.05504185646957754
+        },
+        "2500": {
+          "spearman_map_path": 0.6288524280384208,
+          "spearman_map_path_fake_edges_removed": 0.9012924830915457,
+          "spearman_latent_straight": 0.031996630343534206
+        },
+        "5050": {
+          "spearman_map_path": 0.6303258975731655,
+          "spearman_map_path_fake_edges_removed": 0.9077174363792027,
+          "spearman_latent_straight": 0.04315452700159679
+        }
+      },
+      "nodes_mean": 252.48,
+      "nodes_max": 290,
+      "edges_mean": 574.0,
+      "frames_used_mean": 5050.0,
+      "fake_merge_share_mean": 0.05843283025003774,
+      "fake_merges_mean": 280.28,
+      "fake_edges_mean": 94.84,
+      "fake_edge_share_mean": 0.16424624610347055,
+      "all_pairs_shortest_path_seconds_max": 0.010555505752563477,
+      "grow_seconds_mean_per_5050_frames": 6.285279903411865
+    },
+    "medium_spike_filter": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.5784697200898646,
+        "spearman_map_path_fake_edges_removed": 0.8589824921450248,
+        "spearman_latent_straight": 0.03234927232050985,
+        "share_pairs_disconnected_after_removal": 0.7256154990528014
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.6203421863416241,
+          "spearman_map_path_fake_edges_removed": 0.5340478115978633,
+          "spearman_latent_straight": 0.036860370474996546
+        },
+        "1000": {
+          "spearman_map_path": 0.7093309398855062,
+          "spearman_map_path_fake_edges_removed": 0.6273873128714149,
+          "spearman_latent_straight": 0.02689609142597535
+        },
+        "2500": {
+          "spearman_map_path": 0.5837309821877983,
+          "spearman_map_path_fake_edges_removed": 0.7952599862193682,
+          "spearman_latent_straight": 0.015135654793171638
+        },
+        "5050": {
+          "spearman_map_path": 0.6252088932271465,
+          "spearman_map_path_fake_edges_removed": 0.9023801575874477,
+          "spearman_latent_straight": 0.024290790451799396
+        }
+      },
+      "nodes_mean": 118.32,
+      "nodes_max": 141,
+      "edges_mean": 206.0,
+      "frames_used_mean": 3790.56,
+      "fake_merge_share_mean": 0.06417574860214527,
+      "fake_merges_mean": 235.52,
+      "fake_edges_mean": 55.72,
+      "fake_edge_share_mean": 0.2695768665101293,
+      "all_pairs_shortest_path_seconds_max": 0.002574443817138672,
+      "grow_seconds_mean_per_5050_frames": 2.6400843048095703
+    },
+    "aggressive": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.5309531538383516,
+        "spearman_map_path_fake_edges_removed": 0.9045132860222944,
+        "spearman_latent_straight": 0.006647614060835321,
+        "share_pairs_disconnected_after_removal": 0.37080158802671365
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.6594152777675073,
+          "spearman_map_path_fake_edges_removed": 0.6263646214663325,
+          "spearman_latent_straight": 0.07513622371098688
+        },
+        "1000": {
+          "spearman_map_path": 0.6157452000048399,
+          "spearman_map_path_fake_edges_removed": 0.7243223431751028,
+          "spearman_latent_straight": 0.07091775106748878
+        },
+        "2500": {
+          "spearman_map_path": 0.5620772987580643,
+          "spearman_map_path_fake_edges_removed": 0.8623464721663524,
+          "spearman_latent_straight": 0.02953425658330679
+        },
+        "5050": {
+          "spearman_map_path": 0.5309531538383516,
+          "spearman_map_path_fake_edges_removed": 0.9045132860222944,
+          "spearman_latent_straight": 0.006647614060835321
+        }
+      },
+      "nodes_mean": 244.48,
+      "nodes_max": 281,
+      "edges_mean": 570.96,
+      "frames_used_mean": 5050.0,
+      "fake_merge_share_mean": 0.07307515974829389,
+      "fake_merges_mean": 351.12,
+      "fake_edges_mean": 111.28,
+      "fake_edge_share_mean": 0.193896005862603,
+      "all_pairs_shortest_path_seconds_max": 0.009708166122436523,
+      "grow_seconds_mean_per_5050_frames": 6.1308655834198
+    },
+    "aggressive_spike_filter": {
+      "final_mean_over_maps": {
+        "spearman_map_path": 0.49160990495663465,
+        "spearman_map_path_fake_edges_removed": 0.8709037942901812,
+        "spearman_latent_straight": -0.00579553006511826,
+        "share_pairs_disconnected_after_removal": 0.7769638135458966
+      },
+      "at_steps": {
+        "500": {
+          "spearman_map_path": 0.6224652113569273,
+          "spearman_map_path_fake_edges_removed": 0.4516108906762802,
+          "spearman_latent_straight": 0.033791657219905166
+        },
+        "1000": {
+          "spearman_map_path": 0.6030997295651026,
+          "spearman_map_path_fake_edges_removed": 0.6116200335802566,
+          "spearman_latent_straight": 0.04252994660560927
+        },
+        "2500": {
+          "spearman_map_path": 0.5340243714843278,
+          "spearman_map_path_fake_edges_removed": 0.7654455379491953,
+          "spearman_latent_straight": 0.00726675222536212
+        },
+        "5050": {
+          "spearman_map_path": 0.49513215279780637,
+          "spearman_map_path_fake_edges_removed": 0.8617041433894826,
+          "spearman_latent_straight": 0.001656975625053643
+        }
+      },
+      "nodes_mean": 115.12,
+      "nodes_max": 143,
+      "edges_mean": 207.6,
+      "frames_used_mean": 3790.56,
+      "fake_merge_share_mean": 0.07932853858209907,
+      "fake_merges_mean": 291.32,
+      "fake_edges_mean": 65.44,
+      "fake_edge_share_mean": 0.3132204369787263,
+      "all_pairs_shortest_path_seconds_max": 0.0027282238006591797,
+      "grow_seconds_mean_per_5050_frames": 2.635635633468628
+    }
+  }
+}
