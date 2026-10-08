@@ -58,7 +58,8 @@ L2 비용 공간은 L1 obs latent와 같은 텐서이므로(1단계에서 `torch
 
 ## 3. 확산 스케일링
 
-`latent_law/hg_diffusion.py`, `results_hg_diffusion.json`. n ≤ 100은 r50 원본(500 에피소드, 101프레임)으로 구했다.
+`latent_law/hg_diffusion.py`, `results_hg_diffusion.json`. n ≤ 100은 r50 원본(**1,250 에피소드** = 25맵 × 50, 101프레임)으로 구했다.
+(정정 2026-10-08: 처음에는 "500 에피소드"로 잘못 적었다. 데이터 파일에서 직접 세어 확인했다(DISPLACEMENT_PAIRS C4). 수치는 처음부터 1,250 에피소드 전체로 계산됐으므로 바뀌지 않는다.)
 n = 160은 Kaggle CPU 커널 `hwm-sim-random-r50-200`으로 구했다. 이 커널은 r50과 같은 미로와 시작에서 i.i.d. 무작위 행동(action_repeat 4)으로 200스텝을 시뮬레이션한다.
 초기 속도는 두 가지로 돌렸다. 데이터와 같은 초기 속도 = `sim_data`, 0 = `sim_zero`.
 
