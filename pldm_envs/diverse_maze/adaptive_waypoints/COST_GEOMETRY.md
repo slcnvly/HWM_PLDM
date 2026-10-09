@@ -15,6 +15,7 @@
 
 - 결과 파일: `results_cg_c1_c2.json`, `results_cg_c3_rf.json`, `results_cg_analysis.json`, `results_cg_a2_repro.json`, `results_cg_m3_aux.json`, `results_cg_posthoc_matched.json`, `results_cg_posthoc_open_cells.json`
 - 그림: `c1_agent_crops.png`, `m1_shape_examples.png`, `m1_curves.png`, `m1_regression_m3_coverage.png`
+- `cg_backgrounds.npz`(`cg_c1_c2.py`가 만듦)와 `cg_m1_sweeps.npz`(`cg_m1_sweep.py`가 만듦, 약 50분)는 .gitignore 대상이라 커밋하지 않았다.
 
 ## 요약 — 판정
 
