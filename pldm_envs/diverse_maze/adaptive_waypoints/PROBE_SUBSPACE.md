@@ -9,7 +9,7 @@
   - `ps_mlp.py`: P2
   - `ps_analyze.py`: 집계와 판정
 - 결과: `results_ps_main.json`, `results_ps_mlp.json`, `results_ps_summary.json`, 사후 `results_ps_posthoc_true_xy.json`
-- `ps_pairs.npz`(쌍별 거리, 약 80MB)는 커밋하지 않았다. `ps_main.py`로 다시 만들 수 있다(약 4시간).
+- `ps_pairs.npz`(쌍별 거리, 455MB)는 커밋하지 않았다. `ps_main.py`로 다시 만들 수 있다(약 3시간).
 
 ## 요약
 
