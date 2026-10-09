@@ -1,0 +1,51 @@
+{
+ "note": "AUXILIARY, eyeball estimates from environment descriptions, NOT used for any verdict",
+ "estimates": {
+  "Visual AntMaze": {
+   "gain": 4.07,
+   "size_over_range_point": 0.05,
+   "range": [
+    0.02,
+    0.15
+   ]
+  },
+  "FourRoom": {
+   "gain": 2.36,
+   "size_over_range_point": 0.05,
+   "range": [
+    0.02,
+    0.1
+   ]
+  },
+  "OGBench Cube": {
+   "gain": 1.88,
+   "size_over_range_point": 0.3,
+   "range": [
+    0.15,
+    0.5
+   ]
+  },
+  "Push-T": {
+   "gain": 1.13,
+   "size_over_range_point": 0.25,
+   "range": [
+    0.15,
+    0.4
+   ]
+  },
+  "DROID": {
+   "gain": 1.14,
+   "size_over_range_point": 0.5,
+   "range": [
+    0.3,
+    0.8
+   ]
+  }
+ },
+ "spearman_point": -0.6668859288553503,
+ "p_point": 0.21889398131323154,
+ "spearman_over_bound_combinations": [
+  -0.9999999999999999,
+  -0.30779350562554625
+ ]
+}

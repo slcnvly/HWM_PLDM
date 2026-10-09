@@ -1,0 +1,26 @@
+Using cache found in /home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+done disc s=3
+done disc s=6
+done disc s=9
+done disc s=18
+done disc s=36
+done disc s=72
+done square s=3
+done square s=6
+done square s=9
+done square s=18
+done square s=36
+done square s=72
+done arm s=3
+done arm s=6
+done arm s=9
+done arm s=18
+done arm s=36
+done arm s=72
+done disc s=4

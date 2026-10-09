@@ -1,0 +1,383 @@
+{
+ "note": "POST-HOC: centre in an open cell of map 0 and content fully on screen",
+ "sat": {
+  "disc|3|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|3|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|4|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|6|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|9|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "disc|18|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|3|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|6|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|9|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B1_trained": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B2_random_seed0": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B2_random_seed1": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B2_random_seed2": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B4_pixels": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B3_dinov2_cls": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  },
+  "square|18|B3_dinov2_patch8x8": {
+   "R_xy_cells_cell_unit": null,
+   "n_points": 43,
+   "n_valid_starts": 3,
+   "median_curve_px": {}
+  }
+ }
+}

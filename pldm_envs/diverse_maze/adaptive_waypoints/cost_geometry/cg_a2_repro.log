@@ -1,0 +1,39 @@
+Using cache found in /home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/goodwon01/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+map 0
+map 1
+map 2
+map 3
+map 4
+map 5
+map 6
+map 7
+map 8
+map 9
+map 10
+map 11
+map 12
+map 13
+map 14
+map 15
+map 16
+map 17
+map 18
+map 19
+map 20
+map 21
+map 22
+map 23
+map 24
+B1_trained {'radius': {'maze_base': 0.2628673315048218, 'maze_plateau': 0.6220051765441894, 'R_maze': 2, 'R_maze_slope': 2, 'xy_base': 0.01379322912544012, 'xy_plateau': 0.610552966594696, 'R_xy': 1.35}, 'latent_law_reference': {'maze_base': 0.2628673315048218, 'maze_plateau': 0.6220051765441894, 'R_maze': 2, 'R_maze_slope': 2, 'xy_base': 0.01379322912544012, 'xy_plateau': 0.610552966594696, 'R_xy': 1.35}}
+B2_random_seed0 {'radius': {'maze_base': 0.0015116548165678978, 'maze_plateau': 0.001726360316388309, 'R_maze': 1, 'R_maze_slope': 2, 'xy_base': 0.00026303058257326484, 'xy_plateau': 0.0017524829600006342, 'R_xy': 0.45}, 'latent_law_reference': {'maze_base': 0.0015116548165678978, 'maze_plateau': 0.001726360316388309, 'R_maze': 1, 'R_maze_slope': 2, 'xy_base': 0.00026303058257326484, 'xy_plateau': 0.0017524829600006342, 'R_xy': 0.45}}
+B2_random_seed1 {'radius': {'maze_base': 0.0011188315693289042, 'maze_plateau': 0.0014223471051082015, 'R_maze': 1, 'R_maze_slope': 2, 'xy_base': 0.00017719327297527343, 'xy_plateau': 0.0014374804450199008, 'R_xy': 0.65}, 'latent_law_reference': {'maze_base': 0.0011188315693289042, 'maze_plateau': 0.0014223471051082015, 'R_maze': 1, 'R_maze_slope': 2, 'xy_base': 0.00017719327297527343, 'xy_plateau': 0.0014374804450199008, 'R_xy': 0.65}}
+B2_random_seed2 {'radius': {'maze_base': 0.001475224387831986, 'maze_plateau': 0.0016662227688357234, 'R_maze': 8, 'R_maze_slope': 2, 'xy_base': 0.0002632702235132456, 'xy_plateau': 0.0016585888806730509, 'R_xy': 0.45}, 'latent_law_reference': {'maze_base': 0.001475224387831986, 'maze_plateau': 0.0016662227688357234, 'R_maze': 8, 'R_maze_slope': 2, 'xy_base': 0.0002632702235132456, 'xy_plateau': 0.0016585888806730509, 'R_xy': 0.45}}
+B4_pixels {'radius': {'maze_base': 0.004321088083088398, 'maze_plateau': 0.004844469018280506, 'R_maze': 9, 'R_maze_slope': 1, 'xy_base': 0.0005302064819261432, 'xy_plateau': 0.004805222153663635, 'R_xy': 0.45}, 'latent_law_reference': {'maze_base': 0.004321088083088398, 'maze_plateau': 0.004844469018280506, 'R_maze': 9, 'R_maze_slope': 1, 'xy_base': 0.0005302064819261432, 'xy_plateau': 0.004805222153663635, 'R_xy': 0.45}}
+B3_dinov2_cls {'radius': {'maze_base': 0.02331019937992096, 'maze_plateau': 0.03910058811306953, 'R_maze': 3, 'R_maze_slope': 5, 'xy_base': 0.003248961176723242, 'xy_plateau': 0.041375257074832916, 'R_xy': 2.25}, 'latent_law_reference': {'maze_base': 0.02331019937992096, 'maze_plateau': 0.03910058811306953, 'R_maze': 3, 'R_maze_slope': 5, 'xy_base': 0.003248961176723242, 'xy_plateau': 0.041375257074832916, 'R_xy': 2.25}}
+B3_dinov2_patch8x8 {'radius': {'maze_base': 0.027771785855293274, 'maze_plateau': 0.07157658040523529, 'R_maze': 4, 'R_maze_slope': 5, 'xy_base': 0.0028519427869468927, 'xy_plateau': 0.07311324775218964, 'R_xy': 2.35}, 'latent_law_reference': {'maze_base': 0.027771785855293274, 'maze_plateau': 0.07157658040523529, 'R_maze': 4, 'R_maze_slope': 5, 'xy_base': 0.0028519427869468927, 'xy_plateau': 0.07311324775218964, 'R_xy': 2.35}}

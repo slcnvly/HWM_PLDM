@@ -1,0 +1,296 @@
+{
+ "B1_trained": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.3547348976135254,
+    "maze_plateau": 0.7028519749641419,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.024752892553806305,
+    "xy_plateau": 0.6688460111618042,
+    "R_xy": 1.35
+   },
+   "latent_law_reference": {
+    "maze_base": 0.3547348976135254,
+    "maze_plateau": 0.7028519749641419,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.024752892553806305,
+    "xy_plateau": 0.6688460111618042,
+    "R_xy": 1.35
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.2628673315048218,
+    "maze_plateau": 0.6220051765441894,
+    "R_maze": 2,
+    "R_maze_slope": 2,
+    "xy_base": 0.01379322912544012,
+    "xy_plateau": 0.610552966594696,
+    "R_xy": 1.35
+   },
+   "latent_law_reference": {
+    "maze_base": 0.2628673315048218,
+    "maze_plateau": 0.6220051765441894,
+    "R_maze": 2,
+    "R_maze_slope": 2,
+    "xy_base": 0.01379322912544012,
+    "xy_plateau": 0.610552966594696,
+    "R_xy": 1.35
+   }
+  }
+ },
+ "B2_random_seed0": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.001518258941359818,
+    "maze_plateau": 0.0017304011387750506,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.0002641975006554276,
+    "xy_plateau": 0.0017558927647769451,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.001518258941359818,
+    "maze_plateau": 0.0017304011387750506,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.0002641975006554276,
+    "xy_plateau": 0.0017558927647769451,
+    "R_xy": 0.45
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.0015116548165678978,
+    "maze_plateau": 0.001726360316388309,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.00026303058257326484,
+    "xy_plateau": 0.0017524829600006342,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.0015116548165678978,
+    "maze_plateau": 0.001726360316388309,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.00026303058257326484,
+    "xy_plateau": 0.0017524829600006342,
+    "R_xy": 0.45
+   }
+  }
+ },
+ "B2_random_seed1": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.0011234389385208488,
+    "maze_plateau": 0.0014255178160965444,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.0001798934827093035,
+    "xy_plateau": 0.0014431113377213478,
+    "R_xy": 0.65
+   },
+   "latent_law_reference": {
+    "maze_base": 0.0011234389385208488,
+    "maze_plateau": 0.0014255178160965444,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.0001798934827093035,
+    "xy_plateau": 0.0014431113377213478,
+    "R_xy": 0.65
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.0011188315693289042,
+    "maze_plateau": 0.0014223471051082015,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.00017719327297527343,
+    "xy_plateau": 0.0014374804450199008,
+    "R_xy": 0.65
+   },
+   "latent_law_reference": {
+    "maze_base": 0.0011188315693289042,
+    "maze_plateau": 0.0014223471051082015,
+    "R_maze": 1,
+    "R_maze_slope": 2,
+    "xy_base": 0.00017719327297527343,
+    "xy_plateau": 0.0014374804450199008,
+    "R_xy": 0.65
+   }
+  }
+ },
+ "B2_random_seed2": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.001474402379244566,
+    "maze_plateau": 0.0016658131731674074,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.00026499631348997355,
+    "xy_plateau": 0.0016557412454858422,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.001474402379244566,
+    "maze_plateau": 0.0016658131731674074,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.00026499631348997355,
+    "xy_plateau": 0.0016557412454858422,
+    "R_xy": 0.45
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.001475224387831986,
+    "maze_plateau": 0.0016662227688357234,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.0002632702235132456,
+    "xy_plateau": 0.0016585888806730509,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.001475224387831986,
+    "maze_plateau": 0.0016662227688357234,
+    "R_maze": 8,
+    "R_maze_slope": 2,
+    "xy_base": 0.0002632702235132456,
+    "xy_plateau": 0.0016585888806730509,
+    "R_xy": 0.45
+   }
+  }
+ },
+ "B4_pixels": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.004335782490670681,
+    "maze_plateau": 0.0048518235795199875,
+    "R_maze": 9,
+    "R_maze_slope": 1,
+    "xy_base": 0.0005377441411837935,
+    "xy_plateau": 0.004813874140381813,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.004335782490670681,
+    "maze_plateau": 0.0048518235795199875,
+    "R_maze": 9,
+    "R_maze_slope": 1,
+    "xy_base": 0.0005377441411837935,
+    "xy_plateau": 0.004813874140381813,
+    "R_xy": 0.45
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.004321088083088398,
+    "maze_plateau": 0.004844469018280506,
+    "R_maze": 9,
+    "R_maze_slope": 1,
+    "xy_base": 0.0005302064819261432,
+    "xy_plateau": 0.004805222153663635,
+    "R_xy": 0.45
+   },
+   "latent_law_reference": {
+    "maze_base": 0.004321088083088398,
+    "maze_plateau": 0.004844469018280506,
+    "R_maze": 9,
+    "R_maze_slope": 1,
+    "xy_base": 0.0005302064819261432,
+    "xy_plateau": 0.004805222153663635,
+    "R_xy": 0.45
+   }
+  }
+ },
+ "B3_dinov2_cls": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.023378141224384308,
+    "maze_plateau": 0.03917450904846191,
+    "R_maze": 3,
+    "R_maze_slope": 5,
+    "xy_base": 0.003285828046500683,
+    "xy_plateau": 0.041410744190216064,
+    "R_xy": 2.25
+   },
+   "latent_law_reference": {
+    "maze_base": 0.023378141224384308,
+    "maze_plateau": 0.03917450904846191,
+    "R_maze": 3,
+    "R_maze_slope": 5,
+    "xy_base": 0.003285828046500683,
+    "xy_plateau": 0.041410744190216064,
+    "R_xy": 2.25
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.02331019937992096,
+    "maze_plateau": 0.03910058811306953,
+    "R_maze": 3,
+    "R_maze_slope": 5,
+    "xy_base": 0.003248961176723242,
+    "xy_plateau": 0.041375257074832916,
+    "R_xy": 2.25
+   },
+   "latent_law_reference": {
+    "maze_base": 0.02331019937992096,
+    "maze_plateau": 0.03910058811306953,
+    "R_maze": 3,
+    "R_maze_slope": 5,
+    "xy_base": 0.003248961176723242,
+    "xy_plateau": 0.041375257074832916,
+    "R_xy": 2.25
+   }
+  }
+ },
+ "B3_dinov2_patch8x8": {
+  "all_pairs": {
+   "radius": {
+    "maze_base": 0.027924316003918648,
+    "maze_plateau": 0.07157934308052064,
+    "R_maze": 4,
+    "R_maze_slope": 5,
+    "xy_base": 0.0028256000950932503,
+    "xy_plateau": 0.07307168841362,
+    "R_xy": 2.35
+   },
+   "latent_law_reference": {
+    "maze_base": 0.027924316003918648,
+    "maze_plateau": 0.07157934308052064,
+    "R_maze": 4,
+    "R_maze_slope": 5,
+    "xy_base": 0.0028256000950932503,
+    "xy_plateau": 0.07307168841362,
+    "R_xy": 2.35
+   }
+  },
+  "no_B1_spike_pairs": {
+   "radius": {
+    "maze_base": 0.027771785855293274,
+    "maze_plateau": 0.07157658040523529,
+    "R_maze": 4,
+    "R_maze_slope": 5,
+    "xy_base": 0.0028519427869468927,
+    "xy_plateau": 0.07311324775218964,
+    "R_xy": 2.35
+   },
+   "latent_law_reference": {
+    "maze_base": 0.027771785855293274,
+    "maze_plateau": 0.07157658040523529,
+    "R_maze": 4,
+    "R_maze_slope": 5,
+    "xy_base": 0.0028519427869468927,
+    "xy_plateau": 0.07311324775218964,
+    "R_xy": 2.35
+   }
+  }
+ }
+}

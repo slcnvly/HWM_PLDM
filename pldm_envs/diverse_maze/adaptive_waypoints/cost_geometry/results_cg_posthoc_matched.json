@@ -1,0 +1,186 @@
+{
+ "note": "POST-HOC position-matched real vs synthetic 4-px disc, maps 0-4, A2 frames",
+ "n_pairs": 397368,
+ "B1_trained": {
+  "real|all_pairs": {
+   "R_xy": 1.35,
+   "R_maze": 8,
+   "xy_base": 0.02542216330766678,
+   "xy_plateau": 0.6706938743591309
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 1.35,
+   "R_maze": 6,
+   "xy_base": 0.0140323331579566,
+   "xy_plateau": 0.6174607872962952
+  },
+  "synth|all_pairs": {
+   "R_xy": 1.35,
+   "R_maze": 2,
+   "xy_base": 0.012689040042459965,
+   "xy_plateau": 0.5854626297950745
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 1.35,
+   "R_maze": 2,
+   "xy_base": 0.012726028449833393,
+   "xy_plateau": 0.5850049257278442
+  }
+ },
+ "B2_random_seed0": {
+  "real|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00022824022744316608,
+   "xy_plateau": 0.0016792307142168283
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00022280715347733349,
+   "xy_plateau": 0.0016744539607316256
+  },
+  "synth|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00014334778825286776,
+   "xy_plateau": 0.001281284261494875
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00013838356244377792,
+   "xy_plateau": 0.0012770557077601552
+  }
+ },
+ "B2_random_seed1": {
+  "real|all_pairs": {
+   "R_xy": 0.65,
+   "R_maze": 1,
+   "xy_base": 0.0001625638105906546,
+   "xy_plateau": 0.0014184503816068172
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 0.65,
+   "R_maze": 1,
+   "xy_base": 0.0001586329162819311,
+   "xy_plateau": 0.0014124505687505007
+  },
+  "synth|all_pairs": {
+   "R_xy": 0.65,
+   "R_maze": 1,
+   "xy_base": 0.0001031525171129033,
+   "xy_plateau": 0.0011435074266046286
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 0.65,
+   "R_maze": 1,
+   "xy_base": 0.0001015573216136545,
+   "xy_plateau": 0.0011395239271223545
+  }
+ },
+ "B2_random_seed2": {
+  "real|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 2,
+   "xy_base": 0.00022907927632331848,
+   "xy_plateau": 0.0016200814861804247
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 2,
+   "xy_base": 0.00022589384752791375,
+   "xy_plateau": 0.0016243512509390712
+  },
+  "synth|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 2,
+   "xy_base": 0.00014894973719492555,
+   "xy_plateau": 0.0012177762109786272
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 2,
+   "xy_base": 0.00014577063848264515,
+   "xy_plateau": 0.0012189473491162062
+  }
+ },
+ "B4_pixels": {
+  "real|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 9,
+   "xy_base": 0.0004803241172339767,
+   "xy_plateau": 0.004854101687669754
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 9,
+   "xy_base": 0.00047205164446495473,
+   "xy_plateau": 0.0048470827750861645
+  },
+  "synth|all_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00030269220587797463,
+   "xy_plateau": 0.0036306323017925024
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 0.45,
+   "R_maze": 1,
+   "xy_base": 0.00028870231471955776,
+   "xy_plateau": 0.0036389115266501904
+  }
+ },
+ "B3_dinov2_cls": {
+  "real|all_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 3,
+   "xy_base": 0.0033766478300094604,
+   "xy_plateau": 0.0426686629652977
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 3,
+   "xy_base": 0.003338480368256569,
+   "xy_plateau": 0.04274681955575943
+  },
+  "synth|all_pairs": {
+   "R_xy": 1.75,
+   "R_maze": 2,
+   "xy_base": 0.00539002101868391,
+   "xy_plateau": 0.053944993764162064
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 1.75,
+   "R_maze": 3,
+   "xy_base": 0.004945266060531139,
+   "xy_plateau": 0.05378575623035431
+  }
+ },
+ "B3_dinov2_patch8x8": {
+  "real|all_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 4,
+   "xy_base": 0.002818888518959284,
+   "xy_plateau": 0.0762617439031601
+  },
+  "real|no_B1_spike_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 4,
+   "xy_base": 0.002857993822544813,
+   "xy_plateau": 0.07625699043273926
+  },
+  "synth|all_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 3,
+   "xy_base": 0.004734518006443977,
+   "xy_plateau": 0.09719204902648926
+  },
+  "synth|no_B1_spike_pairs": {
+   "R_xy": 2.25,
+   "R_maze": 4,
+   "xy_base": 0.004530381876975298,
+   "xy_plateau": 0.09723180532455444
+  }
+ }
+}
