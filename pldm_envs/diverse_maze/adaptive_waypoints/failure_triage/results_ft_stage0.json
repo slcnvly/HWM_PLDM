@@ -1,0 +1,77 @@
+{
+ "note": "Bounds from per-chunk failure counts only. Chunk i = episodes 20i..20i+19. No test.",
+ "A_causal_student": {
+  "fail_per_chunk": [
+   2,
+   1,
+   0,
+   3,
+   3,
+   2
+  ],
+  "n_fail": 11,
+  "per_trial_available": false,
+  "per_trial_extraction_errors_in_log": 6
+ },
+ "B_surprise": {
+  "fail_per_chunk": [
+   3,
+   2,
+   1,
+   2,
+   2,
+   1
+  ],
+  "n_fail": 11,
+  "per_trial_available": false
+ },
+ "overlap_bounds": {
+  "both_fail_min": 0,
+  "both_fail_max": 8,
+  "A_only_min": 3,
+  "B_only_min": 3,
+  "jaccard_min": 0.0,
+  "jaccard_max": 0.5714285714285714,
+  "identical_sets_possible": false,
+  "chunks_forcing_A_only": [
+   3,
+   4,
+   5
+  ],
+  "chunks_forcing_B_only": [
+   0,
+   1,
+   2
+  ]
+ },
+ "reference_pair_dp_vs_fixed_reeval": {
+  "note": "Different conditions (RESULTS.md SS9), same 120 instances, no CRN. Reference only.",
+  "dp_only": [
+   39,
+   50,
+   66,
+   70,
+   105,
+   110
+  ],
+  "fixed_only": [
+   7,
+   46,
+   59,
+   61,
+   79,
+   81,
+   94
+  ],
+  "both": [
+   6,
+   19,
+   30,
+   77,
+   90,
+   99,
+   119
+  ],
+  "jaccard": 0.35
+ }
+}

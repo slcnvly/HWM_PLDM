@@ -1,0 +1,12 @@
+[2026-09-19T12:37:23.925906+00:00] stage 5 chunk0: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T12:37:23.930537+00:00] stage 5 chunk0: k=18/20, avg_steps=150.11111450195312
+[2026-09-19T13:44:27.729277+00:00] stage 5 chunk1: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T13:44:27.733187+00:00] stage 5 chunk1: k=19/20, avg_steps=152.42105102539062
+[2026-09-19T14:51:41.924353+00:00] stage 5 chunk2: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T14:51:41.928119+00:00] stage 5 chunk2: k=20/20, avg_steps=197.6999969482422
+[2026-09-19T15:58:43.783759+00:00] stage 5 chunk3: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T15:58:43.788085+00:00] stage 5 chunk3: k=17/20, avg_steps=156.0
+[2026-09-19T17:05:47.060918+00:00] stage 5 chunk4: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T17:05:47.065240+00:00] stage 5 chunk4: k=17/20, avg_steps=153.76470947265625
+[2026-09-19T18:12:44.700653+00:00] stage 5 chunk5: could not extract per-trial data: No module named 'pldm'
+[2026-09-19T18:12:44.713171+00:00] stage 5 chunk5: k=18/20, avg_steps=164.27777099609375
