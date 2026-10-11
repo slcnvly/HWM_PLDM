@@ -1,0 +1,316 @@
+[{"stream_name":"stdout","time":0.994330019,"data":"[2026-10-11T09:41:08Z +0s] $ (nvidia_smi) nvidia-smi; nproc; free -g | head -2; df -h /kaggle/working /kaggle/temp | cat\n"}
+,{"stream_name":"stdout","time":1.038083361,"data":"Sun Oct 11 09:41:08 2026       \n"}
+,{"stream_name":"stdout","time":1.038113385,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":1.038118821,"data":"| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n"}
+,{"stream_name":"stdout","time":1.038123373,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":1.038127979,"data":"| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n"}
+,{"stream_name":"stdout","time":1.038132407,"data":"| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n"}
+,{"stream_name":"stdout","time":1.038137283,"data":"|                                         |                        |               MIG M. |\n"}
+,{"stream_name":"stdout","time":1.038141721,"data":"|=========================================+========================+======================|\n"}
+,{"stream_name":"stdout","time":1.089360597,"data":"|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":1.089407409,"data":"| N/A   50C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":1.08941434,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":1.089420097,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":1.089425135,"data":"|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":1.089429756,"data":"| N/A   51C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":1.089434493,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":1.089438588,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":1.090080876,"data":"\n"}
+,{"stream_name":"stdout","time":1.090096117,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":1.090100794,"data":"| Processes:                                                                              |\n"}
+,{"stream_name":"stdout","time":1.090110765,"data":"|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n"}
+,{"stream_name":"stdout","time":1.090113747,"data":"|        ID   ID                                                               Usage      |\n"}
+,{"stream_name":"stdout","time":1.090116487,"data":"|=========================================================================================|\n"}
+,{"stream_name":"stdout","time":1.091761058,"data":"|  No running processes found                                                             |\n"}
+,{"stream_name":"stdout","time":1.091777804,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":1.421569809,"data":"4\n"}
+,{"stream_name":"stdout","time":1.454017446,"data":"               total        used        free      shared  buff/cache   available\n"}
+,{"stream_name":"stdout","time":1.454064055,"data":"Mem:              31           1          25           0           4          30\n"}
+,{"stream_name":"stdout","time":1.461681311,"data":"Filesystem      Size  Used Avail Use% Mounted on\n"}
+,{"stream_name":"stdout","time":1.461735439,"data":"/dev/loop2       20G  148K   20G   1% /kaggle/working\n"}
+,{"stream_name":"stdout","time":1.461742213,"data":"overlay         8.0T  7.0T  1.1T  87% /\n"}
+,{"stream_name":"stdout","time":1.462388418,"data":"[2026-10-11T09:41:08Z +0s] (nvidia_smi) rc=0 0.5s\n"}
+,{"stream_name":"stdout","time":1.464171356,"data":"[2026-10-11T09:41:08Z +0s] $ (clone) rm -rf /kaggle/temp/H-JEPA \u0026\u0026 git clone -q https://github.com/kevinghst/H-JEPA /kaggle/temp/H-JEPA \u0026\u0026 cd /kaggle/temp/H-JEPA \u0026\u0026 git checkout -q 97054ecaff83e13839195ec4b92d74c08a0127c5 \u0026\u0026 git log -1 --format='%H %ci'\n"}
+,{"stream_name":"stdout","time":2.954534263,"data":"97054ecaff83e13839195ec4b92d74c08a0127c5 2026-10-09 23:58:11 -0400\n"}
+,{"stream_name":"stdout","time":2.9553166859999997,"data":"[2026-10-11T09:41:10Z +2s] (clone) rc=0 1.5s\n"}
+,{"stream_name":"stdout","time":2.955342623,"data":"[2026-10-11T09:41:10Z +2s] $ (venv) uv venv --python 3.11.13 /kaggle/temp/venv311\n"}
+,{"stream_name":"stdout","time":3.142285751,"data":"warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?\n"}
+,{"stream_name":"stdout","time":3.687418765,"data":"Downloading cpython-3.11.13-linux-x86_64-gnu (download) (28.8MiB)\n"}
+,{"stream_name":"stdout","time":5.207003309,"data":" Downloaded cpython-3.11.13-linux-x86_64-gnu (download)\n"}
+,{"stream_name":"stdout","time":5.448112847,"data":"Using CPython 3.11.13\n"}
+,{"stream_name":"stdout","time":5.448142664,"data":"Creating virtual environment at: /kaggle/temp/venv311\n"}
+,{"stream_name":"stdout","time":5.450746209,"data":"Activate with: source /kaggle/temp/venv311/bin/activate\n"}
+,{"stream_name":"stdout","time":5.457436766,"data":"[2026-10-11T09:41:12Z +4s] (venv) rc=0 2.5s\n"}
+,{"stream_name":"stdout","time":5.457539662,"data":"[2026-10-11T09:41:12Z +4s] $ (install) cd /kaggle/temp/H-JEPA \u0026\u0026 uv pip install --python /kaggle/temp/venv311/bin/python -e '.[train,env]' --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match 2\u003e\u00261 | tail -n 30\n"}
+,{"stream_name":"stdout","time":79.3659077,"data":" + submitit==1.5.4\n"}
+,{"stream_name":"stdout","time":79.365953207,"data":" + sympy==1.14.0\n"}
+,{"stream_name":"stdout","time":79.36596038,"data":" + tabulate==0.10.0\n"}
+,{"stream_name":"stdout","time":79.365965565,"data":" + tensorstore==0.1.85\n"}
+,{"stream_name":"stdout","time":79.365970617,"data":" + threadpoolctl==3.7.0\n"}
+,{"stream_name":"stdout","time":79.365975618,"data":" + timm==1.0.30\n"}
+,{"stream_name":"stdout","time":79.365980492,"data":" + tokenizers==0.23.3\n"}
+,{"stream_name":"stdout","time":79.365985322,"data":" + torch==2.7.1+cu128\n"}
+,{"stream_name":"stdout","time":79.36599021399999,"data":" + torchaudio==2.7.1+cu128\n"}
+,{"stream_name":"stdout","time":79.365995626,"data":" + torchmetrics==1.9.0\n"}
+,{"stream_name":"stdout","time":79.366004744,"data":" + torchvision==0.22.1+cu128\n"}
+,{"stream_name":"stdout","time":79.366023168,"data":" + tqdm==4.70.1\n"}
+,{"stream_name":"stdout","time":79.366029258,"data":" + transformers==5.19.0\n"}
+,{"stream_name":"stdout","time":79.36603517,"data":" + treescope==0.1.10\n"}
+,{"stream_name":"stdout","time":79.366041014,"data":" + triton==3.3.1\n"}
+,{"stream_name":"stdout","time":79.366058324,"data":" + truststore==0.10.4\n"}
+,{"stream_name":"stdout","time":79.3660624,"data":" + typer==0.27.3\n"}
+,{"stream_name":"stdout","time":79.36606618,"data":" + typing-extensions==4.16.0\n"}
+,{"stream_name":"stdout","time":79.366069954,"data":" + typing-inspection==0.4.4\n"}
+,{"stream_name":"stdout","time":79.36607374,"data":" + url-normalize==3.0.1\n"}
+,{"stream_name":"stdout","time":79.366077534,"data":" + urllib3==2.8.0\n"}
+,{"stream_name":"stdout","time":79.366081335,"data":" + uvloop==0.23.0\n"}
+,{"stream_name":"stdout","time":79.366085125,"data":" + wandb==0.30.0\n"}
+,{"stream_name":"stdout","time":79.3660889,"data":" + wcwidth==0.9.2\n"}
+,{"stream_name":"stdout","time":79.366092683,"data":" + websockets==17.2\n"}
+,{"stream_name":"stdout","time":79.366096463,"data":" + wrapt==2.5.0\n"}
+,{"stream_name":"stdout","time":79.366104025,"data":" + xxhash==4.0.1\n"}
+,{"stream_name":"stdout","time":79.366107968,"data":" + yarl==1.25.1\n"}
+,{"stream_name":"stdout","time":79.366122509,"data":" + zipp==4.1.1\n"}
+,{"stream_name":"stdout","time":79.366127676,"data":" + zstandard==0.25.0\n"}
+,{"stream_name":"stdout","time":79.366525571,"data":"[2026-10-11T09:42:26Z +78s] (install) rc=0 73.9s\n"}
+,{"stream_name":"stdout","time":79.366729966,"data":"[2026-10-11T09:42:26Z +78s] $ (versions) python -V \u0026\u0026 python -c \"import torch, mujoco; print('torch', torch.__version__, 'cuda', torch.version.cuda, 'available', torch.cuda.is_available(), 'n_gpu', torch.cuda.device_count(), [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())], 'mujoco', mujoco.__version__)\"\n"}
+,{"stream_name":"stdout","time":79.373783429,"data":"Python 3.11.13\n"}
+,{"stream_name":"stdout","time":84.959397263,"data":"torch 2.7.1+cu128 cuda 12.8 available True n_gpu 2 ['Tesla T4', 'Tesla T4'] mujoco 3.14.0\n"}
+,{"stream_name":"stdout","time":85.568108751,"data":"[2026-10-11T09:42:32Z +85s] (versions) rc=0 6.2s\n"}
+,{"stream_name":"stdout","time":85.568184756,"data":"[2026-10-11T09:42:32Z +85s] $ (dl_tasks) hf download jepa-world-models/h-jepa --repo-type dataset --local-dir assets --include 'eval_trajs/*' 2\u003e\u00261 | tail -n 3 \u0026\u0026 (cd assets/eval_trajs \u0026\u0026 sha256sum -c SHA256SUMS)\n"}
+,{"stream_name":"stdout","time":93.283796962,"data":"\n"}
+,{"stream_name":"stdout","time":93.283828876,"data":"Fetching 5 files:  20%|██        | 1/5 [00:00\u003c00:01,  2.60it/s]\n"}
+,{"stream_name":"stdout","time":93.283835992,"data":"Fetching 5 files:  40%|████      | 2/5 [00:03\u003c00:06,  2.11s/it]\n"}
+,{"stream_name":"stdout","time":93.28384114,"data":"Fetching 5 files:  60%|██████    | 3/5 [00:06\u003c00:04,  2.33s/it]\n"}
+,{"stream_name":"stdout","time":93.28384602,"data":"Fetching 5 files: 100%|██████████| 5/5 [00:06\u003c00:00,  1.27s/it]\n"}
+,{"stream_name":"stdout","time":93.283850942,"data":"\u001b[32m✓ Downloaded\u001b[0m\n"}
+,{"stream_name":"stdout","time":93.283855864,"data":"  path: /kaggle/temp/H-JEPA/h_jepa/assets\n"}
+,{"stream_name":"stdout","time":97.453246653,"data":"ant/expert_grid_d3_n50.pt: OK\n"}
+,{"stream_name":"stdout","time":99.213582592,"data":"fourroom/fourroom_tp35_cross2_goal75_n50_d1.pt: OK\n"}
+,{"stream_name":"stdout","time":99.680688994,"data":"ogbench/goal_offset_20_pickup_val.pt: OK\n"}
+,{"stream_name":"stdout","time":101.45561761,"data":"pusht/goal_offset_75_val.pt: OK\n"}
+,{"stream_name":"stdout","time":101.456557785,"data":"[2026-10-11T09:42:48Z +100s] (dl_tasks) rc=0 15.9s\n"}
+,{"stream_name":"stdout","time":101.456574695,"data":"[2026-10-11T09:42:48Z +100s] $ (dl_ckpt) hf download jepa-world-models/h-jepa --local-dir /kaggle/temp/hjepa_data/ckpts --include 'ant/*' 2\u003e\u00261 | tail -n 3 \u0026\u0026 find /kaggle/temp/hjepa_data/ckpts -name '*.ckpt' -o -name 'normalizer.pt' | sort | xargs ls -la\n"}
+,{"stream_name":"stdout","time":116.252105744,"data":"\n"}
+,{"stream_name":"stdout","time":116.252143789,"data":"Fetching 42 files:   0%|          | 0/42 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":116.252150434,"data":"Fetching 42 files:   2%|▏         | 1/42 [00:00\u003c00:25,  1.60it/s]\n"}
+,{"stream_name":"stdout","time":116.252169059,"data":"Fetching 42 files:  12%|█▏        | 5/42 [00:01\u003c00:09,  3.79it/s]\n"}
+,{"stream_name":"stdout","time":116.252173903,"data":"Fetching 42 files:  14%|█▍        | 6/42 [00:01\u003c00:08,  4.11it/s]\n"}
+,{"stream_name":"stdout","time":116.252198499,"data":"Fetching 42 files:  19%|█▉        | 8/42 [00:01\u003c00:05,  6.02it/s]\n"}
+,{"stream_name":"stdout","time":116.252204122,"data":"Fetching 42 files:  24%|██▍       | 10/42 [00:02\u003c00:06,  5.21it/s]\n"}
+,{"stream_name":"stdout","time":116.252209745,"data":"Fetching 42 files:  26%|██▌       | 11/42 [00:02\u003c00:08,  3.85it/s]\n"}
+,{"stream_name":"stdout","time":116.252215188,"data":"Fetching 42 files:  29%|██▊       | 12/42 [00:03\u003c00:09,  3.03it/s]\n"}
+,{"stream_name":"stdout","time":116.252220699,"data":"Fetching 42 files:  38%|███▊      | 16/42 [00:03\u003c00:04,  5.33it/s]\n"}
+,{"stream_name":"stdout","time":116.252226204,"data":"Fetching 42 files:  43%|████▎     | 18/42 [00:03\u003c00:03,  6.18it/s]\n"}
+,{"stream_name":"stdout","time":116.252231684,"data":"Fetching 42 files:  48%|████▊     | 20/42 [00:03\u003c00:03,  7.27it/s]\n"}
+,{"stream_name":"stdout","time":116.25223726,"data":"Fetching 42 files:  52%|█████▏    | 22/42 [00:04\u003c00:02,  8.18it/s]\n"}
+,{"stream_name":"stdout","time":116.252242996,"data":"Fetching 42 files:  57%|█████▋    | 24/42 [00:08\u003c00:12,  1.45it/s]\n"}
+,{"stream_name":"stdout","time":116.252248429,"data":"Fetching 42 files:  67%|██████▋   | 28/42 [00:08\u003c00:05,  2.59it/s]\n"}
+,{"stream_name":"stdout","time":116.252254034,"data":"Fetching 42 files:  74%|███████▍  | 31/42 [00:08\u003c00:03,  3.31it/s]\n"}
+,{"stream_name":"stdout","time":116.252259622,"data":"Fetching 42 files:  79%|███████▊  | 33/42 [00:10\u003c00:03,  2.57it/s]\n"}
+,{"stream_name":"stdout","time":116.252265748,"data":"Fetching 42 files:  86%|████████▌ | 36/42 [00:10\u003c00:01,  3.52it/s]\n"}
+,{"stream_name":"stdout","time":116.252271455,"data":"Fetching 42 files:  95%|█████████▌| 40/42 [00:10\u003c00:00,  5.09it/s]\n"}
+,{"stream_name":"stdout","time":116.2522773,"data":"Fetching 42 files: 100%|██████████| 42/42 [00:14\u003c00:00,  1.83it/s]\n"}
+,{"stream_name":"stdout","time":116.252283114,"data":"Fetching 42 files: 100%|██████████| 42/42 [00:14\u003c00:00,  2.98it/s]\n"}
+,{"stream_name":"stdout","time":116.252289179,"data":"\u001b[32m✓ Downloaded\u001b[0m\n"}
+,{"stream_name":"stdout","time":116.2522947,"data":"  path: /kaggle/temp/hjepa_data/ckpts\n"}
+,{"stream_name":"stdout","time":116.275799073,"data":"-rw-r--r-- 1 root root  94566152 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed42/ant_hjepa_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275827548,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275832025,"data":"-rw-r--r-- 1 root root  94566152 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed43/ant_hjepa_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275845406,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275848393,"data":"-rw-r--r-- 1 root root  94566152 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed44/ant_hjepa_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275851153,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l2/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275853963,"data":"-rw-r--r-- 1 root root 139538683 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275857053,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275859743,"data":"-rw-r--r-- 1 root root 139538683 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed43/ant_hjepa_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275862417,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275865171,"data":"-rw-r--r-- 1 root root 139538683 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed44/ant_hjepa_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275867916,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275870578,"data":"-rw-r--r-- 1 root root 184511150 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed42/ant_hjepa_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.27587324,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275876037,"data":"-rw-r--r-- 1 root root 184511150 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed43/ant_hjepa_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.27587872,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275881448,"data":"-rw-r--r-- 1 root root 184511150 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed44/ant_hjepa_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275885132,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275887991,"data":"-rw-r--r-- 1 root root  93371315 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed42/ant_hwm_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275904371,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.27590771,"data":"-rw-r--r-- 1 root root  93371315 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed43/ant_hwm_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275911954,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275916129,"data":"-rw-r--r-- 1 root root  93371315 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed44/ant_hwm_l2_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275920088,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l2/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275924095,"data":"-rw-r--r-- 1 root root 137153195 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed42/ant_hwm_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.27592992,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275932747,"data":"-rw-r--r-- 1 root root 137153195 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed43/ant_hwm_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275935431,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275938096,"data":"-rw-r--r-- 1 root root 137153195 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed44/ant_hwm_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.27594075,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275943423,"data":"-rw-r--r-- 1 root root 180935075 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed42/ant_hwm_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275946078,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275948746,"data":"-rw-r--r-- 1 root root 180935075 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed43/ant_hwm_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.2759514,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275954421,"data":"-rw-r--r-- 1 root root 180935075 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed44/ant_hwm_l4_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275957116,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l4/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275959763,"data":"-rw-r--r-- 1 root root  49592431 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed42/ant_lewm_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.27596242,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275965091,"data":"-rw-r--r-- 1 root root  49592431 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed43/ant_lewm_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275967771,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed43/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.275970466,"data":"-rw-r--r-- 1 root root  49592431 Oct 11 09:43 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed44/ant_lewm_object.ckpt\n"}
+,{"stream_name":"stdout","time":116.275973159,"data":"-rw-r--r-- 1 root root      3071 Oct 11 09:42 /kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed44/normalizer.pt\n"}
+,{"stream_name":"stdout","time":116.276713728,"data":"[2026-10-11T09:43:03Z +115s] (dl_ckpt) rc=0 14.8s\n"}
+,{"stream_name":"stdout","time":116.324363417,"data":"[2026-10-11T09:43:03Z +115s] [w0 gpu0] START repro_hjepa_l3_seed42 (attempt 1, chunks so far 0): python -u eval.py --config-name ant_l3 seed=42 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/eval_l3\n"}
+,{"stream_name":"stdout","time":121.324820795,"data":"[2026-10-11T09:43:08Z +120s] [w1 gpu1] START repro_lewm_seed42 (attempt 1, chunks so far 0): python -u eval.py --config-name ant_flat seed=42 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed42/ant_lewm_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_lewm/seed42/eval_flat\n"}
+,{"stream_name":"stdout","time":126.325392315,"data":"[2026-10-11T09:43:13Z +125s] [w2 gpu0] START repro_hjepa_l4_seed42 (attempt 1, chunks so far 0): python -u eval.py --config-name ant_l4 seed=42 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed42/ant_hjepa_l4_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l4/seed42/eval_l4\n"}
+,{"stream_name":"stdout","time":131.325925497,"data":"[2026-10-11T09:43:18Z +130s] [w3 gpu1] START repro_hwm_l3_seed42 (attempt 1, chunks so far 0): python -u eval.py --config-name ant_l3 seed=42 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed42/ant_hwm_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hwm_l3/seed42/eval_l3\n"}
+,{"stream_name":"stdout","time":1036.461765231,"data":"[2026-10-11T09:58:23Z +1035s] PROGRESS gpu[95 %, 1715 MiB | 92 %, 2163 MiB] repro_hjepa_l3_seed42:runn:2, repro_lewm_seed42:runn:1, repro_hjepa_l4_seed42:runn:1, repro_hwm_l3_seed42:runn:2\n"}
+,{"stream_name":"stdout","time":1036.463088003,"data":"[2026-10-11T09:58:23Z +1035s]   repro_hjepa_l3_seed42: tasks=2 successes=2 eval_time_sum=834s mean_per_task=417.2s\n"}
+,{"stream_name":"stdout","time":1036.463533835,"data":"[2026-10-11T09:58:23Z +1035s]   repro_lewm_seed42: tasks=1 successes=0 eval_time_sum=871s mean_per_task=870.6s\n"}
+,{"stream_name":"stdout","time":1036.467419523,"data":"[2026-10-11T09:58:23Z +1035s]   repro_hjepa_l4_seed42: tasks=1 successes=1 eval_time_sum=435s mean_per_task=435.0s\n"}
+,{"stream_name":"stdout","time":1036.47071469,"data":"[2026-10-11T09:58:23Z +1035s]   repro_hwm_l3_seed42: tasks=2 successes=2 eval_time_sum=788s mean_per_task=393.8s\n"}
+,{"stream_name":"stdout","time":1936.605320352,"data":"[2026-10-11T10:13:23Z +1936s] PROGRESS gpu[83 %, 1715 MiB | 11 %, 2163 MiB] repro_hjepa_l3_seed42:runn:4, repro_lewm_seed42:runn:2, repro_hjepa_l4_seed42:runn:3, repro_hwm_l3_seed42:runn:4\n"}
+,{"stream_name":"stdout","time":1936.613739697,"data":"[2026-10-11T10:13:23Z +1936s]   repro_hjepa_l3_seed42: tasks=4 successes=3 eval_time_sum=1775s mean_per_task=443.8s\n"}
+,{"stream_name":"stdout","time":1936.615325378,"data":"[2026-10-11T10:13:23Z +1936s]   repro_lewm_seed42: tasks=2 successes=1 eval_time_sum=1629s mean_per_task=814.5s\n"}
+,{"stream_name":"stdout","time":1936.623660827,"data":"[2026-10-11T10:13:23Z +1936s]   repro_hjepa_l4_seed42: tasks=3 successes=3 eval_time_sum=1347s mean_per_task=448.9s\n"}
+,{"stream_name":"stdout","time":1936.629777987,"data":"[2026-10-11T10:13:23Z +1936s]   repro_hwm_l3_seed42: tasks=4 successes=4 eval_time_sum=1607s mean_per_task=401.7s\n"}
+,{"stream_name":"stdout","time":2836.76593501,"data":"[2026-10-11T10:28:23Z +2836s] PROGRESS gpu[92 %, 1715 MiB | 80 %, 2163 MiB] repro_hjepa_l3_seed42:runn:6, repro_lewm_seed42:runn:3, repro_hjepa_l4_seed42:runn:5, repro_hwm_l3_seed42:runn:6\n"}
+,{"stream_name":"stdout","time":2836.775470821,"data":"[2026-10-11T10:28:23Z +2836s]   repro_hjepa_l3_seed42: tasks=6 successes=4 eval_time_sum=2643s mean_per_task=440.5s\n"}
+,{"stream_name":"stdout","time":2836.776791084,"data":"[2026-10-11T10:28:23Z +2836s]   repro_lewm_seed42: tasks=3 successes=1 eval_time_sum=2366s mean_per_task=788.7s\n"}
+,{"stream_name":"stdout","time":2836.78078272,"data":"[2026-10-11T10:28:23Z +2836s]   repro_hjepa_l4_seed42: tasks=5 successes=3 eval_time_sum=2307s mean_per_task=461.5s\n"}
+,{"stream_name":"stdout","time":2836.78514522,"data":"[2026-10-11T10:28:23Z +2836s]   repro_hwm_l3_seed42: tasks=6 successes=6 eval_time_sum=2443s mean_per_task=407.2s\n"}
+,{"stream_name":"stdout","time":3736.930823471,"data":"[2026-10-11T10:43:24Z +3736s] PROGRESS gpu[93 %, 1715 MiB | 95 %, 2163 MiB] repro_hjepa_l3_seed42:runn:8, repro_lewm_seed42:runn:4, repro_hjepa_l4_seed42:runn:7, repro_hwm_l3_seed42:runn:8\n"}
+,{"stream_name":"stdout","time":3736.957766901,"data":"[2026-10-11T10:43:24Z +3736s]   repro_hjepa_l3_seed42: tasks=8 successes=6 eval_time_sum=3553s mean_per_task=444.2s\n"}
+,{"stream_name":"stdout","time":3736.961733726,"data":"[2026-10-11T10:43:24Z +3736s]   repro_lewm_seed42: tasks=4 successes=1 eval_time_sum=3126s mean_per_task=781.5s\n"}
+,{"stream_name":"stdout","time":3736.972739668,"data":"[2026-10-11T10:43:24Z +3736s]   repro_hjepa_l4_seed42: tasks=7 successes=4 eval_time_sum=3245s mean_per_task=463.5s\n"}
+,{"stream_name":"stdout","time":3736.983914647,"data":"[2026-10-11T10:43:24Z +3736s]   repro_hwm_l3_seed42: tasks=8 successes=6 eval_time_sum=3261s mean_per_task=407.6s\n"}
+,{"stream_name":"stdout","time":4637.124567849,"data":"[2026-10-11T10:58:24Z +4636s] PROGRESS gpu[90 %, 1715 MiB | 92 %, 2163 MiB] repro_hjepa_l3_seed42:runn:10, repro_lewm_seed42:runn:5, repro_hjepa_l4_seed42:runn:9, repro_hwm_l3_seed42:runn:10\n"}
+,{"stream_name":"stdout","time":4637.135623081,"data":"[2026-10-11T10:58:24Z +4636s]   repro_hjepa_l3_seed42: tasks=10 successes=7 eval_time_sum=4425s mean_per_task=442.5s\n"}
+,{"stream_name":"stdout","time":4637.139739404,"data":"[2026-10-11T10:58:24Z +4636s]   repro_lewm_seed42: tasks=5 successes=1 eval_time_sum=3893s mean_per_task=778.5s\n"}
+,{"stream_name":"stdout","time":4637.152125289,"data":"[2026-10-11T10:58:24Z +4636s]   repro_hjepa_l4_seed42: tasks=9 successes=4 eval_time_sum=4151s mean_per_task=461.3s\n"}
+,{"stream_name":"stdout","time":4637.164166835,"data":"[2026-10-11T10:58:24Z +4636s]   repro_hwm_l3_seed42: tasks=10 successes=6 eval_time_sum=4201s mean_per_task=420.1s\n"}
+,{"stream_name":"stdout","time":5537.327915229,"data":"[2026-10-11T11:13:24Z +5536s] PROGRESS gpu[67 %, 1715 MiB | 43 %, 2163 MiB] repro_hjepa_l3_seed42:runn:12, repro_lewm_seed42:runn:6, repro_hjepa_l4_seed42:runn:11, repro_hwm_l3_seed42:runn:12\n"}
+,{"stream_name":"stdout","time":5537.34227737,"data":"[2026-10-11T11:13:24Z +5536s]   repro_hjepa_l3_seed42: tasks=12 successes=8 eval_time_sum=5330s mean_per_task=444.1s\n"}
+,{"stream_name":"stdout","time":5537.346783405,"data":"[2026-10-11T11:13:24Z +5536s]   repro_lewm_seed42: tasks=6 successes=1 eval_time_sum=4581s mean_per_task=763.5s\n"}
+,{"stream_name":"stdout","time":5537.364908135,"data":"[2026-10-11T11:13:24Z +5536s]   repro_hjepa_l4_seed42: tasks=11 successes=5 eval_time_sum=5031s mean_per_task=457.4s\n"}
+,{"stream_name":"stdout","time":5537.380091782,"data":"[2026-10-11T11:13:24Z +5536s]   repro_hwm_l3_seed42: tasks=12 successes=7 eval_time_sum=5127s mean_per_task=427.2s\n"}
+,{"stream_name":"stdout","time":6437.552763341,"data":"[2026-10-11T11:28:24Z +6437s] PROGRESS gpu[93 %, 1715 MiB | 93 %, 2163 MiB] repro_hjepa_l3_seed42:runn:14, repro_lewm_seed42:runn:8, repro_hjepa_l4_seed42:runn:13, repro_hwm_l3_seed42:runn:14\n"}
+,{"stream_name":"stdout","time":6437.568854716,"data":"[2026-10-11T11:28:24Z +6437s]   repro_hjepa_l3_seed42: tasks=14 successes=10 eval_time_sum=6192s mean_per_task=442.3s\n"}
+,{"stream_name":"stdout","time":6437.571554816,"data":"[2026-10-11T11:28:24Z +6437s]   repro_lewm_seed42: tasks=8 successes=2 eval_time_sum=6217s mean_per_task=777.1s\n"}
+,{"stream_name":"stdout","time":6437.592936731,"data":"[2026-10-11T11:28:24Z +6437s]   repro_hjepa_l4_seed42: tasks=13 successes=6 eval_time_sum=5966s mean_per_task=459.0s\n"}
+,{"stream_name":"stdout","time":6437.608763889,"data":"[2026-10-11T11:28:24Z +6437s]   repro_hwm_l3_seed42: tasks=14 successes=9 eval_time_sum=5948s mean_per_task=424.9s\n"}
+,{"stream_name":"stdout","time":7337.797041297,"data":"[2026-10-11T11:43:24Z +7337s] PROGRESS gpu[93 %, 1715 MiB | 16 %, 2163 MiB] repro_hjepa_l3_seed42:runn:16, repro_lewm_seed42:runn:9, repro_hjepa_l4_seed42:runn:15, repro_hwm_l3_seed42:runn:16\n"}
+,{"stream_name":"stdout","time":7337.815997712,"data":"[2026-10-11T11:43:24Z +7337s]   repro_hjepa_l3_seed42: tasks=16 successes=12 eval_time_sum=7039s mean_per_task=439.9s\n"}
+,{"stream_name":"stdout","time":7337.819713989,"data":"[2026-10-11T11:43:24Z +7337s]   repro_lewm_seed42: tasks=9 successes=2 eval_time_sum=6937s mean_per_task=770.8s\n"}
+,{"stream_name":"stdout","time":7337.841013004,"data":"[2026-10-11T11:43:24Z +7337s]   repro_hjepa_l4_seed42: tasks=15 successes=7 eval_time_sum=6923s mean_per_task=461.5s\n"}
+,{"stream_name":"stdout","time":7337.859303146,"data":"[2026-10-11T11:43:24Z +7337s]   repro_hwm_l3_seed42: tasks=16 successes=10 eval_time_sum=6841s mean_per_task=427.5s\n"}
+,{"stream_name":"stdout","time":8238.035800853,"data":"[2026-10-11T11:58:25Z +8237s] PROGRESS gpu[93 %, 1715 MiB | 84 %, 2163 MiB] repro_hjepa_l3_seed42:runn:18, repro_lewm_seed42:runn:10, repro_hjepa_l4_seed42:runn:17, repro_hwm_l3_seed42:runn:18\n"}
+,{"stream_name":"stdout","time":8238.055797616,"data":"[2026-10-11T11:58:25Z +8237s]   repro_hjepa_l3_seed42: tasks=18 successes=13 eval_time_sum=7904s mean_per_task=439.1s\n"}
+,{"stream_name":"stdout","time":8238.062121168,"data":"[2026-10-11T11:58:25Z +8237s]   repro_lewm_seed42: tasks=10 successes=2 eval_time_sum=7640s mean_per_task=764.0s\n"}
+,{"stream_name":"stdout","time":8238.085795537,"data":"[2026-10-11T11:58:25Z +8237s]   repro_hjepa_l4_seed42: tasks=17 successes=9 eval_time_sum=7831s mean_per_task=460.6s\n"}
+,{"stream_name":"stdout","time":8238.103961282,"data":"[2026-10-11T11:58:25Z +8237s]   repro_hwm_l3_seed42: tasks=18 successes=11 eval_time_sum=7634s mean_per_task=424.1s\n"}
+,{"stream_name":"stdout","time":9138.287783577,"data":"[2026-10-11T12:13:25Z +9137s] PROGRESS gpu[91 %, 1715 MiB | 93 %, 2163 MiB] repro_hjepa_l3_seed42:runn:20, repro_lewm_seed42:runn:11, repro_hjepa_l4_seed42:runn:19, repro_hwm_l3_seed42:runn:21\n"}
+,{"stream_name":"stdout","time":9138.30826403,"data":"[2026-10-11T12:13:25Z +9137s]   repro_hjepa_l3_seed42: tasks=20 successes=14 eval_time_sum=8758s mean_per_task=437.9s\n"}
+,{"stream_name":"stdout","time":9138.311740643,"data":"[2026-10-11T12:13:25Z +9137s]   repro_lewm_seed42: tasks=11 successes=2 eval_time_sum=8383s mean_per_task=762.1s\n"}
+,{"stream_name":"stdout","time":9138.324254531,"data":"[2026-10-11T12:13:25Z +9137s]   repro_hjepa_l4_seed42: tasks=19 successes=11 eval_time_sum=8742s mean_per_task=460.1s\n"}
+,{"stream_name":"stdout","time":9138.335679815,"data":"[2026-10-11T12:13:25Z +9137s]   repro_hwm_l3_seed42: tasks=21 successes=12 eval_time_sum=8880s mean_per_task=422.9s\n"}
+,{"stream_name":"stdout","time":10038.541412787,"data":"[2026-10-11T12:28:25Z +10038s] PROGRESS gpu[76 %, 1715 MiB | 94 %, 2163 MiB] repro_hjepa_l3_seed42:runn:22, repro_lewm_seed42:runn:12, repro_hjepa_l4_seed42:runn:21, repro_hwm_l3_seed42:runn:23\n"}
+,{"stream_name":"stdout","time":10038.554491396,"data":"[2026-10-11T12:28:25Z +10038s]   repro_hjepa_l3_seed42: tasks=22 successes=14 eval_time_sum=9754s mean_per_task=443.4s\n"}
+,{"stream_name":"stdout","time":10038.558504335,"data":"[2026-10-11T12:28:25Z +10038s]   repro_lewm_seed42: tasks=12 successes=2 eval_time_sum=9104s mean_per_task=758.6s\n"}
+,{"stream_name":"stdout","time":10038.572972602,"data":"[2026-10-11T12:28:25Z +10038s]   repro_hjepa_l4_seed42: tasks=21 successes=13 eval_time_sum=9614s mean_per_task=457.8s\n"}
+,{"stream_name":"stdout","time":10038.585665051,"data":"[2026-10-11T12:28:25Z +10038s]   repro_hwm_l3_seed42: tasks=23 successes=12 eval_time_sum=9764s mean_per_task=424.5s\n"}
+,{"stream_name":"stdout","time":10938.739889645,"data":"[2026-10-11T12:43:25Z +10938s] PROGRESS gpu[94 %, 1715 MiB | 91 %, 2163 MiB] repro_hjepa_l3_seed42:runn:24, repro_lewm_seed42:runn:14, repro_hjepa_l4_seed42:runn:23, repro_hwm_l3_seed42:runn:25\n"}
+,{"stream_name":"stdout","time":10938.764718395,"data":"[2026-10-11T12:43:25Z +10938s]   repro_hjepa_l3_seed42: tasks=24 successes=15 eval_time_sum=10596s mean_per_task=441.5s\n"}
+,{"stream_name":"stdout","time":10938.771635883,"data":"[2026-10-11T12:43:25Z +10938s]   repro_lewm_seed42: tasks=14 successes=3 eval_time_sum=10753s mean_per_task=768.1s\n"}
+,{"stream_name":"stdout","time":10938.78684297,"data":"[2026-10-11T12:43:25Z +10938s]   repro_hjepa_l4_seed42: tasks=23 successes=14 eval_time_sum=10562s mean_per_task=459.2s\n"}
+,{"stream_name":"stdout","time":10938.80049562,"data":"[2026-10-11T12:43:25Z +10938s]   repro_hwm_l3_seed42: tasks=25 successes=13 eval_time_sum=10645s mean_per_task=425.8s\n"}
+,{"stream_name":"stdout","time":11839.089079115,"data":"[2026-10-11T12:58:26Z +11838s] PROGRESS gpu[16 %, 1715 MiB | 11 %, 2163 MiB] repro_hjepa_l3_seed42:runn:26, repro_lewm_seed42:runn:15, repro_hjepa_l4_seed42:runn:25, repro_hwm_l3_seed42:runn:27\n"}
+,{"stream_name":"stdout","time":11839.104287127,"data":"[2026-10-11T12:58:26Z +11838s]   repro_hjepa_l3_seed42: tasks=26 successes=17 eval_time_sum=11466s mean_per_task=441.0s\n"}
+,{"stream_name":"stdout","time":11839.110424619,"data":"[2026-10-11T12:58:26Z +11838s]   repro_lewm_seed42: tasks=15 successes=4 eval_time_sum=11433s mean_per_task=762.2s\n"}
+,{"stream_name":"stdout","time":11839.128772341,"data":"[2026-10-11T12:58:26Z +11838s]   repro_hjepa_l4_seed42: tasks=25 successes=16 eval_time_sum=11464s mean_per_task=458.6s\n"}
+,{"stream_name":"stdout","time":11839.145233248,"data":"[2026-10-11T12:58:26Z +11838s]   repro_hwm_l3_seed42: tasks=27 successes=14 eval_time_sum=11490s mean_per_task=425.6s\n"}
+,{"stream_name":"stdout","time":12739.364065782,"data":"[2026-10-11T13:13:26Z +12738s] PROGRESS gpu[78 %, 1715 MiB | 85 %, 2163 MiB] repro_hjepa_l3_seed42:runn:28, repro_lewm_seed42:runn:16, repro_hjepa_l4_seed42:runn:27, repro_hwm_l3_seed42:runn:29\n"}
+,{"stream_name":"stdout","time":12739.394955426,"data":"[2026-10-11T13:13:26Z +12738s]   repro_hjepa_l3_seed42: tasks=28 successes=19 eval_time_sum=12385s mean_per_task=442.3s\n"}
+,{"stream_name":"stdout","time":12739.405761426,"data":"[2026-10-11T13:13:26Z +12738s]   repro_lewm_seed42: tasks=16 successes=4 eval_time_sum=12274s mean_per_task=767.1s\n"}
+,{"stream_name":"stdout","time":12739.433380008,"data":"[2026-10-11T13:13:26Z +12738s]   repro_hjepa_l4_seed42: tasks=27 successes=18 eval_time_sum=12382s mean_per_task=458.6s\n"}
+,{"stream_name":"stdout","time":12739.449643139,"data":"[2026-10-11T13:13:26Z +12738s]   repro_hwm_l3_seed42: tasks=29 successes=14 eval_time_sum=12418s mean_per_task=428.2s\n"}
+,{"stream_name":"stdout","time":13639.687837152,"data":"[2026-10-11T13:28:26Z +13639s] PROGRESS gpu[79 %, 1715 MiB | 68 %, 2163 MiB] repro_hjepa_l3_seed42:runn:30, repro_lewm_seed42:runn:17, repro_hjepa_l4_seed42:runn:29, repro_hwm_l3_seed42:runn:31\n"}
+,{"stream_name":"stdout","time":13639.723727568,"data":"[2026-10-11T13:28:26Z +13639s]   repro_hjepa_l3_seed42: tasks=30 successes=21 eval_time_sum=13232s mean_per_task=441.1s\n"}
+,{"stream_name":"stdout","time":13639.732593005,"data":"[2026-10-11T13:28:26Z +13639s]   repro_lewm_seed42: tasks=17 successes=5 eval_time_sum=13122s mean_per_task=771.9s\n"}
+,{"stream_name":"stdout","time":13639.754501487,"data":"[2026-10-11T13:28:26Z +13639s]   repro_hjepa_l4_seed42: tasks=29 successes=19 eval_time_sum=13316s mean_per_task=459.2s\n"}
+,{"stream_name":"stdout","time":13639.770829251,"data":"[2026-10-11T13:28:26Z +13639s]   repro_hwm_l3_seed42: tasks=31 successes=15 eval_time_sum=13267s mean_per_task=428.0s\n"}
+,{"stream_name":"stdout","time":14540.017250102,"data":"[2026-10-11T13:43:27Z +14539s] PROGRESS gpu[18 %, 1715 MiB | 69 %, 2163 MiB] repro_hjepa_l3_seed42:runn:32, repro_lewm_seed42:runn:18, repro_hjepa_l4_seed42:runn:31, repro_hwm_l3_seed42:runn:33\n"}
+,{"stream_name":"stdout","time":14540.058804606,"data":"[2026-10-11T13:43:27Z +14539s]   repro_hjepa_l3_seed42: tasks=32 successes=23 eval_time_sum=14149s mean_per_task=442.2s\n"}
+,{"stream_name":"stdout","time":14540.071066226,"data":"[2026-10-11T13:43:27Z +14539s]   repro_lewm_seed42: tasks=18 successes=5 eval_time_sum=13916s mean_per_task=773.1s\n"}
+,{"stream_name":"stdout","time":14540.118742741,"data":"[2026-10-11T13:43:27Z +14539s]   repro_hjepa_l4_seed42: tasks=31 successes=21 eval_time_sum=14234s mean_per_task=459.2s\n"}
+,{"stream_name":"stdout","time":14540.158035793,"data":"[2026-10-11T13:43:27Z +14539s]   repro_hwm_l3_seed42: tasks=33 successes=17 eval_time_sum=14061s mean_per_task=426.1s\n"}
+,{"stream_name":"stdout","time":15440.408454251,"data":"[2026-10-11T13:58:27Z +15439s] PROGRESS gpu[36 %, 1715 MiB | 14 %, 2163 MiB] repro_hjepa_l3_seed42:runn:34, repro_lewm_seed42:runn:19, repro_hjepa_l4_seed42:runn:33, repro_hwm_l3_seed42:runn:35\n"}
+,{"stream_name":"stdout","time":15440.449298792,"data":"[2026-10-11T13:58:27Z +15439s]   repro_hjepa_l3_seed42: tasks=34 successes=25 eval_time_sum=15025s mean_per_task=441.9s\n"}
+,{"stream_name":"stdout","time":15440.457809695,"data":"[2026-10-11T13:58:27Z +15439s]   repro_lewm_seed42: tasks=19 successes=5 eval_time_sum=14694s mean_per_task=773.4s\n"}
+,{"stream_name":"stdout","time":15440.505831754,"data":"[2026-10-11T13:58:27Z +15440s]   repro_hjepa_l4_seed42: tasks=33 successes=22 eval_time_sum=15154s mean_per_task=459.2s\n"}
+,{"stream_name":"stdout","time":15440.545746027,"data":"[2026-10-11T13:58:27Z +15440s]   repro_hwm_l3_seed42: tasks=35 successes=18 eval_time_sum=14892s mean_per_task=425.5s\n"}
+,{"stream_name":"stdout","time":16340.812844755,"data":"[2026-10-11T14:13:27Z +16340s] PROGRESS gpu[19 %, 1715 MiB | 67 %, 2163 MiB] repro_hjepa_l3_seed42:runn:36, repro_lewm_seed42:runn:21, repro_hjepa_l4_seed42:runn:35, repro_hwm_l3_seed42:runn:37\n"}
+,{"stream_name":"stdout","time":16340.891738715,"data":"[2026-10-11T14:13:27Z +16340s]   repro_hjepa_l3_seed42: tasks=36 successes=25 eval_time_sum=15916s mean_per_task=442.1s\n"}
+,{"stream_name":"stdout","time":16340.910706848,"data":"[2026-10-11T14:13:27Z +16340s]   repro_lewm_seed42: tasks=21 successes=6 eval_time_sum=16050s mean_per_task=764.3s\n"}
+,{"stream_name":"stdout","time":16340.935025832,"data":"[2026-10-11T14:13:28Z +16340s]   repro_hjepa_l4_seed42: tasks=35 successes=24 eval_time_sum=16075s mean_per_task=459.3s\n"}
+,{"stream_name":"stdout","time":16340.964045657,"data":"[2026-10-11T14:13:28Z +16340s]   repro_hwm_l3_seed42: tasks=37 successes=19 eval_time_sum=15794s mean_per_task=426.9s\n"}
+,{"stream_name":"stdout","time":17241.291657596,"data":"[2026-10-11T14:28:28Z +17240s] PROGRESS gpu[56 %, 1715 MiB | 33 %, 2163 MiB] repro_hjepa_l3_seed42:runn:38, repro_lewm_seed42:runn:22, repro_hjepa_l4_seed42:runn:37, repro_hwm_l3_seed42:runn:39\n"}
+,{"stream_name":"stdout","time":17241.34178702,"data":"[2026-10-11T14:28:28Z +17240s]   repro_hjepa_l3_seed42: tasks=38 successes=27 eval_time_sum=16772s mean_per_task=441.4s\n"}
+,{"stream_name":"stdout","time":17241.358875079,"data":"[2026-10-11T14:28:28Z +17240s]   repro_lewm_seed42: tasks=22 successes=6 eval_time_sum=16829s mean_per_task=765.0s\n"}
+,{"stream_name":"stdout","time":17241.414666181,"data":"[2026-10-11T14:28:28Z +17240s]   repro_hjepa_l4_seed42: tasks=37 successes=26 eval_time_sum=17035s mean_per_task=460.4s\n"}
+,{"stream_name":"stdout","time":17241.461535358,"data":"[2026-10-11T14:28:28Z +17240s]   repro_hwm_l3_seed42: tasks=39 successes=19 eval_time_sum=16689s mean_per_task=427.9s\n"}
+,{"stream_name":"stdout","time":18141.73089756,"data":"[2026-10-11T14:43:28Z +18141s] PROGRESS gpu[89 %, 1715 MiB | 65 %, 2163 MiB] repro_hjepa_l3_seed42:runn:40, repro_lewm_seed42:runn:23, repro_hjepa_l4_seed42:runn:38, repro_hwm_l3_seed42:runn:41\n"}
+,{"stream_name":"stdout","time":18141.767048044,"data":"[2026-10-11T14:43:28Z +18141s]   repro_hjepa_l3_seed42: tasks=40 successes=29 eval_time_sum=17719s mean_per_task=443.0s\n"}
+,{"stream_name":"stdout","time":18141.774064142,"data":"[2026-10-11T14:43:28Z +18141s]   repro_lewm_seed42: tasks=23 successes=6 eval_time_sum=17505s mean_per_task=761.1s\n"}
+,{"stream_name":"stdout","time":18141.819729148,"data":"[2026-10-11T14:43:28Z +18141s]   repro_hjepa_l4_seed42: tasks=38 successes=27 eval_time_sum=17547s mean_per_task=461.8s\n"}
+,{"stream_name":"stdout","time":18141.839883287,"data":"[2026-10-11T14:43:28Z +18141s]   repro_hwm_l3_seed42: tasks=41 successes=21 eval_time_sum=17548s mean_per_task=428.0s\n"}
+,{"stream_name":"stdout","time":19042.07093757,"data":"[2026-10-11T14:58:29Z +19041s] PROGRESS gpu[14 %, 1715 MiB | 72 %, 2163 MiB] repro_hjepa_l3_seed42:runn:42, repro_lewm_seed42:runn:24, repro_hjepa_l4_seed42:runn:40, repro_hwm_l3_seed42:runn:43\n"}
+,{"stream_name":"stdout","time":19042.126761142,"data":"[2026-10-11T14:58:29Z +19041s]   repro_hjepa_l3_seed42: tasks=42 successes=31 eval_time_sum=18609s mean_per_task=443.1s\n"}
+,{"stream_name":"stdout","time":19042.134804312,"data":"[2026-10-11T14:58:29Z +19041s]   repro_lewm_seed42: tasks=24 successes=6 eval_time_sum=18261s mean_per_task=760.9s\n"}
+,{"stream_name":"stdout","time":19042.198746777,"data":"[2026-10-11T14:58:29Z +19041s]   repro_hjepa_l4_seed42: tasks=40 successes=27 eval_time_sum=18508s mean_per_task=462.7s\n"}
+,{"stream_name":"stdout","time":19042.26038253,"data":"[2026-10-11T14:58:29Z +19041s]   repro_hwm_l3_seed42: tasks=43 successes=22 eval_time_sum=18477s mean_per_task=429.7s\n"}
+,{"stream_name":"stdout","time":19942.544779465,"data":"[2026-10-11T15:13:29Z +19942s] PROGRESS gpu[92 %, 1715 MiB | 67 %, 2163 MiB] repro_hjepa_l3_seed42:runn:44, repro_lewm_seed42:runn:26, repro_hjepa_l4_seed42:runn:42, repro_hwm_l3_seed42:runn:45\n"}
+,{"stream_name":"stdout","time":19942.598777746,"data":"[2026-10-11T15:13:29Z +19942s]   repro_hjepa_l3_seed42: tasks=44 successes=33 eval_time_sum=19470s mean_per_task=442.5s\n"}
+,{"stream_name":"stdout","time":19942.613002054,"data":"[2026-10-11T15:13:29Z +19942s]   repro_lewm_seed42: tasks=26 successes=6 eval_time_sum=19712s mean_per_task=758.2s\n"}
+,{"stream_name":"stdout","time":19942.649865378,"data":"[2026-10-11T15:13:29Z +19942s]   repro_hjepa_l4_seed42: tasks=42 successes=29 eval_time_sum=19440s mean_per_task=462.8s\n"}
+,{"stream_name":"stdout","time":19942.674754729,"data":"[2026-10-11T15:13:29Z +19942s]   repro_hwm_l3_seed42: tasks=45 successes=23 eval_time_sum=19331s mean_per_task=429.6s\n"}
+,{"stream_name":"stdout","time":20842.981415253,"data":"[2026-10-11T15:28:30Z +20842s] PROGRESS gpu[34 %, 1715 MiB | 59 %, 2163 MiB] repro_hjepa_l3_seed42:runn:46, repro_lewm_seed42:runn:27, repro_hjepa_l4_seed42:runn:44, repro_hwm_l3_seed42:runn:48\n"}
+,{"stream_name":"stdout","time":20843.030223933,"data":"[2026-10-11T15:28:30Z +20842s]   repro_hjepa_l3_seed42: tasks=46 successes=34 eval_time_sum=20368s mean_per_task=442.8s\n"}
+,{"stream_name":"stdout","time":20843.054009242,"data":"[2026-10-11T15:28:30Z +20842s]   repro_lewm_seed42: tasks=27 successes=6 eval_time_sum=20425s mean_per_task=756.5s\n"}
+,{"stream_name":"stdout","time":20843.120270523,"data":"[2026-10-11T15:28:30Z +20842s]   repro_hjepa_l4_seed42: tasks=44 successes=31 eval_time_sum=20404s mean_per_task=463.7s\n"}
+,{"stream_name":"stdout","time":20843.178059146,"data":"[2026-10-11T15:28:30Z +20842s]   repro_hwm_l3_seed42: tasks=48 successes=25 eval_time_sum=20640s mean_per_task=430.0s\n"}
+,{"stream_name":"stdout","time":21620.581730542,"data":"[2026-10-11T15:41:27Z +21620s] [w3] DONE repro_hwm_l3_seed42: tasks=50 successes=27 eval_time_sum=21433s mean_per_task=428.7s wall=21489s\n"}
+,{"stream_name":"stdout","time":21743.354905704,"data":"[2026-10-11T15:43:30Z +21742s] PROGRESS gpu[56 %, 1715 MiB | 31 %, 1119 MiB] repro_hjepa_l3_seed42:runn:48, repro_lewm_seed42:runn:28, repro_hjepa_l4_seed42:runn:46, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":21743.38632863,"data":"[2026-10-11T15:43:30Z +21742s]   repro_hjepa_l3_seed42: tasks=48 successes=36 eval_time_sum=21228s mean_per_task=442.2s\n"}
+,{"stream_name":"stdout","time":21743.395754771,"data":"[2026-10-11T15:43:30Z +21742s]   repro_lewm_seed42: tasks=28 successes=6 eval_time_sum=21313s mean_per_task=761.2s\n"}
+,{"stream_name":"stdout","time":21743.430495298,"data":"[2026-10-11T15:43:30Z +21742s]   repro_hjepa_l4_seed42: tasks=46 successes=33 eval_time_sum=21329s mean_per_task=463.7s\n"}
+,{"stream_name":"stdout","time":22159.839498579,"data":"[2026-10-11T15:50:26Z +22159s] [w0] DONE repro_hjepa_l3_seed42: tasks=50 successes=37 eval_time_sum=21973s mean_per_task=439.5s wall=22043s\n"}
+,{"stream_name":"stdout","time":22643.567026625,"data":"[2026-10-11T15:58:30Z +22643s] PROGRESS gpu[18 %, 669 MiB | 32 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:30, repro_hjepa_l4_seed42:runn:49, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":22643.576138138,"data":"[2026-10-11T15:58:30Z +22643s]   repro_lewm_seed42: tasks=30 successes=6 eval_time_sum=22448s mean_per_task=748.3s\n"}
+,{"stream_name":"stdout","time":22643.617680573,"data":"[2026-10-11T15:58:30Z +22643s]   repro_hjepa_l4_seed42: tasks=49 successes=34 eval_time_sum=22407s mean_per_task=457.3s\n"}
+,{"stream_name":"stdout","time":22864.203024216,"data":"[2026-10-11T16:02:11Z +22863s] [w2] DONE repro_hjepa_l4_seed42: tasks=50 successes=35 eval_time_sum=22678s mean_per_task=453.6s wall=22738s\n"}
+,{"stream_name":"stdout","time":23543.749409832,"data":"[2026-10-11T16:13:30Z +23543s] PROGRESS gpu[0 %, 0 MiB | 30 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:32, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":23543.759239833,"data":"[2026-10-11T16:13:30Z +23543s]   repro_lewm_seed42: tasks=32 successes=6 eval_time_sum=23283s mean_per_task=727.6s\n"}
+,{"stream_name":"stdout","time":24443.877636373,"data":"[2026-10-11T16:28:30Z +24443s] PROGRESS gpu[0 %, 0 MiB | 30 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:34, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":24443.887709344,"data":"[2026-10-11T16:28:30Z +24443s]   repro_lewm_seed42: tasks=34 successes=7 eval_time_sum=24172s mean_per_task=711.0s\n"}
+,{"stream_name":"stdout","time":25344.008238247,"data":"[2026-10-11T16:43:31Z +25343s] PROGRESS gpu[0 %, 0 MiB | 36 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:36, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":25344.018960087,"data":"[2026-10-11T16:43:31Z +25343s]   repro_lewm_seed42: tasks=36 successes=7 eval_time_sum=25067s mean_per_task=696.3s\n"}
+,{"stream_name":"stdout","time":26244.146418161,"data":"[2026-10-11T16:58:31Z +26243s] PROGRESS gpu[0 %, 0 MiB | 32 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:38, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":26244.153207225,"data":"[2026-10-11T16:58:31Z +26243s]   repro_lewm_seed42: tasks=38 successes=7 eval_time_sum=25928s mean_per_task=682.3s\n"}
+,{"stream_name":"stdout","time":27144.311253758,"data":"[2026-10-11T17:13:31Z +27143s] PROGRESS gpu[0 %, 0 MiB | 0 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:40, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":27144.318415103,"data":"[2026-10-11T17:13:31Z +27143s]   repro_lewm_seed42: tasks=40 successes=7 eval_time_sum=26747s mean_per_task=668.7s\n"}
+,{"stream_name":"stdout","time":28044.446836667,"data":"[2026-10-11T17:28:31Z +28043s] PROGRESS gpu[0 %, 0 MiB | 38 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:42, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":28044.459621084,"data":"[2026-10-11T17:28:31Z +28043s]   repro_lewm_seed42: tasks=42 successes=7 eval_time_sum=27672s mean_per_task=658.9s\n"}
+,{"stream_name":"stdout","time":28944.57770076,"data":"[2026-10-11T17:43:31Z +28944s] PROGRESS gpu[0 %, 0 MiB | 38 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:44, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":28944.585526735,"data":"[2026-10-11T17:43:31Z +28944s]   repro_lewm_seed42: tasks=44 successes=8 eval_time_sum=28518s mean_per_task=648.1s\n"}
+,{"stream_name":"stdout","time":29844.735454117,"data":"[2026-10-11T17:58:31Z +29844s] PROGRESS gpu[0 %, 0 MiB | 0 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:46, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":29844.743577714,"data":"[2026-10-11T17:58:31Z +29844s]   repro_lewm_seed42: tasks=46 successes=8 eval_time_sum=29355s mean_per_task=638.1s\n"}
+,{"stream_name":"stdout","time":30744.874048135,"data":"[2026-10-11T18:13:31Z +30744s] PROGRESS gpu[0 %, 0 MiB | 40 %, 1119 MiB] repro_hjepa_l3_seed42:done:50, repro_lewm_seed42:runn:48, repro_hjepa_l4_seed42:done:50, repro_hwm_l3_seed42:done:50\n"}
+,{"stream_name":"stdout","time":30744.882182416,"data":"[2026-10-11T18:13:31Z +30744s]   repro_lewm_seed42: tasks=48 successes=8 eval_time_sum=30214s mean_per_task=629.5s\n"}
+,{"stream_name":"stdout","time":31324.448659001,"data":"[2026-10-11T18:23:11Z +31323s] [w1] DONE repro_lewm_seed42: tasks=50 successes=8 eval_time_sum=31144s mean_per_task=622.9s wall=31203s\n"}
+,{"stream_name":"stdout","time":31324.957089113,"data":"[2026-10-11T18:23:12Z +31324s] FINAL {\"repro_hjepa_l3_seed42\": [\"done\", 50], \"repro_lewm_seed42\": [\"done\", 50], \"repro_hjepa_l4_seed42\": [\"done\", 50], \"repro_hwm_l3_seed42\": [\"done\", 50]}\n"}
+,{"stream_name":"stdout","time":31325.74997092,"data":"[2026-10-11T18:23:12Z +31325s] ===== DONE =====\n"}
+,{"stream_name":"stderr","time":31328.924699831,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":31328.924740216,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":31329.415607466,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":31329.415640852,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":31331.730654508,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":31333.086674284,"data":"[NbConvertApp] Writing 362409 bytes to __results__.html\n"}
+]
