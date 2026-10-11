@@ -37,6 +37,14 @@ def sweep_job(h, seed, split, n_tasks, level="level3", model="hjepa_l3", config=
                           f"eval.num_eval={n_tasks}"]}
 
 
+def range_job(h, seed, split, a, b, model="hjepa_l3", config="ant_l3", level="level3"):
+    """Tasks a..b-1 of the sweep eval (h, seed), run in its own folder (see kernel_body.py, range jobs)."""
+    j = sweep_job(h, seed, split, b, level=level, model=model, config=config)
+    j.update({"name": f"sweep_{model}_h{h}_s{seed}_r{a}_{b}", "out": f"sweep_ranges/h{h}_s{seed}_r{a}_{b}",
+              "base_out": f"sweep/h{h}_s{seed}", "range": [a, b]})
+    return j
+
+
 if __name__ == "__main__":
     which = sys.argv[1]
     if which == "gen":
@@ -55,3 +63,11 @@ if __name__ == "__main__":
         dsets = [x[3:] for x in sys.argv[3:] if x.startswith("ds:")]  # datasets holding earlier results
         print(build(which, {"ROLE": "jobs", "CKPT_INCLUDE": "ant/ant_hjepa_l3/seed42/*", "JOBS": jobs, "N_WORKERS": 4, "TIER_STEP": [5, 10, 15, 20, 25, 30, 35, 40, 42, 44, 46, 48, 50],
                             "WALL_LIMIT_S": int(limit_h * 3600), "TASK_FILE_NAME": ""}, sources, dsets))
+    elif which == "fill":
+        # fill <name> <limit_h> '<json list of [h, seed, a, b]>' [sources...]: range jobs listed explicitly
+        name, limit_h, spec = sys.argv[2], float(sys.argv[3]), json.loads(sys.argv[4])
+        jobs = [range_job(h, s, "A" if s < 103 else "B", a, b_) for h, s, a, b_ in spec]
+        sources = [x for x in sys.argv[5:] if not x.startswith("ds:")]
+        dsets = [x[3:] for x in sys.argv[5:] if x.startswith("ds:")]
+        print(build(name, {"ROLE": "jobs", "CKPT_INCLUDE": "ant/ant_hjepa_l3/seed42/*", "JOBS": jobs, "N_WORKERS": 4,
+                           "TIER_STEP": 0, "WALL_LIMIT_S": int(limit_h * 3600), "TASK_FILE_NAME": ""}, sources, dsets))

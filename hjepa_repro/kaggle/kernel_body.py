@@ -171,15 +171,47 @@ if ROLE == "jobs":
     def n_chunks(d):
         return len(glob.glob(f"{d}/chunks/tasks_*.json"))
 
+    # Range jobs ("range": [a, b], "base_out": the real job's output folder) let several processes work
+    # on disjoint task ranges of ONE eval: the process gets its own output folder in which the chunk
+    # files of tasks < a already exist (real ones where available, otherwise placeholders that are
+    # never copied out), so eval.py skips them and evaluates tasks a..b-1 with the usual per-task seed.
+    def task_of(path):
+        return int(os.path.basename(path)[len("tasks_"):].split("-")[0])
+
+    def base_res_dir(job):
+        return f"{RES}/ant_{job['model']}/seed{job['ckpt_seed']}/{job.get('base_out', job['out'])}"
+
+    def n_range_done(job):
+        a, b = job["range"]
+        return sum(1 for f in glob.glob(f"{run_dir(job)}/chunks/tasks_*.json") if a <= task_of(f) < b)
+
     # restore results of earlier sessions (kernel output mounted as input)
     for job in JOBS:
-        rel = f"results/ant_{job['model']}/seed{job['ckpt_seed']}/{job['out']}"
+        rel = f"results/ant_{job['model']}/seed{job['ckpt_seed']}/{job.get('base_out', job['out'])}"
         best = max(find_input(f"{rel}/chunks") or [None], key=lambda p: len(os.listdir(p)) if p else -1)
+        os.makedirs(f"{run_dir(job)}/chunks", exist_ok=True)
         if best:
-            os.makedirs(f"{run_dir(job)}/chunks", exist_ok=True)
             for f in glob.glob(f"{best}/*.json"):
+                if "range" in job and not task_of(f) < job["range"][0]:
+                    continue  # a range job only needs the earlier tasks present
                 shutil.copy(f, f"{run_dir(job)}/chunks/")
+            if "range" not in job:  # keep everything restored in this session's output too
+                os.makedirs(f"{base_res_dir(job)}/chunks", exist_ok=True)
+                for f in glob.glob(f"{best}/*.json"):
+                    shutil.copy(f, f"{base_res_dir(job)}/chunks/")
             say(f"[restore] {job['name']}: {n_chunks(run_dir(job))} chunks from {best}")
+        if "range" in job:
+            a0 = job["range"][0]
+            real = sorted(glob.glob(f"{run_dir(job)}/chunks/tasks_*.json"))
+            made = []
+            for t in range(a0):
+                p = f"{run_dir(job)}/chunks/tasks_{t:03d}-{t + 1:03d}.json"
+                if not os.path.exists(p):
+                    assert real, "no real chunk to use as a placeholder"
+                    shutil.copy(real[0], p)
+                    made.append(t)
+            job["placeholders"] = made
+            say(f"[range] {job['name']}: tasks {job['range']}, placeholders for {made}")
     prior_status = {}
     for p in find_input("status.json"):
         try:
@@ -199,17 +231,26 @@ if ROLE == "jobs":
         with LOCK:
             raw = []
             for job in JOBS:
-                src, dst = run_dir(job), res_dir(job)
+                src, dst = run_dir(job), base_res_dir(job)
                 if not os.path.isdir(src):
                     continue
                 os.makedirs(f"{dst}/chunks", exist_ok=True)
                 for f in glob.glob(f"{src}/chunks/tasks_*.json"):
+                    if "range" in job and not (job["range"][0] <= task_of(f) < job["range"][1]):
+                        continue  # never copy out the earlier (possibly placeholder) chunks of a range job
                     if not os.path.exists(f"{dst}/chunks/{os.path.basename(f)}"):
                         shutil.copy(f, f"{dst}/chunks/")
-                for name in ("metrics.yaml", "eval_config.yaml", "planning_compute.json"):
-                    if os.path.exists(f"{src}/{name}"):
-                        shutil.copy(f"{src}/{name}", dst)
-                state[job["name"]]["chunks"] = n_chunks(dst)
+                if "range" not in job:
+                    for name in ("metrics.yaml", "eval_config.yaml", "planning_compute.json"):
+                        if os.path.exists(f"{src}/{name}"):
+                            shutil.copy(f"{src}/{name}", dst)
+                state[job["name"]]["chunks"] = n_range_done(job) if "range" in job else n_chunks(dst)
+            done_dirs = set()
+            for job in JOBS:
+                dst = base_res_dir(job)
+                if dst in done_dirs or not os.path.isdir(dst):
+                    continue
+                done_dirs.add(dst)
                 for f in sorted(glob.glob(f"{dst}/chunks/tasks_*.json")):
                     c = json.load(open(f))
                     start = int(os.path.basename(f)[len("tasks_"):].split("-")[0])
@@ -227,7 +268,8 @@ if ROLE == "jobs":
 
     def summarize(job):
         d = run_dir(job)
-        cs = [json.load(open(f)) for f in sorted(glob.glob(f"{d}/chunks/tasks_*.json"))]
+        cs = [json.load(open(f)) for f in sorted(glob.glob(f"{d}/chunks/tasks_*.json"))
+              if "range" not in job or job["range"][0] <= task_of(f) < job["range"][1]]
         if not cs:
             return "no chunks"
         succ = sum(int(bool(x)) for c in cs for x in c["episode_successes"])
@@ -242,7 +284,7 @@ if ROLE == "jobs":
     # planner seed + task index, and skips chunk files that exist. TIER_STEP = 0: one tier (all tasks).
     def tiers_of(job):
         n = job["n_tasks"]
-        if not TIER_STEP:
+        if not TIER_STEP or "range" in job:
             return [n]
         if isinstance(TIER_STEP, (list, tuple)):  # explicit tier list
             return sorted({t for t in TIER_STEP if t < n} | {n})
@@ -253,6 +295,8 @@ if ROLE == "jobs":
     busy = set()
 
     def item_done(tier, job):
+        if "range" in job:
+            return n_range_done(job) >= job["range"][1] - job["range"][0]
         if n_chunks(run_dir(job)) < tier:
             return False
         return tier < job["n_tasks"] or os.path.exists(f"{run_dir(job)}/metrics.yaml")
