@@ -97,7 +97,7 @@ OFFICIAL = f"{HJ}/assets/eval_trajs/ant/expert_grid_d3_n50.pt"
 
 def find_input(pattern):
     """Files under /kaggle/input matching a glob suffix; kernel-source _output_.zip archives are unpacked first."""
-    for z in glob.glob("/kaggle/input/**/_output_.zip", recursive=True):
+    for z in glob.glob("/kaggle/input/**/*.zip", recursive=True):
         dst = f"{TEMP}/unz_{abs(hash(z))}"
         if not os.path.exists(dst):
             os.makedirs(dst)
@@ -241,7 +241,11 @@ if ROLE == "jobs":
     # planner seed + task index, and skips chunk files that exist. TIER_STEP = 0: one tier (all tasks).
     def tiers_of(job):
         n = job["n_tasks"]
-        return [n] if not TIER_STEP else sorted(set(list(range(TIER_STEP, n, TIER_STEP)) + [n]))
+        if not TIER_STEP:
+            return [n]
+        if isinstance(TIER_STEP, (list, tuple)):  # explicit tier list
+            return sorted({t for t in TIER_STEP if t < n} | {n})
+        return sorted(set(list(range(TIER_STEP, n, TIER_STEP)) + [n]))
 
     all_tiers = sorted({t for j in JOBS for t in tiers_of(j)})
     ITEMS = [(t, j) for t in all_tiers for j in JOBS if t in tiers_of(j)]
