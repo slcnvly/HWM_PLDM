@@ -21,6 +21,7 @@ import threading
 import time
 from datetime import datetime, timezone
 
+CONTROL_URL = "https://raw.githubusercontent.com/slcnvly/HWM_PLDM/hjepa-ant-horizon/hjepa_repro/kaggle/control.json"
 REPO_URL = "https://github.com/kevinghst/H-JEPA"
 REPO_COMMIT = "97054ecaff83e13839195ec4b92d74c08a0127c5"
 TEMP = "/kaggle/temp"
@@ -322,9 +323,26 @@ if ROLE == "jobs":
         th.start()
         time.sleep(5)
     last = time.time()
+    last_ctl = 0.0
+
+    def remote_stop():
+        """Graceful stop requested from outside: this kernel's slug listed in control.json on the branch."""
+        try:
+            import urllib.request
+            with urllib.request.urlopen(f"{CONTROL_URL}?t={int(time.time())}", timeout=15) as r:
+                return SLUG in json.load(r).get("stop", [])
+        except Exception:
+            return False
+
     while any(th.is_alive() for th in threads):
         time.sleep(20)
-        if time.time() >= deadline and not stop.is_set():
+        hit_limit = time.time() >= deadline
+        if not hit_limit and not stop.is_set() and time.time() - last_ctl > 120:
+            last_ctl = time.time()
+            if remote_stop():
+                say("REMOTE STOP requested via control.json")
+                hit_limit = True
+        if hit_limit and not stop.is_set():
             say("WALL LIMIT reached: stopping eval processes")
             stop.set()
             for p in list(procs.values()):
