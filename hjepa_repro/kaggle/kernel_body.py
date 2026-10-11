@@ -234,51 +234,82 @@ if ROLE == "jobs":
         tt = sum(c["evaluation_time"] for c in cs)
         return f"tasks={n} successes={succ} eval_time_sum={tt:.0f}s mean_per_task={tt / n:.1f}s"
 
+    # Work items: (tier, job) in order -- every job is first brought to `tier` finished tasks before
+    # any job goes on to the next tier, so that a time-limited run leaves all jobs with (nearly) the
+    # same number of finished tasks. A tier run is the same eval.py command with eval.num_eval=tier:
+    # eval.py evaluates the first num_eval tasks, one chunk file per task, each task seeded by
+    # planner seed + task index, and skips chunk files that exist. TIER_STEP = 0: one tier (all tasks).
+    def tiers_of(job):
+        n = job["n_tasks"]
+        return [n] if not TIER_STEP else sorted(set(list(range(TIER_STEP, n, TIER_STEP)) + [n]))
+
+    all_tiers = sorted({t for j in JOBS for t in tiers_of(j)})
+    ITEMS = [(t, j) for t in all_tiers for j in JOBS if t in tiers_of(j)]
+    busy = set()
+
+    def item_done(tier, job):
+        if n_chunks(run_dir(job)) < tier:
+            return False
+        return tier < job["n_tasks"] or os.path.exists(f"{run_dir(job)}/metrics.yaml")
+
     def worker(k, n_gpus):
         wenv = dict(env)
         wenv["CUDA_VISIBLE_DEVICES"] = str(k % n_gpus)
         while not stop.is_set():
             with LOCK:
-                job = next((j for j in JOBS if state[j["name"]]["state"] == "pending"), None)
-                if job is None:
+                pick, waiting = None, False
+                for tier, job in ITEMS:
+                    st = state[job["name"]]
+                    if st["state"].startswith("skipped") or item_done(tier, job):
+                        continue
+                    if job["name"] in busy:
+                        waiting = True
+                        continue
+                    pick = (tier, job)
+                    break
+                if pick:
+                    tier, job = pick
+                    st = state[job["name"]]
+                    busy.add(job["name"])
+                    st["state"] = "running"
+                    st["worker"] = k
+            if not pick:
+                if not waiting:
                     return
-                st = state[job["name"]]
-                st["state"] = "running"
-                st["worker"] = k
-            if os.path.exists(f"{run_dir(job)}/metrics.yaml") and n_chunks(run_dir(job)) >= job["n_tasks"]:
-                st["state"] = "done"
+                time.sleep(10)
                 continue
             policy = f"{CK}/ant/ant_{job['model']}/seed{job['ckpt_seed']}/ant_{job['model']}_object.ckpt"
-            cmd = ["python", "-u", "eval.py", "--config-name", job["config"], f"seed={job['seed']}"] + \
-                  [o.replace("@TASKFILE@", str(task_file)) for o in job.get("overrides", [])] + \
+            ovr = [o for o in job.get("overrides", []) if not o.startswith("eval.num_eval=")]
+            if tier != 50 or any(o.startswith("eval.num_eval=") for o in job.get("overrides", [])):
+                ovr.append(f"eval.num_eval={tier}")
+            cmd = ["python", "-u", "eval.py", "--config-name", job["config"], f"seed={job['seed']}"] + ovr + \
                   [f"policy={policy}", f"output.dir={run_dir(job)}"]
             st["cmd"] = " ".join(cmd)
-            while not stop.is_set():
-                st["attempts"] += 1
-                t = time.time()
-                say(f"[w{k} gpu{k % n_gpus}] START {job['name']} (attempt {st['attempts']}, chunks so far {n_chunks(run_dir(job))}): {' '.join(cmd)}")
-                with open(f"{LOGS}/job_{job['name']}.log", "a") as log:
-                    log.write(f"\n===== attempt {st['attempts']} {now()} =====\n")
-                    log.flush()
-                    p = subprocess.Popen(cmd, cwd=HJ, env=wenv, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-                    procs[k] = p
-                    rc = p.wait()
-                st["wall_seconds"] += time.time() - t
-                if stop.is_set():
-                    st["state"] = "interrupted"
-                    break
-                if rc == 0 and os.path.exists(f"{run_dir(job)}/metrics.yaml"):
-                    st["state"] = "done"
-                    say(f"[w{k}] DONE {job['name']}: {summarize(job)} wall={st['wall_seconds']:.0f}s")
-                    break
+            st["attempts"] += 1
+            t = time.time()
+            say(f"[w{k} gpu{k % n_gpus}] START {job['name']} tier={tier} (attempt {st['attempts']}, chunks so far {n_chunks(run_dir(job))}): {' '.join(cmd)}")
+            with open(f"{LOGS}/job_{job['name']}.log", "a") as log:
+                log.write(f"\n===== attempt {st['attempts']} tier {tier} {now()} =====\n")
+                log.flush()
+                p = subprocess.Popen(cmd, cwd=HJ, env=wenv, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                procs[k] = p
+                rc = p.wait()
+            st["wall_seconds"] += time.time() - t
+            if stop.is_set():
+                st["state"] = "interrupted"
+            elif rc == 0 and item_done(tier, job):
+                st["fails"] = 0
+                st["state"] = "done" if tier >= job["n_tasks"] else "pending"
+                say(f"[w{k}] DONE {job['name']} tier={tier}: {summarize(job)} wall={st['wall_seconds']:.0f}s")
+            else:
                 st["fails"] += 1
                 tail = subprocess.run(f"grep -v 'policy call number\\|GradientSolver\\|planning horizon' {LOGS}/job_{job['name']}.log | tail -n 15",
                                       shell=True, capture_output=True, text=True).stdout
-                say(f"[w{k}] FAIL {job['name']} rc={rc} (consecutive fails {st['fails']})\n{tail}")
+                say(f"[w{k}] FAIL {job['name']} tier={tier} rc={rc} (consecutive fails {st['fails']})\n{tail}")
                 st["last_error"] = tail[-1500:]
-                if st["fails"] >= 3:
-                    st["state"] = "skipped_after_3_failures"
-                    break
+                st["state"] = "skipped_after_3_failures" if st["fails"] >= 3 else "pending"
+            with LOCK:
+                busy.discard(job["name"])
             sync()
 
     n_gpus = max(1, len(subprocess.run("nvidia-smi -L", shell=True, capture_output=True, text=True).stdout.strip().splitlines()))

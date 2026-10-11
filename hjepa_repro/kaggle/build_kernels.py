@@ -42,7 +42,7 @@ if __name__ == "__main__":
         print(build("gen", {"ROLE": "gen", "CKPT_INCLUDE": "ant/ant_lewm/seed42/*"}, []))
     elif which == "repro42":
         jobs = [repro_job("hjepa_l3", "l3", 42), repro_job("lewm", "flat", 42), repro_job("hjepa_l4", "l4", 42), repro_job("hwm_l3", "l3", 42)]
-        print(build("repro42", {"ROLE": "jobs", "CKPT_INCLUDE": "ant/*", "JOBS": jobs, "N_WORKERS": 4, "WALL_LIMIT_S": 11 * 3600,
+        print(build("repro42", {"ROLE": "jobs", "CKPT_INCLUDE": "ant/*", "JOBS": jobs, "N_WORKERS": 4, "TIER_STEP": 0, "WALL_LIMIT_S": 11 * 3600,
                                 "TASK_FILE_NAME": ""}, REPRO_SOURCES))
     elif which in ("sweep1", "sweep2"):
         # PREREG.md: session 1 = split A seeds, session 2 = split B seeds; seed outer, horizon inner
@@ -50,5 +50,5 @@ if __name__ == "__main__":
         jobs = [sweep_job(h, s, split, 50) for s in seeds for h in (5, 3, 7)]
         limit_h = float(sys.argv[2])
         sources = sys.argv[3:]  # own slug when re-pushing to resume
-        print(build(which, {"ROLE": "jobs", "CKPT_INCLUDE": "ant/ant_hjepa_l3/seed42/*", "JOBS": jobs, "N_WORKERS": 4,
+        print(build(which, {"ROLE": "jobs", "CKPT_INCLUDE": "ant/ant_hjepa_l3/seed42/*", "JOBS": jobs, "N_WORKERS": 4, "TIER_STEP": 5,
                             "WALL_LIMIT_S": int(limit_h * 3600), "TASK_FILE_NAME": ""}, sources))
