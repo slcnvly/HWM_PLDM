@@ -41,6 +41,17 @@ class HierarchicalD4RLMPCConfig(D4RLMPCConfig):
     l1_plan_size: int = 0
     diag_path: str = ""
     diag_prober_path: str = ""
+    # PARTITION_ORACLE (adaptive_waypoints/PARTITION_ORACLE_PREREG.md); defaults
+    # reproduce the original behavior.
+    # > 0: L2 plan size is computed as if level2.max_plan_length were this value
+    # (plan_size = ceil((override * step_skip - i) / step_skip), floored at
+    # level2.min_plan_length). The episode structure (stage-1 length, final flat
+    # phase) still comes from level2.max_plan_length.
+    l2_plan_length_override: int = 0
+    # stop the MPC loop once every env of the chunk has reached its goal
+    stop_when_all_done: bool = False
+    # > 0: hard cap on executed env steps (stage 1 + stage 2); success must happen within it
+    step_budget: int = 0
 
 
 class MPCReport(NamedTuple):

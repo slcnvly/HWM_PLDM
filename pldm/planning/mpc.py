@@ -266,11 +266,22 @@ class MPCEvaluator(ABC):
         )
 
         # Stage 2: Use flat L1 planning for the final steps near the goal
-        if self.config.final_trans_steps:
+        final_trans_steps = self.config.final_trans_steps
+        # PARTITION_ORACLE flags (both off by default): no stage 2 when every env
+        # already succeeded, and stage 2 never runs past step_budget.
+        steps_done_1 = len(mpc_result_1.reward_history)
+        if final_trans_steps and getattr(self.config, "stop_when_all_done", False):
+            if torch.stack(mpc_result_1.reward_history).bool().any(dim=0).all():
+                final_trans_steps = 0
+        step_budget = int(getattr(self.config, "step_budget", 0))
+        if final_trans_steps and step_budget > 0:
+            final_trans_steps = max(0, min(final_trans_steps, step_budget - steps_done_1))
+
+        if final_trans_steps:
             mpc_result_2 = self._perform_mpc(
                 planner=planner,
                 envs=envs,
-                max_steps_override=self.config.final_trans_steps,
+                max_steps_override=final_trans_steps,
             )
             # combine results
             mpc_result = MPCResult(
@@ -488,10 +499,24 @@ class MPCEvaluator(ABC):
             final_trans_steps = getattr(self.config, "final_trans_steps", 0)
             n_steps_stage1 = self.config.n_steps - final_trans_steps
             max_steps = min(n_steps_stage1, max_plan_horizon_l2)
+            # PARTITION_ORACLE: horizon used for the L2 plan size only
+            l2_override = int(getattr(self.config, "l2_plan_length_override", 0))
+            plan_size_horizon_l2 = (
+                l2_override * step_skip if l2_override > 0 else max_plan_horizon_l2
+            )
         else:
             max_steps = self.config.n_steps
 
+        # PARTITION_ORACLE flags (off by default, see d4rl/enums.py)
+        stop_when_all_done = bool(getattr(self.config, "stop_when_all_done", False))
+        step_budget = int(getattr(self.config, "step_budget", 0))
+        if step_budget > 0:
+            max_steps = min(max_steps, step_budget)
+        env_done = torch.zeros(len(envs), dtype=torch.bool)
+
         for i in tqdm(range(max_steps), desc="Planning steps"):
+            if stop_when_all_done and i > 0 and bool(env_done.all()):
+                break
             if i % self.config.replan_every == 0:
                 if self.model.level1.using_proprio_pos:
                     curr_proprio_pos = [
@@ -520,7 +545,7 @@ class MPCEvaluator(ABC):
                     curr_locations = None
 
                 if bilevel_planning:
-                    plan_size = (max_plan_horizon_l2 - i + step_skip - 1) // step_skip
+                    plan_size = (plan_size_horizon_l2 - i + step_skip - 1) // step_skip
                     plan_size = max(plan_size, self.config.level2.min_plan_length)
                 else:
                     plan_size = min(
@@ -637,6 +662,7 @@ class MPCEvaluator(ABC):
             action_history.append(planned_actions.detach().cpu())
             observation_history.append(current_obs)
             reward_history.append(rewards_t)
+            env_done |= rewards_t.bool()
 
             if "location" in infos[0]:
                 location_history.append(np.array([info["location"] for info in infos]))
