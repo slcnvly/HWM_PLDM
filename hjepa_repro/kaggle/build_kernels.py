@@ -32,7 +32,8 @@ def repro_job(model, planner, seed):
 def sweep_job(h, seed, split, n_tasks, level="level3", model="hjepa_l3", config="ant_l3"):
     return {"name": f"sweep_{model}_h{h}_s{seed}", "model": model, "ckpt_seed": 42, "seed": seed, "config": config,
             "out": f"sweep/h{h}_s{seed}", "n_tasks": n_tasks, "horizon": h, "split": split,
-            "overrides": [f"hierarchical_plan_config.{level}.horizon={h}", "load_eval_trajs_path=@TASKFILE@", f"eval.num_eval={n_tasks}"]}
+            "overrides": [f"hierarchical_plan_config.{level}.horizon={h}", "load_eval_trajs_path=assets/eval_trajs/ant/expert_grid_d3_n50.pt",
+                          f"eval.num_eval={n_tasks}"]}
 
 
 if __name__ == "__main__":
@@ -43,3 +44,11 @@ if __name__ == "__main__":
         jobs = [repro_job("hjepa_l3", "l3", 42), repro_job("lewm", "flat", 42), repro_job("hjepa_l4", "l4", 42), repro_job("hwm_l3", "l3", 42)]
         print(build("repro42", {"ROLE": "jobs", "CKPT_INCLUDE": "ant/*", "JOBS": jobs, "N_WORKERS": 4, "WALL_LIMIT_S": 11 * 3600,
                                 "TASK_FILE_NAME": ""}, REPRO_SOURCES))
+    elif which in ("sweep1", "sweep2"):
+        # PREREG.md: session 1 = split A seeds, session 2 = split B seeds; seed outer, horizon inner
+        seeds, split = ((100, 101, 102), "A") if which == "sweep1" else ((103, 104, 105), "B")
+        jobs = [sweep_job(h, s, split, 50) for s in seeds for h in (5, 3, 7)]
+        limit_h = float(sys.argv[2])
+        sources = sys.argv[3:]  # own slug when re-pushing to resume
+        print(build(which, {"ROLE": "jobs", "CKPT_INCLUDE": "ant/ant_hjepa_l3/seed42/*", "JOBS": jobs, "N_WORKERS": 4,
+                            "WALL_LIMIT_S": int(limit_h * 3600), "TASK_FILE_NAME": ""}, sources))
