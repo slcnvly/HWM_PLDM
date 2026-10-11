@@ -1,0 +1,11 @@
+{
+ "horizons_priority": [5, 3, 7],
+ "seeds_A": [100, 101, 102],
+ "seeds_B": [103, 104, 105],
+ "n_tasks": 50,
+ "min_seeds_per_half": 3,
+ "task_file": "assets/eval_trajs/ant/expert_grid_d3_n50.pt",
+ "checkpoint": "ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt",
+ "config": "ant_l3",
+ "null_reps": 1000, "null_seed": 20261011, "boot_reps": 2000, "boot_seed": 20261012
+}
