@@ -185,4 +185,4 @@ horizon 외의 planner 설정은 바꾸지 않았다. PREREG.md와 prereg.json�
 | 설치 기록, 커널 로그 | [install_record/](install_record/) |
 
 - sweep 평가 폴더의 `metrics.yaml`은 마지막으로 실행한 `eval.num_eval` 기준의 집계다. 분석에는 쓰지 않았고 `chunks/`만 썼다.
-- `results/ant_hjepa_l3/seed42/sweep/h7_s102`에는 `metrics.yaml`이 없다 (구간 실행).
+- `results/ant_hjepa_l3/seed42/sweep/h7_s102`의 `metrics.yaml`은 앞쪽 일부 과제만의 집계다 (뒤 과제는 구간 실행).
