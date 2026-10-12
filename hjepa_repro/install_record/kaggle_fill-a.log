@@ -1,0 +1,142 @@
+[{"stream_name":"stdout","time":0.756090289,"data":"[2026-10-12T04:03:52Z +0s] $ (nvidia_smi) nvidia-smi; nproc; free -g | head -2; df -h /kaggle/working /kaggle/temp | cat\n"}
+,{"stream_name":"stdout","time":0.794557219,"data":"Mon Oct 12 04:03:52 2026       \n"}
+,{"stream_name":"stdout","time":0.794584157,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":0.79459416,"data":"| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n"}
+,{"stream_name":"stdout","time":0.794598629,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":0.794602831,"data":"| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n"}
+,{"stream_name":"stdout","time":0.794606879,"data":"| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n"}
+,{"stream_name":"stdout","time":0.794611251,"data":"|                                         |                        |               MIG M. |\n"}
+,{"stream_name":"stdout","time":0.794619033,"data":"|=========================================+========================+======================|\n"}
+,{"stream_name":"stdout","time":0.847677717,"data":"|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":0.847698891,"data":"| N/A   53C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":0.847704007,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":0.847709023,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":0.847713048,"data":"|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":0.84771676,"data":"| N/A   53C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":0.847720825,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":0.847724519,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":0.848418068,"data":"\n"}
+,{"stream_name":"stdout","time":0.848431976,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":0.848436292,"data":"| Processes:                                                                              |\n"}
+,{"stream_name":"stdout","time":0.848439928,"data":"|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n"}
+,{"stream_name":"stdout","time":0.848444115,"data":"|        ID   ID                                                               Usage      |\n"}
+,{"stream_name":"stdout","time":0.848448247,"data":"|=========================================================================================|\n"}
+,{"stream_name":"stdout","time":0.849835401,"data":"|  No running processes found                                                             |\n"}
+,{"stream_name":"stdout","time":0.849847927,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":1.182115362,"data":"4\n"}
+,{"stream_name":"stdout","time":1.204302376,"data":"               total        used        free      shared  buff/cache   available\n"}
+,{"stream_name":"stdout","time":1.204336202,"data":"Mem:              31           1          25           0           4          30\n"}
+,{"stream_name":"stdout","time":1.209333328,"data":"Filesystem      Size  Used Avail Use% Mounted on\n"}
+,{"stream_name":"stdout","time":1.209352583,"data":"/dev/loop2       20G  172K   20G   1% /kaggle/working\n"}
+,{"stream_name":"stdout","time":1.20935746,"data":"overlay         8.0T  7.0T  1.1T  87% /\n"}
+,{"stream_name":"stdout","time":1.209601612,"data":"[2026-10-12T04:03:53Z +0s] (nvidia_smi) rc=0 0.5s\n"}
+,{"stream_name":"stdout","time":1.210845853,"data":"[2026-10-12T04:03:53Z +0s] $ (clone) rm -rf /kaggle/temp/H-JEPA \u0026\u0026 git clone -q https://github.com/kevinghst/H-JEPA /kaggle/temp/H-JEPA \u0026\u0026 cd /kaggle/temp/H-JEPA \u0026\u0026 git checkout -q 97054ecaff83e13839195ec4b92d74c08a0127c5 \u0026\u0026 git log -1 --format='%H %ci'\n"}
+,{"stream_name":"stdout","time":2.5177111500000002,"data":"97054ecaff83e13839195ec4b92d74c08a0127c5 2026-10-09 23:58:11 -0400\n"}
+,{"stream_name":"stdout","time":2.518186057,"data":"[2026-10-12T04:03:54Z +2s] (clone) rc=0 1.3s\n"}
+,{"stream_name":"stdout","time":2.518201091,"data":"[2026-10-12T04:03:54Z +2s] $ (venv) uv venv --python 3.11.13 /kaggle/temp/venv311\n"}
+,{"stream_name":"stdout","time":2.6936917879999998,"data":"warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?\n"}
+,{"stream_name":"stdout","time":3.144721283,"data":"Downloading cpython-3.11.13-linux-x86_64-gnu (download) (28.8MiB)\n"}
+,{"stream_name":"stdout","time":4.3553509009999996,"data":" Downloaded cpython-3.11.13-linux-x86_64-gnu (download)\n"}
+,{"stream_name":"stdout","time":4.551671129,"data":"Using CPython 3.11.13\n"}
+,{"stream_name":"stdout","time":4.551693062,"data":"Creating virtual environment at: /kaggle/temp/venv311\n"}
+,{"stream_name":"stdout","time":4.553818163,"data":"Activate with: source /kaggle/temp/venv311/bin/activate\n"}
+,{"stream_name":"stdout","time":4.559525498,"data":"[2026-10-12T04:03:56Z +4s] (venv) rc=0 2.0s\n"}
+,{"stream_name":"stdout","time":4.559543672,"data":"[2026-10-12T04:03:56Z +4s] $ (install) cd /kaggle/temp/H-JEPA \u0026\u0026 uv pip install --python /kaggle/temp/venv311/bin/python -e '.[train,env]' --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match 2\u003e\u00261 | tail -n 30\n"}
+,{"stream_name":"stdout","time":64.388484617,"data":" + submitit==1.5.4\n"}
+,{"stream_name":"stdout","time":64.388522355,"data":" + sympy==1.14.0\n"}
+,{"stream_name":"stdout","time":64.388532519,"data":" + tabulate==0.10.0\n"}
+,{"stream_name":"stdout","time":64.38853601,"data":" + tensorstore==0.1.85\n"}
+,{"stream_name":"stdout","time":64.388557501,"data":" + threadpoolctl==3.7.0\n"}
+,{"stream_name":"stdout","time":64.388564226,"data":" + timm==1.0.30\n"}
+,{"stream_name":"stdout","time":64.388570037,"data":" + tokenizers==0.23.3\n"}
+,{"stream_name":"stdout","time":64.388575678,"data":" + torch==2.7.1+cu128\n"}
+,{"stream_name":"stdout","time":64.388580897,"data":" + torchaudio==2.7.1+cu128\n"}
+,{"stream_name":"stdout","time":64.388585631,"data":" + torchmetrics==1.9.0\n"}
+,{"stream_name":"stdout","time":64.388590307,"data":" + torchvision==0.22.1+cu128\n"}
+,{"stream_name":"stdout","time":64.388594958,"data":" + tqdm==4.70.1\n"}
+,{"stream_name":"stdout","time":64.38859959,"data":" + transformers==5.19.0\n"}
+,{"stream_name":"stdout","time":64.388604488,"data":" + treescope==0.1.10\n"}
+,{"stream_name":"stdout","time":64.388615982,"data":" + triton==3.3.1\n"}
+,{"stream_name":"stdout","time":64.388639014,"data":" + truststore==0.10.4\n"}
+,{"stream_name":"stdout","time":64.388642509,"data":" + typer==0.27.3\n"}
+,{"stream_name":"stdout","time":64.388660162,"data":" + typing-extensions==4.16.0\n"}
+,{"stream_name":"stdout","time":64.388664895,"data":" + typing-inspection==0.4.4\n"}
+,{"stream_name":"stdout","time":64.388669103,"data":" + url-normalize==3.0.1\n"}
+,{"stream_name":"stdout","time":64.388673527,"data":" + urllib3==2.8.0\n"}
+,{"stream_name":"stdout","time":64.388677924,"data":" + uvloop==0.23.0\n"}
+,{"stream_name":"stdout","time":64.388681801,"data":" + wandb==0.30.0\n"}
+,{"stream_name":"stdout","time":64.388685361,"data":" + wcwidth==0.9.2\n"}
+,{"stream_name":"stdout","time":64.388689018,"data":" + websockets==17.2\n"}
+,{"stream_name":"stdout","time":64.388692659,"data":" + wrapt==2.5.0\n"}
+,{"stream_name":"stdout","time":64.388696282,"data":" + xxhash==4.0.1\n"}
+,{"stream_name":"stdout","time":64.388699887,"data":" + yarl==1.25.1\n"}
+,{"stream_name":"stdout","time":64.388719779,"data":" + zipp==4.1.1\n"}
+,{"stream_name":"stdout","time":64.388723001,"data":" + zstandard==0.25.0\n"}
+,{"stream_name":"stdout","time":64.389049208,"data":"[2026-10-12T04:04:56Z +64s] (install) rc=0 59.8s\n"}
+,{"stream_name":"stdout","time":64.389124589,"data":"[2026-10-12T04:04:56Z +64s] $ (versions) python -V \u0026\u0026 python -c \"import torch, mujoco; print('torch', torch.__version__, 'cuda', torch.version.cuda, 'available', torch.cuda.is_available(), 'n_gpu', torch.cuda.device_count(), [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())], 'mujoco', mujoco.__version__)\"\n"}
+,{"stream_name":"stdout","time":64.394883047,"data":"Python 3.11.13\n"}
+,{"stream_name":"stdout","time":71.668484105,"data":"torch 2.7.1+cu128 cuda 12.8 available True n_gpu 2 ['Tesla T4', 'Tesla T4'] mujoco 3.14.0\n"}
+,{"stream_name":"stdout","time":72.203609543,"data":"[2026-10-12T04:05:04Z +71s] (versions) rc=0 7.8s\n"}
+,{"stream_name":"stdout","time":72.203736297,"data":"[2026-10-12T04:05:04Z +71s] $ (dl_tasks) hf download jepa-world-models/h-jepa --repo-type dataset --local-dir assets --include 'eval_trajs/*' 2\u003e\u00261 | tail -n 3 \u0026\u0026 (cd assets/eval_trajs \u0026\u0026 sha256sum -c SHA256SUMS)\n"}
+,{"stream_name":"stdout","time":76.801186834,"data":"\n"}
+,{"stream_name":"stdout","time":76.801220667,"data":"Fetching 5 files:  20%|██        | 1/5 [00:00\u003c00:00,  7.04it/s]\n"}
+,{"stream_name":"stdout","time":76.801227756,"data":"Fetching 5 files:  40%|████      | 2/5 [00:03\u003c00:05,  1.79s/it]\n"}
+,{"stream_name":"stdout","time":76.801232698,"data":"Fetching 5 files: 100%|██████████| 5/5 [00:03\u003c00:00,  1.80it/s]\n"}
+,{"stream_name":"stdout","time":76.801237368,"data":"Fetching 5 files: 100%|██████████| 5/5 [00:03\u003c00:00,  1.52it/s]\n"}
+,{"stream_name":"stdout","time":76.801241942,"data":"\u001b[32m✓ Downloaded\u001b[0m\n"}
+,{"stream_name":"stdout","time":76.801249316,"data":"  path: /kaggle/temp/H-JEPA/h_jepa/assets\n"}
+,{"stream_name":"stdout","time":77.503820067,"data":"ant/expert_grid_d3_n50.pt: OK\n"}
+,{"stream_name":"stdout","time":79.162014567,"data":"fourroom/fourroom_tp35_cross2_goal75_n50_d1.pt: OK\n"}
+,{"stream_name":"stdout","time":79.587722544,"data":"ogbench/goal_offset_20_pickup_val.pt: OK\n"}
+,{"stream_name":"stdout","time":84.98794367,"data":"pusht/goal_offset_75_val.pt: OK\n"}
+,{"stream_name":"stdout","time":85.075029986,"data":"[2026-10-12T04:05:16Z +84s] (dl_tasks) rc=0 12.8s\n"}
+,{"stream_name":"stdout","time":85.07504951,"data":"[2026-10-12T04:05:16Z +84s] $ (dl_ckpt) hf download jepa-world-models/h-jepa --local-dir /kaggle/temp/hjepa_data/ckpts --include 'ant/ant_hjepa_l3/seed42/*' 2\u003e\u00261 | tail -n 3 \u0026\u0026 find /kaggle/temp/hjepa_data/ckpts -name '*.ckpt' -o -name 'normalizer.pt' | sort | xargs ls -la\n"}
+,{"stream_name":"stdout","time":87.487546941,"data":"\n"}
+,{"stream_name":"stdout","time":87.487578991,"data":"Fetching 2 files:   0%|          | 0/2 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":87.487583595,"data":"Fetching 2 files:  50%|█████     | 1/2 [00:00\u003c00:00,  1.01it/s]\n"}
+,{"stream_name":"stdout","time":87.487587996,"data":"Fetching 2 files: 100%|██████████| 2/2 [00:01\u003c00:00,  1.14it/s]\n"}
+,{"stream_name":"stdout","time":87.48759198,"data":"Fetching 2 files: 100%|██████████| 2/2 [00:01\u003c00:00,  1.12it/s]\n"}
+,{"stream_name":"stdout","time":87.487595486,"data":"\u001b[32m✓ Downloaded\u001b[0m\n"}
+,{"stream_name":"stdout","time":87.487599607,"data":"  path: /kaggle/temp/hjepa_data/ckpts\n"}
+,{"stream_name":"stdout","time":87.504884467,"data":"-rw-r--r-- 1 root root 139538683 Oct 12 04:05 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt\n"}
+,{"stream_name":"stdout","time":87.50490872,"data":"-rw-r--r-- 1 root root      3071 Oct 12 04:05 /kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/normalizer.pt\n"}
+,{"stream_name":"stdout","time":87.505632984,"data":"[2026-10-12T04:05:19Z +87s] (dl_ckpt) rc=0 2.5s\n"}
+,{"stream_name":"stdout","time":87.925688409,"data":"[2026-10-12T04:05:19Z +87s] [restore] sweep_hjepa_l3_h7_s102_r13_20: 13 chunks from /kaggle/input/notebooks/seungwonryoo/hjepa-ant-sweep1b/out/results/ant_hjepa_l3/seed42/sweep/h7_s102/chunks\n"}
+,{"stream_name":"stdout","time":87.925930048,"data":"[2026-10-12T04:05:19Z +87s] [range] sweep_hjepa_l3_h7_s102_r13_20: tasks [13, 20], placeholders for []\n"}
+,{"stream_name":"stdout","time":87.998591529,"data":"[2026-10-12T04:05:19Z +87s] [restore] sweep_hjepa_l3_h7_s102_r20_27: 13 chunks from /kaggle/input/notebooks/seungwonryoo/hjepa-ant-sweep1b/out/results/ant_hjepa_l3/seed42/sweep/h7_s102/chunks\n"}
+,{"stream_name":"stdout","time":88.000459909,"data":"[2026-10-12T04:05:19Z +87s] [range] sweep_hjepa_l3_h7_s102_r20_27: tasks [20, 27], placeholders for [13, 14, 15, 16, 17, 18, 19]\n"}
+,{"stream_name":"stdout","time":88.06886912,"data":"[2026-10-12T04:05:19Z +87s] [restore] sweep_hjepa_l3_h7_s102_r27_34: 13 chunks from /kaggle/input/notebooks/seungwonryoo/hjepa-ant-sweep1b/out/results/ant_hjepa_l3/seed42/sweep/h7_s102/chunks\n"}
+,{"stream_name":"stdout","time":88.0711806,"data":"[2026-10-12T04:05:19Z +87s] [range] sweep_hjepa_l3_h7_s102_r27_34: tasks [27, 34], placeholders for [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]\n"}
+,{"stream_name":"stdout","time":88.135168956,"data":"[2026-10-12T04:05:19Z +87s] [restore] sweep_hjepa_l3_h7_s102_r34_40: 13 chunks from /kaggle/input/notebooks/seungwonryoo/hjepa-ant-sweep1b/out/results/ant_hjepa_l3/seed42/sweep/h7_s102/chunks\n"}
+,{"stream_name":"stdout","time":88.138468885,"data":"[2026-10-12T04:05:19Z +87s] [range] sweep_hjepa_l3_h7_s102_r34_40: tasks [34, 40], placeholders for [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]\n"}
+,{"stream_name":"stdout","time":88.247729149,"data":"[2026-10-12T04:05:20Z +87s] [w0 gpu0] START sweep_hjepa_l3_h7_s102_r13_20 tier=20 (attempt 1, chunks so far 13): python -u eval.py --config-name ant_l3 seed=102 hierarchical_plan_config.level3.horizon=7 load_eval_trajs_path=assets/eval_trajs/ant/expert_grid_d3_n50.pt eval.num_eval=20 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/sweep_ranges/h7_s102_r13_20\n"}
+,{"stream_name":"stdout","time":93.248362843,"data":"[2026-10-12T04:05:25Z +92s] [w1 gpu1] START sweep_hjepa_l3_h7_s102_r20_27 tier=27 (attempt 1, chunks so far 20): python -u eval.py --config-name ant_l3 seed=102 hierarchical_plan_config.level3.horizon=7 load_eval_trajs_path=assets/eval_trajs/ant/expert_grid_d3_n50.pt eval.num_eval=27 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/sweep_ranges/h7_s102_r20_27\n"}
+,{"stream_name":"stdout","time":98.249235884,"data":"[2026-10-12T04:05:30Z +97s] [w2 gpu0] START sweep_hjepa_l3_h7_s102_r27_34 tier=34 (attempt 1, chunks so far 27): python -u eval.py --config-name ant_l3 seed=102 hierarchical_plan_config.level3.horizon=7 load_eval_trajs_path=assets/eval_trajs/ant/expert_grid_d3_n50.pt eval.num_eval=34 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/sweep_ranges/h7_s102_r27_34\n"}
+,{"stream_name":"stdout","time":103.250558036,"data":"[2026-10-12T04:05:35Z +102s] [w3 gpu1] START sweep_hjepa_l3_h7_s102_r34_40 tier=40 (attempt 1, chunks so far 34): python -u eval.py --config-name ant_l3 seed=102 hierarchical_plan_config.level3.horizon=7 load_eval_trajs_path=assets/eval_trajs/ant/expert_grid_d3_n50.pt eval.num_eval=40 policy=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/ant_hjepa_l3_object.ckpt output.dir=/kaggle/temp/hjepa_data/ckpts/ant/ant_hjepa_l3/seed42/sweep_ranges/h7_s102_r34_40\n"}
+,{"stream_name":"stdout","time":1009.493701294,"data":"[2026-10-12T04:20:41Z +1009s] PROGRESS gpu[93 %, 2583 MiB | 100 %, 2583 MiB] sweep_hjepa_l3_h7_s102_r13_20:runn:15, sweep_hjepa_l3_h7_s102_r20_27:runn:22, sweep_hjepa_l3_h7_s102_r27_34:runn:29, sweep_hjepa_l3_h7_s102_r34_40:runn:36\n"}
+,{"stream_name":"stdout","time":1009.495204871,"data":"[2026-10-12T04:20:41Z +1009s]   sweep_hjepa_l3_h7_s102_r13_20: tasks=2 successes=2 eval_time_sum=842s mean_per_task=420.8s\n"}
+,{"stream_name":"stdout","time":1009.499348572,"data":"[2026-10-12T04:20:41Z +1009s]   sweep_hjepa_l3_h7_s102_r20_27: tasks=2 successes=1 eval_time_sum=878s mean_per_task=439.2s\n"}
+,{"stream_name":"stdout","time":1009.500589837,"data":"[2026-10-12T04:20:41Z +1009s]   sweep_hjepa_l3_h7_s102_r27_34: tasks=2 successes=2 eval_time_sum=825s mean_per_task=412.6s\n"}
+,{"stream_name":"stdout","time":1009.504938666,"data":"[2026-10-12T04:20:41Z +1009s]   sweep_hjepa_l3_h7_s102_r34_40: tasks=2 successes=1 eval_time_sum=853s mean_per_task=426.5s\n"}
+,{"stream_name":"stdout","time":1910.194670329,"data":"[2026-10-12T04:35:42Z +1909s] PROGRESS gpu[0 %, 2583 MiB | 72 %, 2583 MiB] sweep_hjepa_l3_h7_s102_r13_20:runn:17, sweep_hjepa_l3_h7_s102_r20_27:runn:24, sweep_hjepa_l3_h7_s102_r27_34:runn:31, sweep_hjepa_l3_h7_s102_r34_40:runn:38\n"}
+,{"stream_name":"stdout","time":1910.197492073,"data":"[2026-10-12T04:35:42Z +1909s]   sweep_hjepa_l3_h7_s102_r13_20: tasks=4 successes=4 eval_time_sum=1673s mean_per_task=418.3s\n"}
+,{"stream_name":"stdout","time":1910.199919265,"data":"[2026-10-12T04:35:42Z +1909s]   sweep_hjepa_l3_h7_s102_r20_27: tasks=4 successes=1 eval_time_sum=1732s mean_per_task=433.0s\n"}
+,{"stream_name":"stdout","time":1910.202549669,"data":"[2026-10-12T04:35:42Z +1909s]   sweep_hjepa_l3_h7_s102_r27_34: tasks=4 successes=4 eval_time_sum=1652s mean_per_task=412.9s\n"}
+,{"stream_name":"stdout","time":1910.204932947,"data":"[2026-10-12T04:35:42Z +1909s]   sweep_hjepa_l3_h7_s102_r34_40: tasks=4 successes=3 eval_time_sum=1663s mean_per_task=415.7s\n"}
+,{"stream_name":"stdout","time":2699.256289071,"data":"[2026-10-12T04:48:51Z +2699s] [w3] DONE sweep_hjepa_l3_h7_s102_r34_40 tier=40: tasks=6 successes=4 eval_time_sum=2572s mean_per_task=428.7s wall=2596s\n"}
+,{"stream_name":"stdout","time":2811.013367174,"data":"[2026-10-12T04:50:42Z +2810s] PROGRESS gpu[91 %, 2583 MiB | 86 %, 1293 MiB] sweep_hjepa_l3_h7_s102_r13_20:runn:19, sweep_hjepa_l3_h7_s102_r20_27:runn:26, sweep_hjepa_l3_h7_s102_r27_34:runn:33, sweep_hjepa_l3_h7_s102_r34_40:done:40\n"}
+,{"stream_name":"stdout","time":2811.016312994,"data":"[2026-10-12T04:50:42Z +2810s]   sweep_hjepa_l3_h7_s102_r13_20: tasks=6 successes=5 eval_time_sum=2489s mean_per_task=414.8s\n"}
+,{"stream_name":"stdout","time":2811.018188091,"data":"[2026-10-12T04:50:42Z +2810s]   sweep_hjepa_l3_h7_s102_r20_27: tasks=6 successes=1 eval_time_sum=2548s mean_per_task=424.7s\n"}
+,{"stream_name":"stdout","time":2811.020203808,"data":"[2026-10-12T04:50:42Z +2810s]   sweep_hjepa_l3_h7_s102_r27_34: tasks=6 successes=6 eval_time_sum=2471s mean_per_task=411.8s\n"}
+,{"stream_name":"stdout","time":2956.90033942,"data":"[2026-10-12T04:53:08Z +2956s] [w2] DONE sweep_hjepa_l3_h7_s102_r27_34 tier=34: tasks=7 successes=7 eval_time_sum=2839s mean_per_task=405.5s wall=2859s\n"}
+,{"stream_name":"stdout","time":2958.296218307,"data":"[2026-10-12T04:53:10Z +2958s] [w0] DONE sweep_hjepa_l3_h7_s102_r13_20 tier=20: tasks=7 successes=6 eval_time_sum=2840s mean_per_task=405.8s wall=2870s\n"}
+,{"stream_name":"stdout","time":2987.089288962,"data":"[2026-10-12T04:53:38Z +2986s] [w1] DONE sweep_hjepa_l3_h7_s102_r20_27 tier=27: tasks=7 successes=2 eval_time_sum=2870s mean_per_task=409.9s wall=2894s\n"}
+,{"stream_name":"stdout","time":2991.075667163,"data":"[2026-10-12T04:53:42Z +2990s] FINAL {\"sweep_hjepa_l3_h7_s102_r13_20\": [\"done\", 7], \"sweep_hjepa_l3_h7_s102_r20_27\": [\"done\", 7], \"sweep_hjepa_l3_h7_s102_r27_34\": [\"done\", 7], \"sweep_hjepa_l3_h7_s102_r34_40\": [\"done\", 6]}\n"}
+,{"stream_name":"stdout","time":2991.746480999,"data":"[2026-10-12T04:53:43Z +2991s] ===== DONE =====\n"}
+,{"stream_name":"stderr","time":2994.206064612,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":2994.206093901,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":2994.585954856,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":2994.585978114,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":2996.504418941,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":2997.637052887,"data":"[NbConvertApp] Writing 390972 bytes to __results__.html\n"}
+]
