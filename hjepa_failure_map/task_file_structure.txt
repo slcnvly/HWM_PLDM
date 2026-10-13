@@ -1,0 +1,33 @@
+top-level keys: ['format', 'data', 'columns', 'episodes_idx', 'start_steps', 'goal_steps', 'segment_lengths', 'goal_offset_steps', 'eval_budget', 'process', 'task_info']
+len(data) = 50
+columns = ['goal', 'env_name', 'xy', 'qpos', 'qvel', 'proprio', 'prev_qpos', 'prev_qvel', 'success', 'init_ij', 'init_xy', 'goal_ij', 'goal_xy', 'direction', 'render_time', 'pixels', 'observation', 'reward', 'terminated', 'truncated', 'action', 'step_idx', 'id', 'goal_qpos', 'goal_qvel', 'goal_proprio']
+episode 0 fields (key, type, shape, dtype):
+  goal: Tensor (68, 3, 64, 64) torch.uint8
+  env_name: ndarray (1,) <U7
+  xy: Tensor (68, 2) torch.float64
+  qpos: Tensor (68, 15) torch.float64
+  qvel: Tensor (68, 14) torch.float64
+  proprio: Tensor (68, 27) torch.float32
+  prev_qpos: Tensor (68, 15) torch.float64
+  prev_qvel: Tensor (68, 14) torch.float64
+  success: Tensor (68,) torch.float64
+  init_ij: Tensor (68, 2) torch.int32
+  init_xy: Tensor (68, 2) torch.float32
+  goal_ij: Tensor (68, 2) torch.int32
+  goal_xy: Tensor (68, 2) torch.float32
+  direction: Tensor (67, 2) torch.float32
+  render_time: Tensor (68,) torch.float64
+  pixels: Tensor (68, 3, 64, 64) torch.uint8
+  observation: Tensor (68, 64, 64, 3) torch.uint8
+  reward: Tensor (68,) torch.float64
+  terminated: Tensor (68,) torch.bool
+  truncated: Tensor (68,) torch.bool
+  action: Tensor (67, 8) torch.float32
+  step_idx: Tensor (68,) torch.int64
+  id: Tensor (68,) torch.int64
+  goal_qpos: Tensor (68, 15) torch.float64
+  goal_qvel: Tensor (68, 14) torch.float64
+  goal_proprio: Tensor (68, 27) torch.float32
+task_info keys: ['maze_type', 'd_low', 'd_high', 'num_episodes', 'goal_cell_set', 'seed', 'dataset_name_for_process', 'policy_dataset_type', 'policy_noise', 'min_steps', 'max_steps', 'rollout_budget', 'attempts', 'tasks']
+task_info['tasks'][0] = {'episode_idx': 0, 'grid_distance': 3, 'start_ij': [1, 5], 'goal_ij': [3, 4], 'requested_start_xy': [15.87775707244873, 0.7171958684921265], 'requested_goal_xy': [12.394736289978027, 7.1883544921875], 'settled_start_xy': [15.79342037416079, 0.8019376273991274], 'settled_goal_xy': [12.463004487710561, 7.118500055957257], 'final_xy': [11.667190551757812, 6.724008560180664], 'final_goal_l2': 0.8882245421409607, 'segment_len': 68}
+task_info (scalars): {'maze_type': 'medium', 'd_low': 3, 'd_high': 3, 'num_episodes': 50, 'goal_cell_set': 'all', 'seed': 42, 'dataset_name_for_process': 'visual_antmaze_medium_stitch_val', 'policy_dataset_type': 'stitch', 'policy_noise': None, 'min_steps': None, 'max_steps': None, 'rollout_budget': 125, 'attempts': 53}

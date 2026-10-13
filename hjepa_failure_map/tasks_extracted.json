@@ -1,0 +1,1340 @@
+{
+ "maze_map": [
+  [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  [
+   1,
+   0,
+   0,
+   1,
+   1,
+   0,
+   0,
+   1
+  ],
+  [
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  [
+   1,
+   1,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1
+  ],
+  [
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  [
+   1,
+   0,
+   1,
+   0,
+   0,
+   1,
+   0,
+   1
+  ],
+  [
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1
+  ],
+  [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ]
+ ],
+ "maze_unit": 4.0,
+ "offset_x": 4.0,
+ "offset_y": 4.0,
+ "maze_map_source": "ogbench 1.2.1, ogbench/locomaze/maze.py lines 101-111 (read from env.unwrapped.maze_map)",
+ "tasks": [
+  {
+   "task": 0,
+   "start_xy": [
+    15.79342037416079,
+    0.8019376273991274
+   ],
+   "goal_xy": [
+    12.463004112243652,
+    7.118500232696533
+   ],
+   "file_start_ij": [
+    1,
+    5
+   ],
+   "file_goal_ij": [
+    3,
+    4
+   ],
+   "file_init_ij": [
+    1,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 68
+  },
+  {
+   "task": 1,
+   "start_xy": [
+    20.978222837532865,
+    16.49066858134292
+   ],
+   "goal_xy": [
+    12.677471160888672,
+    11.306962013244629
+   ],
+   "file_start_ij": [
+    5,
+    6
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    5,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 116
+  },
+  {
+   "task": 2,
+   "start_xy": [
+    -0.21470943363338066,
+    20.72832644869101
+   ],
+   "goal_xy": [
+    4.224865436553955,
+    12.595120429992676
+   ],
+   "file_start_ij": [
+    6,
+    1
+   ],
+   "file_goal_ij": [
+    4,
+    2
+   ],
+   "file_init_ij": [
+    6,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 80
+  },
+  {
+   "task": 3,
+   "start_xy": [
+    11.45350304512089,
+    12.107684133312537
+   ],
+   "goal_xy": [
+    3.149670124053955,
+    8.742155075073242
+   ],
+   "file_start_ij": [
+    4,
+    4
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    4,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 89
+  },
+  {
+   "task": 4,
+   "start_xy": [
+    16.51392721524545,
+    3.7336307215556195
+   ],
+   "goal_xy": [
+    12.938521385192871,
+    12.854499816894531
+   ],
+   "file_start_ij": [
+    2,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    2,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 104
+  },
+  {
+   "task": 5,
+   "start_xy": [
+    12.571108434336386,
+    16.804435150655785
+   ],
+   "goal_xy": [
+    19.634714126586914,
+    11.769786834716797
+   ],
+   "file_start_ij": [
+    5,
+    4
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    5,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 78
+  },
+  {
+   "task": 6,
+   "start_xy": [
+    3.512332771006967,
+    -0.7544374640512939
+   ],
+   "goal_xy": [
+    3.9927425384521484,
+    11.513787269592285
+   ],
+   "file_start_ij": [
+    1,
+    2
+   ],
+   "file_goal_ij": [
+    4,
+    2
+   ],
+   "file_init_ij": [
+    1,
+    2
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 113
+  },
+  {
+   "task": 7,
+   "start_xy": [
+    11.867728592491769,
+    12.649709996581297
+   ],
+   "goal_xy": [
+    8.31515884399414,
+    19.59374237060547
+   ],
+   "file_start_ij": [
+    4,
+    4
+   ],
+   "file_goal_ij": [
+    6,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 75
+  },
+  {
+   "task": 8,
+   "start_xy": [
+    12.638536226728581,
+    15.813346622377704
+   ],
+   "goal_xy": [
+    3.5590951442718506,
+    20.37164306640625
+   ],
+   "file_start_ij": [
+    5,
+    4
+   ],
+   "file_goal_ij": [
+    6,
+    2
+   ],
+   "file_init_ij": [
+    5,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 70
+  },
+  {
+   "task": 9,
+   "start_xy": [
+    19.408032612099216,
+    11.010467206826435
+   ],
+   "goal_xy": [
+    12.521669387817383,
+    8.525459289550781
+   ],
+   "file_start_ij": [
+    4,
+    6
+   ],
+   "file_goal_ij": [
+    3,
+    4
+   ],
+   "file_init_ij": [
+    4,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 62
+  },
+  {
+   "task": 10,
+   "start_xy": [
+    0.6488633504165696,
+    12.057401628148364
+   ],
+   "goal_xy": [
+    8.03494930267334,
+    7.389247417449951
+   ],
+   "file_start_ij": [
+    4,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 70
+  },
+  {
+   "task": 11,
+   "start_xy": [
+    12.501590891587623,
+    4.101429989273484
+   ],
+   "goal_xy": [
+    4.16293478012085,
+    8.599061012268066
+   ],
+   "file_start_ij": [
+    2,
+    4
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    2,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 82
+  },
+  {
+   "task": 12,
+   "start_xy": [
+    12.038391215404994,
+    12.060090937968281
+   ],
+   "goal_xy": [
+    7.537406921386719,
+    19.048931121826172
+   ],
+   "file_start_ij": [
+    4,
+    4
+   ],
+   "file_goal_ij": [
+    6,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 62
+  },
+  {
+   "task": 13,
+   "start_xy": [
+    3.4471208571587932,
+    7.903785417093571
+   ],
+   "goal_xy": [
+    0.6396465301513672,
+    15.498806953430176
+   ],
+   "file_start_ij": [
+    3,
+    2
+   ],
+   "file_goal_ij": [
+    5,
+    1
+   ],
+   "file_init_ij": [
+    3,
+    2
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 62
+  },
+  {
+   "task": 14,
+   "start_xy": [
+    -0.34965842620719945,
+    19.714653408008267
+   ],
+   "goal_xy": [
+    4.389110088348389,
+    12.02892780303955
+   ],
+   "file_start_ij": [
+    6,
+    1
+   ],
+   "file_goal_ij": [
+    4,
+    2
+   ],
+   "file_init_ij": [
+    6,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 71
+  },
+  {
+   "task": 15,
+   "start_xy": [
+    4.374360201102235,
+    11.736033653379703
+   ],
+   "goal_xy": [
+    0.6293853521347046,
+    19.29884910583496
+   ],
+   "file_start_ij": [
+    4,
+    2
+   ],
+   "file_goal_ij": [
+    6,
+    1
+   ],
+   "file_init_ij": [
+    4,
+    2
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 97
+  },
+  {
+   "task": 16,
+   "start_xy": [
+    19.19442060303283,
+    4.407923387946979
+   ],
+   "goal_xy": [
+    11.844009399414062,
+    7.159265518188477
+   ],
+   "file_start_ij": [
+    2,
+    6
+   ],
+   "file_goal_ij": [
+    3,
+    4
+   ],
+   "file_init_ij": [
+    2,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 73
+  },
+  {
+   "task": 17,
+   "start_xy": [
+    -0.00632067837347659,
+    -0.6450900569976876
+   ],
+   "goal_xy": [
+    4.356081008911133,
+    7.79398775100708
+   ],
+   "file_start_ij": [
+    1,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    1,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 74
+  },
+  {
+   "task": 18,
+   "start_xy": [
+    -0.4325489291718967,
+    4.297880892110171
+   ],
+   "goal_xy": [
+    3.779653787612915,
+    11.268341064453125
+   ],
+   "file_start_ij": [
+    2,
+    1
+   ],
+   "file_goal_ij": [
+    4,
+    2
+   ],
+   "file_init_ij": [
+    2,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 97
+  },
+  {
+   "task": 19,
+   "start_xy": [
+    20.79935475301381,
+    4.704187895246901
+   ],
+   "goal_xy": [
+    12.319093704223633,
+    7.576446056365967
+   ],
+   "file_start_ij": [
+    2,
+    6
+   ],
+   "file_goal_ij": [
+    3,
+    4
+   ],
+   "file_init_ij": [
+    2,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 73
+  },
+  {
+   "task": 20,
+   "start_xy": [
+    20.8943452809862,
+    0.5096214887177808
+   ],
+   "goal_xy": [
+    12.344843864440918,
+    3.955881357192993
+   ],
+   "file_start_ij": [
+    1,
+    6
+   ],
+   "file_goal_ij": [
+    2,
+    4
+   ],
+   "file_init_ij": [
+    1,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 65
+  },
+  {
+   "task": 21,
+   "start_xy": [
+    11.200464262822456,
+    16.63691660293538
+   ],
+   "goal_xy": [
+    7.885171413421631,
+    7.345793724060059
+   ],
+   "file_start_ij": [
+    5,
+    4
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    5,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 78
+  },
+  {
+   "task": 22,
+   "start_xy": [
+    8.124035910975408,
+    15.364666244168202
+   ],
+   "goal_xy": [
+    0.6893543601036072,
+    20.53147315979004
+   ],
+   "file_start_ij": [
+    5,
+    3
+   ],
+   "file_goal_ij": [
+    6,
+    1
+   ],
+   "file_init_ij": [
+    5,
+    3
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 101
+  },
+  {
+   "task": 23,
+   "start_xy": [
+    -0.24529724193954341,
+    12.302646413289484
+   ],
+   "goal_xy": [
+    8.18635368347168,
+    8.340160369873047
+   ],
+   "file_start_ij": [
+    4,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 68
+  },
+  {
+   "task": 24,
+   "start_xy": [
+    19.89235536859634,
+    11.089154565420278
+   ],
+   "goal_xy": [
+    11.971757888793945,
+    7.606141090393066
+   ],
+   "file_start_ij": [
+    4,
+    6
+   ],
+   "file_goal_ij": [
+    3,
+    4
+   ],
+   "file_init_ij": [
+    4,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 65
+  },
+  {
+   "task": 25,
+   "start_xy": [
+    -0.8168028136634256,
+    16.249565042390426
+   ],
+   "goal_xy": [
+    3.4770491123199463,
+    8.876182556152344
+   ],
+   "file_start_ij": [
+    5,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    5,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 84
+  },
+  {
+   "task": 26,
+   "start_xy": [
+    19.748260174775368,
+    20.061217965992093
+   ],
+   "goal_xy": [
+    15.091201782226562,
+    12.876605033874512
+   ],
+   "file_start_ij": [
+    6,
+    6
+   ],
+   "file_goal_ij": [
+    4,
+    5
+   ],
+   "file_init_ij": [
+    6,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 77
+  },
+  {
+   "task": 27,
+   "start_xy": [
+    16.69044868118735,
+    11.1626640278472
+   ],
+   "goal_xy": [
+    8.036090850830078,
+    7.829874515533447
+   ],
+   "file_start_ij": [
+    4,
+    5
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 78
+  },
+  {
+   "task": 28,
+   "start_xy": [
+    0.16455590620886307,
+    12.041622481962573
+   ],
+   "goal_xy": [
+    3.6006081104278564,
+    3.70047926902771
+   ],
+   "file_start_ij": [
+    4,
+    1
+   ],
+   "file_goal_ij": [
+    2,
+    2
+   ],
+   "file_init_ij": [
+    4,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 70
+  },
+  {
+   "task": 29,
+   "start_xy": [
+    16.094538701301275,
+    19.938876014598787
+   ],
+   "goal_xy": [
+    19.07004737854004,
+    12.69405460357666
+   ],
+   "file_start_ij": [
+    6,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    6,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 114
+  },
+  {
+   "task": 30,
+   "start_xy": [
+    -0.6195175918478377,
+    -0.04938773614751761
+   ],
+   "goal_xy": [
+    3.1438612937927246,
+    8.34270191192627
+   ],
+   "file_start_ij": [
+    1,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    1,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 92
+  },
+  {
+   "task": 31,
+   "start_xy": [
+    8.329592360174706,
+    20.420155896521404
+   ],
+   "goal_xy": [
+    12.582497596740723,
+    11.19614315032959
+   ],
+   "file_start_ij": [
+    6,
+    3
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    6,
+    3
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 74
+  },
+  {
+   "task": 32,
+   "start_xy": [
+    15.505895095358026,
+    3.002248938800752
+   ],
+   "goal_xy": [
+    12.097923278808594,
+    11.721678733825684
+   ],
+   "file_start_ij": [
+    2,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    2,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 99
+  },
+  {
+   "task": 33,
+   "start_xy": [
+    8.638909804239633,
+    19.61827652522058
+   ],
+   "goal_xy": [
+    12.75850772857666,
+    11.673783302307129
+   ],
+   "file_start_ij": [
+    6,
+    3
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    6,
+    3
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 69
+  },
+  {
+   "task": 34,
+   "start_xy": [
+    -0.44751978056353536,
+    20.92582612734997
+   ],
+   "goal_xy": [
+    7.368171691894531,
+    15.030767440795898
+   ],
+   "file_start_ij": [
+    6,
+    1
+   ],
+   "file_goal_ij": [
+    5,
+    3
+   ],
+   "file_init_ij": [
+    6,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 85
+  },
+  {
+   "task": 35,
+   "start_xy": [
+    4.901550214186096,
+    12.671592118818058
+   ],
+   "goal_xy": [
+    0.409742534160614,
+    4.666748523712158
+   ],
+   "file_start_ij": [
+    4,
+    2
+   ],
+   "file_goal_ij": [
+    2,
+    1
+   ],
+   "file_init_ij": [
+    4,
+    2
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 98
+  },
+  {
+   "task": 36,
+   "start_xy": [
+    7.15576530376363,
+    20.555234947012593
+   ],
+   "goal_xy": [
+    11.51425838470459,
+    12.902925491333008
+   ],
+   "file_start_ij": [
+    6,
+    3
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    6,
+    3
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 68
+  },
+  {
+   "task": 37,
+   "start_xy": [
+    3.2065201860946106,
+    8.705453033729889
+   ],
+   "goal_xy": [
+    11.379620552062988,
+    11.423380851745605
+   ],
+   "file_start_ij": [
+    3,
+    2
+   ],
+   "file_goal_ij": [
+    4,
+    4
+   ],
+   "file_init_ij": [
+    3,
+    2
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 68
+  },
+  {
+   "task": 38,
+   "start_xy": [
+    12.708715936376604,
+    3.3449585795255845
+   ],
+   "goal_xy": [
+    11.619589805603027,
+    16.436017990112305
+   ],
+   "file_start_ij": [
+    2,
+    4
+   ],
+   "file_goal_ij": [
+    5,
+    4
+   ],
+   "file_init_ij": [
+    2,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 116
+  },
+  {
+   "task": 39,
+   "start_xy": [
+    15.81985106480735,
+    11.27867751273549
+   ],
+   "goal_xy": [
+    7.153319835662842,
+    7.614284038543701
+   ],
+   "file_start_ij": [
+    4,
+    5
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    4,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 84
+  },
+  {
+   "task": 40,
+   "start_xy": [
+    19.259465546363955,
+    20.356452121154813
+   ],
+   "goal_xy": [
+    15.32663345336914,
+    12.012002944946289
+   ],
+   "file_start_ij": [
+    6,
+    6
+   ],
+   "file_goal_ij": [
+    4,
+    5
+   ],
+   "file_init_ij": [
+    6,
+    6
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 91
+  },
+  {
+   "task": 41,
+   "start_xy": [
+    16.314094510788053,
+    19.366808948188726
+   ],
+   "goal_xy": [
+    20.711484909057617,
+    12.363443374633789
+   ],
+   "file_start_ij": [
+    6,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    6,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 69
+  },
+  {
+   "task": 42,
+   "start_xy": [
+    7.337971996559488,
+    15.275484433541791
+   ],
+   "goal_xy": [
+    0.9900579452514648,
+    19.9228458404541
+   ],
+   "file_start_ij": [
+    5,
+    3
+   ],
+   "file_goal_ij": [
+    6,
+    1
+   ],
+   "file_init_ij": [
+    5,
+    3
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 73
+  },
+  {
+   "task": 43,
+   "start_xy": [
+    11.995903025732002,
+    16.35005808976059
+   ],
+   "goal_xy": [
+    4.803754806518555,
+    19.604562759399414
+   ],
+   "file_start_ij": [
+    5,
+    4
+   ],
+   "file_goal_ij": [
+    6,
+    2
+   ],
+   "file_init_ij": [
+    5,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 75
+  },
+  {
+   "task": 44,
+   "start_xy": [
+    15.228585719830685,
+    19.89653412459302
+   ],
+   "goal_xy": [
+    20.849477767944336,
+    12.268138885498047
+   ],
+   "file_start_ij": [
+    6,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    6,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 94
+  },
+  {
+   "task": 45,
+   "start_xy": [
+    0.6630372280894892,
+    4.037817821899302
+   ],
+   "goal_xy": [
+    8.583756446838379,
+    7.003767490386963
+   ],
+   "file_start_ij": [
+    2,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    3
+   ],
+   "file_init_ij": [
+    2,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 97
+  },
+  {
+   "task": 46,
+   "start_xy": [
+    0.625380331487379,
+    16.686607220163122
+   ],
+   "goal_xy": [
+    3.458794355392456,
+    8.013958930969238
+   ],
+   "file_start_ij": [
+    5,
+    1
+   ],
+   "file_goal_ij": [
+    3,
+    2
+   ],
+   "file_init_ij": [
+    5,
+    1
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 79
+  },
+  {
+   "task": 47,
+   "start_xy": [
+    12.564569487250024,
+    16.33678202625982
+   ],
+   "goal_xy": [
+    19.97370147705078,
+    11.757919311523438
+   ],
+   "file_start_ij": [
+    5,
+    4
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    5,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 71
+  },
+  {
+   "task": 48,
+   "start_xy": [
+    16.344267194381253,
+    20.713256238040398
+   ],
+   "goal_xy": [
+    19.904972076416016,
+    11.501025199890137
+   ],
+   "file_start_ij": [
+    6,
+    5
+   ],
+   "file_goal_ij": [
+    4,
+    6
+   ],
+   "file_init_ij": [
+    6,
+    5
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 77
+  },
+  {
+   "task": 49,
+   "start_xy": [
+    12.56666397312666,
+    8.662317928453215
+   ],
+   "goal_xy": [
+    19.176868438720703,
+    3.0931806564331055
+   ],
+   "file_start_ij": [
+    3,
+    4
+   ],
+   "file_goal_ij": [
+    2,
+    6
+   ],
+   "file_init_ij": [
+    3,
+    4
+   ],
+   "file_grid_distance": 3,
+   "segment_len": 88
+  }
+ ]
+}
